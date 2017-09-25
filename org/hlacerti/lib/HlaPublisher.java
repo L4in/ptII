@@ -80,28 +80,27 @@ public class HlaPublisher extends TypedAtomicActor {
      *  actor with this name.
      */
     public HlaPublisher(CompositeEntity container, String name)
-            throws NameDuplicationException, IllegalActionException {
-        super(container, name);
+	    throws NameDuplicationException, IllegalActionException {
+	super(container, name);
 
-        // The single output port of the actor.
-        input = new TypedIOPort(this, "input", true, false);
-        input.setMultiport(true);
+	// The single output port of the actor.
+	input = new TypedIOPort(this, "input", true, false);
+	input.setMultiport(false);
 
-        classObjectHandle = new Parameter(this, "classObjectHandle");
-        classObjectHandle.setDisplayName("Object class in FOM");
-        classObjectHandle.setTypeEquals(BaseType.STRING);
-        classObjectHandle.setExpression("\"myObjectClass\"");
-        attributeChanged(classObjectHandle);
+	classObjectHandle = new Parameter(this, "classObjectHandle");
+	classObjectHandle.setDisplayName("Object class in FOM");
+	classObjectHandle.setTypeEquals(BaseType.STRING);
+	classObjectHandle.setExpression("\"myObjectClass\"");
+	attributeChanged(classObjectHandle);
 
+	useCertiMessageBuffer = new Parameter(this, "useCertiMessageBuffer");
+	useCertiMessageBuffer.setTypeEquals(BaseType.BOOLEAN);
+	useCertiMessageBuffer.setExpression("false");
+	useCertiMessageBuffer.setDisplayName("use CERTI message buffer");
+	attributeChanged(useCertiMessageBuffer);
 
-        useCertiMessageBuffer = new Parameter(this, "useCertiMessageBuffer");
-        useCertiMessageBuffer.setTypeEquals(BaseType.BOOLEAN);
-        useCertiMessageBuffer.setExpression("false");
-        useCertiMessageBuffer.setDisplayName("use CERTI message buffer");
-        attributeChanged(useCertiMessageBuffer);
-
-        _hlaManager = null;
-        _useCertiMessageBuffer = false;
+	_hlaManager = null;
+	_useCertiMessageBuffer = false;
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -127,19 +126,19 @@ public class HlaPublisher extends TypedAtomicActor {
      */
     @Override
     public void attributeChanged(Attribute attribute)
-            throws IllegalActionException {
-        if (attribute == classObjectHandle) {
-            String value = ((StringToken) classObjectHandle.getToken())
-                    .stringValue();
-            if (value.compareTo("") == 0) {
-                throw new IllegalActionException(this,
-                        "Cannot have empty name !");
-            }
-        } else if (attribute == useCertiMessageBuffer) {
-            _useCertiMessageBuffer = ((BooleanToken) useCertiMessageBuffer
-                    .getToken()).booleanValue();
-        }
-        super.attributeChanged(attribute);
+	    throws IllegalActionException {
+	if (attribute == classObjectHandle) {
+	    String value = ((StringToken) classObjectHandle.getToken())
+		    .stringValue();
+	    if (value.compareTo("") == 0) {
+		throw new IllegalActionException(this,
+			"Cannot have empty name !");
+	    }
+	} else if (attribute == useCertiMessageBuffer) {
+	    _useCertiMessageBuffer = ((BooleanToken) useCertiMessageBuffer
+		    .getToken()).booleanValue();
+	}
+	super.attributeChanged(attribute);
     }
 
     /** Clone the actor into the specified workspace.
@@ -150,10 +149,10 @@ public class HlaPublisher extends TypedAtomicActor {
      */
     @Override
     public Object clone(Workspace workspace) throws CloneNotSupportedException {
-        HlaPublisher newObject = (HlaPublisher) super.clone(workspace);
-        newObject._hlaManager = _hlaManager;
-        newObject._useCertiMessageBuffer = _useCertiMessageBuffer;
-        return newObject;
+	HlaPublisher newObject = (HlaPublisher) super.clone(workspace);
+	newObject._hlaManager = _hlaManager;
+	newObject._useCertiMessageBuffer = _useCertiMessageBuffer;
+	return newObject;
     }
 
     /** Retrieve and check if there is one and only one {@link HlaManager}
@@ -165,22 +164,26 @@ public class HlaPublisher extends TypedAtomicActor {
      */
     @Override
     public void initialize() throws IllegalActionException {
-        super.initialize();
+	super.initialize();
 
-        CompositeActor ca = (CompositeActor) this.getContainer();
+	// XXX: FIXME: GiL: publisher cannot be in composite actor ?
 
-        List<HlaManager> hlaManagers = ca.attributeList(HlaManager.class);
-        if (hlaManagers.size() > 1) {
-            throw new IllegalActionException(this,
-                    "Only one HlaManager attribute is allowed per model");
-        } else if (hlaManagers.size() < 1) {
-            throw new IllegalActionException(this,
-                    "A HlaManager attribute is required to use this actor");
-        }
+	// Find the HlaManager by looking into container
+	// (recursively if needed).
+	CompositeActor ca = (CompositeActor) this.getContainer();
 
-        // Here, we are sure that there is one and only one instance of the
-        // HlaManager in the Ptolemy model.
-        _hlaManager = hlaManagers.get(0);
+	List<HlaManager> hlaManagers = ca.attributeList(HlaManager.class);
+	if (hlaManagers.size() > 1) {
+	    throw new IllegalActionException(this,
+		    "Only one HlaManager attribute is allowed per model");
+	} else if (hlaManagers.size() < 1) {
+	    throw new IllegalActionException(this,
+		    "A HlaManager attribute is required to use this actor");
+	}
+
+	// Here, we are sure that there is one and only one instance of the
+	// HlaManager in the Ptolemy model.
+	_hlaManager = hlaManagers.get(0);
     }
 
     /** Each tokens, received in the input port, are transmitted to the
@@ -188,23 +191,25 @@ public class HlaPublisher extends TypedAtomicActor {
      */
     @Override
     public void fire() throws IllegalActionException {
-       
-    	super.fire();
-    	
-    	for (int i = 0 ; i < input.getWidth() ; ++i) {
-    		if (input.hasToken(i)) {
-    			Token in = input.get(i);
-    			_hlaManager.updateHlaAttribute(this, in,input.sourcePortList().get(i).getContainer().getName());
 
-    			if (_debugging) {
-    				_debug(this.getDisplayName()
-                        + " Called fire() - the update value \""
-                        + in.toString() + "\" of the HLA Attribute \""
-                        + this.getName() + "\" has been sent to \""
-                        + _hlaManager.getDisplayName() + "\"");
-    			}
-    		}
-    	}
+	super.fire();
+
+	for (int i = 0 ; i < input.getWidth() ; ++i) {
+	    if (input.hasToken(i)) {
+		Token in = input.get(i);
+		_hlaManager.updateHlaAttribute(this, in,
+			/* Retrieve the name of sender to this input port */
+			input.sourcePortList().get(i).getContainer().getName());
+
+		if (_debugging) {
+		    _debug(this.getDisplayName()
+			    + " Called fire() - the update value \""
+			    + in.toString() + "\" of the HLA Attribute \""
+			    + this.getName() + "\" has been sent to \""
+			    + _hlaManager.getDisplayName() + "\"");
+		}
+	    }
+	}
     }
 
     /** Indicate if the HLA publisher actor uses the CERTI message
@@ -214,7 +219,7 @@ public class HlaPublisher extends TypedAtomicActor {
      *  @exception IllegalActionException
      */
     public boolean useCertiMessageBuffer() throws IllegalActionException {
-        return _useCertiMessageBuffer;
+	return _useCertiMessageBuffer;
     }
 
     ///////////////////////////////////////////////////////////////////
