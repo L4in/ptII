@@ -87,11 +87,20 @@ public class HlaPublisher extends TypedAtomicActor {
 	input = new TypedIOPort(this, "input", true, false);
 	input.setMultiport(false);
 
-	classObjectHandle = new Parameter(this, "classObjectHandle");
-	classObjectHandle.setDisplayName("Object class in FOM");
-	classObjectHandle.setTypeEquals(BaseType.STRING);
-	classObjectHandle.setExpression("\"myObjectClass\"");
-	attributeChanged(classObjectHandle);
+	
+	// HLA object class in FOM.
+	classObjectName = new Parameter(this, "classObjectName");
+	classObjectName.setDisplayName("Object class in FOM");
+	classObjectName.setTypeEquals(BaseType.STRING);
+	classObjectName.setExpression("\"myObjectClass\"");
+	attributeChanged(classObjectName);
+	
+	// HLA class instance name.
+	classInstanceName = new Parameter(this, "classInstanceName");
+	classInstanceName.setDisplayName("Name of the HLA class instance");
+	classInstanceName.setTypeEquals(BaseType.STRING);
+	classInstanceName.setExpression("\"myClassInstanceName\"");
+	attributeChanged(classInstanceName);
 
 	useCertiMessageBuffer = new Parameter(this, "useCertiMessageBuffer");
 	useCertiMessageBuffer.setTypeEquals(BaseType.BOOLEAN);
@@ -107,7 +116,10 @@ public class HlaPublisher extends TypedAtomicActor {
     ////                         public variables                  ////
 
     /** The object class of the HLA attribute to publish. */
-    public Parameter classObjectHandle;
+    public Parameter classObjectName;
+    
+    /** The name of the HLA class instance this publisher belongs to. */
+    public Parameter classInstanceName;
 
     /** Indicate if the event is wrapped in a CERTI message buffer. */
     public Parameter useCertiMessageBuffer;
@@ -127,14 +139,21 @@ public class HlaPublisher extends TypedAtomicActor {
     @Override
     public void attributeChanged(Attribute attribute)
 	    throws IllegalActionException {
-	if (attribute == classObjectHandle) {
-	    String value = ((StringToken) classObjectHandle.getToken())
+	if (attribute == classObjectName) {
+	    String value = ((StringToken) classObjectName.getToken())
 		    .stringValue();
 	    if (value.compareTo("") == 0) {
 		throw new IllegalActionException(this,
 			"Cannot have empty name !");
 	    }
-	} else if (attribute == useCertiMessageBuffer) {
+	} if (attribute == classInstanceName) {
+            String value = ((StringToken) classInstanceName.getToken())
+                    .stringValue();
+            if (value.compareTo("") == 0) {
+                throw new IllegalActionException(this,
+                        "Cannot have empty name !");
+            }
+        } else if (attribute == useCertiMessageBuffer) {
 	    _useCertiMessageBuffer = ((BooleanToken) useCertiMessageBuffer
 		    .getToken()).booleanValue();
 	}
@@ -197,9 +216,9 @@ public class HlaPublisher extends TypedAtomicActor {
 	for (int i = 0 ; i < input.getWidth() ; ++i) {
 	    if (input.hasToken(i)) {
 		Token in = input.get(i);
-		_hlaManager.updateHlaAttribute(this, in,
+		_hlaManager.updateHlaAttribute(this, in, getClassInstanceName());
 			/* Retrieve the name of sender to this input port */
-			input.sourcePortList().get(i).getContainer().getName());
+			//input.sourcePortList().get(i).getContainer().getName());
 
 		if (_debugging) {
 		    _debug(this.getDisplayName()
@@ -212,14 +231,47 @@ public class HlaPublisher extends TypedAtomicActor {
 	}
     }
 
+    /**
+     * Return the name of the HLA object class in FOM.
+     * @return A string that represents the HLA object class name.
+     * @exception IllegalActionException if a bad token string value is provided.
+     */
+    public String getClassObjectName() throws IllegalActionException {
+        String parameter = "";
+        try {
+            parameter = ((StringToken) classObjectName.getToken()).stringValue();
+        } catch (IllegalActionException illegalActionException) {
+            throw new IllegalActionException(this,
+                    "Bad classObjectName token string value");
+        }
+        return parameter;
+    }
+    
+    /**
+     * Return the name of the HLA class instance this HlaPublisher belongs to.
+     * @return A string that represents the HLA class instance.
+     * @exception IllegalActionException if a bad token string value is provided.
+     */
+    public String getClassInstanceName() throws IllegalActionException {
+        String parameter = "";
+        try {
+            parameter = ((StringToken) classInstanceName.getToken()).stringValue();
+        } catch (IllegalActionException illegalActionException) {
+            throw new IllegalActionException(this,
+                    "Bad classInstanceName token string value");
+        }
+        return parameter;
+    }
+
     /** Indicate if the HLA publisher actor uses the CERTI message
      *  buffer API.
      *  @return true if the HLA publisher actor uses the CERTI message and false if
      *  it doesn't.
-     *  @exception IllegalActionException
+     *  @exception IllegalActionException TBC
      */
     public boolean useCertiMessageBuffer() throws IllegalActionException {
 	return _useCertiMessageBuffer;
+	// XXX: FIXME: where is the exception management ?
     }
 
     ///////////////////////////////////////////////////////////////////
