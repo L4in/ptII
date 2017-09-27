@@ -426,7 +426,7 @@ implements TimeRegulator {
         TimeAdvancementRequest;
 
         /** Override the toString of enum class.
-         * @return The string associated for each enum value.
+         *  @return The string associated for each enum value.
          */
         @Override
         public String toString() {
@@ -629,11 +629,11 @@ implements TimeRegulator {
                     "RTIinternalError. "
                             + "If the error is \"Connection to RTIA failed\", "
                             + "then the problem is likely that the rtig "
-                            + "binary could not be started by CertRtig. "
+                            + "binary could not be started by CertiRtig. "
                             + "One way to debug this is to set the various "
                             + "environment variables by sourcing certi/share/scripts/myCERTI_env.sh, "
                             + "then invoking rtig on the .fed file "
-                            + "then rerunning the model.");
+                            + "then (re)running the model.");
         }
 
         // Create the Federation or raise a warning it the Federation already exits.
@@ -680,16 +680,15 @@ implements TimeRegulator {
 
     }
 
-    /** Return true if at least an object has been discovered during the time
-     *   advance phase.
+    // XXX: FIXME: check if usage is required ?
+    /** Return true. This function is not used in this implementation
+     *  of TimeRegulator interface. It must return true otherwise the
+     *  proposeTime() will enter in an infinite loop.
+     *  @return true always return true
      */
     @Override
     public boolean noNewActors() {
-        // XXX: FIXME: GiL: check usage ?
-        boolean old = _noObjectDicovered;
-        _noObjectDicovered = true;
-        return old;
-        //return true;
+        return true;
     }
 
     /** Launch the HLA/CERTI RTIG process as subprocess. The RTIG has to be
@@ -933,12 +932,11 @@ implements TimeRegulator {
         }
         suppAttributes.add(_getAttributeHandleFromTab(tObj), bAttributeValue);
 
-        //byte[] tag = EncodingHelpers
-        //        .encodeString(_getPortFromTab(tObj).getContainer().getFullName());
-
+        // XXX: FIXME: GiL: seems not used in our case ?
         HlaPublisher pub = (HlaPublisher)_getPortFromTab(tObj).getContainer();
         byte[] tag = EncodingHelpers
-                .encodeString(pub.getClassInstanceName());
+                //.encodeString(pub.getClassInstanceName());
+                .encodeString(pub.getFullName());
 
         // Create a representation of uav-event timestamp for CERTI.
         // HLA implies to send event in the future when using NER or TAR services with lookahead > 0.
@@ -1624,7 +1622,6 @@ implements TimeRegulator {
         List<HlaSubscriber> _hlaSubscribers = getHlaSubscribers(ce);
 
         for (HlaSubscriber hs : _hlaSubscribers) {
-            //System.out.println("ciele_debug: " +  hs.getName() + " " + hs.getFullName());
             if (_hlaAttributesToSubscribeTo.get(hs.getFullName()) != null) {
                 throw new IllegalActionException(this,
                         "A HLA attribute with the same name is already "
@@ -2463,13 +2460,13 @@ implements TimeRegulator {
 
             // Configure HlaPublisher actors from model */
             if (!_hlaAttributesToPublish.isEmpty()){
-                setupHlaPublishers(rtia);
+                _setupHlaPublishers(rtia);
             } else {
                 System.out.println("PtolemyFederateAmbassadorInner: initialize(): _hlaAttributesToPublish is empty");
             }
             // Configure HlaSubscriber actors from model */
             if (!_hlaAttributesToSubscribeTo.isEmpty()) {
-                setupHlaSubscribers(rtia);
+                _setupHlaSubscribers(rtia);
             } else {
                 System.out.println("PtolemyFederateAmbassadorInner: initialize(): _hlaAttributesToSubscribeTo is empty");
             }
@@ -2742,7 +2739,7 @@ implements TimeRegulator {
                 // elt.getValue() => tObj[] array.
                 Object[] tObj = elt.getValue();
 
-                // Get corresponding HlaSubcriber actor.
+                // Get corresponding HlaSubscriber actor.
                 HlaSubscriber sub = (HlaSubscriber) ((TypedIOPort) tObj[0]).getContainer();
                 try {
                     if (sub.getClassInstanceName().compareTo(classInstanceName) == 0) {
@@ -3013,7 +3010,7 @@ implements TimeRegulator {
         ///////////////////////////////////////////////////////////////////
         ////                         private methods                   ////
 
-        private void setupHlaPublishers(RTIambassador rtia) throws NameNotFound,
+        private void _setupHlaPublishers(RTIambassador rtia) throws NameNotFound,
         ObjectClassNotDefined, FederateNotExecutionMember,
         RTIinternalError, AttributeNotDefined, SaveInProgress,
         RestoreInProgress, ConcurrentAccessAttempted {
@@ -3024,8 +3021,8 @@ implements TimeRegulator {
             System.out.println("ciele_debug: setupHlaPublishers: step 1");
 
             // 1. Get classHandle and attributeHandle IDs for each attribute
-            // value to publish (i.e. HlaPublisher). Update the HlaPublishers
-            // table with the information.
+            //    value to publish (i.e. HlaPublisher). Update the HlaPublishers
+            //    table with the information.
             Iterator<Entry<String, Object[]>> it = _hlaAttributesToPublish.entrySet().iterator();
 
             while (it.hasNext()) {
@@ -3034,15 +3031,40 @@ implements TimeRegulator {
                 // elt.getValue() => tObj[] array.
                 Object[] tObj = elt.getValue();
 
+                // Get corresponding HlaPublisher actor.
+                HlaPublisher pub = (HlaPublisher) _getPortFromTab(tObj).getContainer();
+
                 // Object class handle and object attribute handle are IDs that
                 // allow to identify an HLA attribute.
-                int classHandle = rtia
-                        .getObjectClassHandle(_getClassObjectNameFromTab(tObj));
 
-                // XXX: FIXME: GiL: warning, the HlaPublisher actor name is the HLA attribute name...
-                int attributeHandle = rtia
-                        .getAttributeHandle(_getPortFromTab(tObj).getContainer().getName(),
-                                classHandle);
+                // Object class handle and attribute handle are IDs that
+                // allow to identify an HLA attribute.
+
+                // Retrieve HLA class handle from RTI.
+                int classHandle = Integer.MIN_VALUE;
+
+                try {
+                    classHandle = rtia.getObjectClassHandle(_getClassObjectNameFromTab(tObj));
+                } catch (Exception e) {
+                    // XXX: FIXME: GiL: so what???
+                    System.out.println("setupHlaPublishers: attempt to reference a HLA class not in FOM (see fed file), so just skip it.");
+                    continue;
+                }
+
+                // Retrieve HLA attribute handle from RTI.
+                int attributeHandle = Integer.MIN_VALUE;
+                try {
+                    System.out.println("setupHlaPublishers: container name = " + pub.getFullName());
+                    System.out.println("setupHlaPublishers: object name = " + pub.getAttributeName());
+
+                    attributeHandle = rtia
+                            .getAttributeHandle(pub.getAttributeName(), classHandle);
+
+                    System.out.println("setupHlaPublishers: attributeHandle = " + attributeHandle);
+                } catch (IllegalActionException e) {
+                    // XXX: FIXME: getAttributeName() exception.
+                    System.out.println("setupHlaPublishers: getAttributeName() " + e.getMessage());
+                }
 
                 System.out.println("setupHlaPublishers: classHandle = " + classHandle);
                 System.out.println("setupHlaPublishers: attributeHandle = " + attributeHandle);
@@ -3084,11 +3106,8 @@ implements TimeRegulator {
                 Map.Entry<String, Object[]> elt = it21.next();
                 // elt.getKey()   => HlaPublisher actor full name.
                 // elt.getValue() => tObj[] array.
-
                 Object[] tObj = elt.getValue();
 
-                // The classInstanceName where the HLA attribute belongs to (see FOM).
-                //String classHandleName = _getClassNameFromTab(tObj);
                 String classInstanceName = _getClassInstanceNameFromTab(tObj);
 
                 if (classInstanceNameHlaPublisherTable.containsKey(classInstanceName)) {
@@ -3103,7 +3122,7 @@ implements TimeRegulator {
             System.out.println("ciele_debug: setupHlaPublishers: classHandle list: step 2.2");
 
             // 2.2 Create a table of HlaPublishers indexed by their corresponding
-            //     classInstanceName (no duplication).
+            //     class handle (no duplication).
             HashMap<Integer, LinkedList<String>> classHandleHlaPublisherTable = new HashMap<Integer, LinkedList<String>>();
 
             Iterator<Entry<String, Object[]>> it22 = _hlaAttributesToPublish.entrySet().iterator();
@@ -3112,11 +3131,8 @@ implements TimeRegulator {
                 Map.Entry<String, Object[]> elt = it22.next();
                 // elt.getKey()   => HlaPublisher actor full name.
                 // elt.getValue() => tObj[] array.
-
                 Object[] tObj = elt.getValue();
 
-                // The classInstanceName where the HLA attribute belongs to (see FOM).
-                //String classHandleName = _getClassNameFromTab(tObj);
                 int classHandle = _getClassHandleFromTab(tObj);
 
                 if (classHandleHlaPublisherTable.containsKey(classHandle)) {
@@ -3131,8 +3147,8 @@ implements TimeRegulator {
             System.out.println("ciele_debug: setupHlaPublishers: step 3");
 
             // 3. Declare to the Federation the HLA attributes to publish. If
-            // these attributes belongs to the same object class then only
-            // one publishObjectClass() call is performed.
+            //    these attributes belongs to the same object class then only
+            //    one publishObjectClass() call is performed.
             Iterator<Entry<Integer, LinkedList<String>>> it3 = classHandleHlaPublisherTable
                     .entrySet().iterator();
 
@@ -3141,9 +3157,6 @@ implements TimeRegulator {
                 // elt.getKey()   => HLA class instance name.
                 // elt.getValue() => list of HlaPublisher actor full names.
                 LinkedList<String> hlaPublishersFullnames = elt.getValue();
-
-                // XXX: FIXME: GiL: optimize as we already call to get classHandle?
-                //int classHandle = rtia.getObjectClassHandle(elt.getKey());
 
                 // The attribute handle set to declare all attributes to publish
                 // for one object class.
@@ -3163,8 +3176,8 @@ implements TimeRegulator {
 
                 // Declare to the Federation the HLA attribute(s) to publish.
                 try {
-                    rtia.publishObjectClass(classHandle, _attributesLocal);
                     System.out.println("setupHlaPublishers: publish classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
+                    rtia.publishObjectClass(classHandle, _attributesLocal);
                 } catch (OwnershipAcquisitionPending e) {
                     System.out.println("setupHlaPublishers: exception OwnershipAcquisitionPending " + e.getMessage());
                     e.printStackTrace();
@@ -3172,8 +3185,8 @@ implements TimeRegulator {
             }
 
             // 4. Register object instances. Only one registerObjectInstance() call is performed
-            // by class instance (name). Finally, update the hash map of class instance name and
-            // with the returned object instance ID.
+            //    by class instance (name). Finally, update the hash map of class instance name
+            //    with the returned object instance ID.
             Iterator<Entry<String, LinkedList<String>>> it4 = classInstanceNameHlaPublisherTable
                     .entrySet().iterator();
 
@@ -3189,16 +3202,6 @@ implements TimeRegulator {
                 Object[] tObj = _hlaAttributesToPublish.get(hlaPublishersFullnames.getFirst());
 
                 int classHandle = _getClassHandleFromTab(tObj);
-
-                // _federateName is used to do deal with the fact we might run
-                // several federates from different threads (instead of processes
-                // as it should be) then we end up with some attributes being
-                // not owned because another object with the same name as already
-                // been registered from another thread. Since _federateName
-                // are unique across a federation, its a good workaround.
-
-                // XXX: FIXME: rename senderName by "class instance name"
-                //String senderName = _federateName + "%%" + _getClassInstanceNameFromTab(tObj);
                 String classInstanceName = _getClassInstanceNameFromTab(tObj);
 
                 if (!_registerObjectInstanceMap.containsKey(classInstanceName)) {
@@ -3225,11 +3228,11 @@ implements TimeRegulator {
          * Configure the different HLASubscribers (ie will make them subscribe
          * to what they should)
          */
-        private void setupHlaSubscribers(RTIambassador rtia) throws NameNotFound,
+        private void _setupHlaSubscribers(RTIambassador rtia) throws NameNotFound,
         ObjectClassNotDefined, FederateNotExecutionMember,
         RTIinternalError, AttributeNotDefined, SaveInProgress,
         RestoreInProgress, ConcurrentAccessAttempted {
-            // XXX: FIXME: check mixing betwen tObj[] and HlaSubcriber getter/setter.
+            // XXX: FIXME: check mixing between tObj[] and HlaSubcriber getter/setter.
 
             // For each HlaSubscriber actors deployed in the model we declare
             // to the HLA/CERTI Federation a HLA attribute to subscribe to.
@@ -3247,10 +3250,10 @@ implements TimeRegulator {
                 // elt.getValue() => tObj[] array.
                 Object[] tObj = elt.getValue();
 
-                // Get corresponding HlaSubcriber actor.
+                // Get corresponding HlaSubscriber actor.
                 HlaSubscriber sub = (HlaSubscriber) ((TypedIOPort) tObj[0]).getContainer();
 
-                // Object class handle and object attribute handle are IDs that
+                // Object class handle and attribute handle are IDs that
                 // allow to identify an HLA attribute.
 
                 // Retrieve HLA class handle from RTI.
@@ -3265,6 +3268,7 @@ implements TimeRegulator {
                     continue;
                 }
 
+                // Retrieve HLA attribute handle from RTI.
                 int attributeHandle = Integer.MIN_VALUE;
                 try {
                     System.out.println("setupHlaSubscribers: container name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getFullName());
@@ -3380,10 +3384,6 @@ implements TimeRegulator {
                 // elt.getValue() => list of HlaSubscriber actor full names.
                 LinkedList<String> hlaSubscribersFullnames = elt.getValue();
 
-                // XXX: FIXME: GiL: optimize as we already get the objectClassHandle ?
-                //System.out.println("setupHlaSubscribers: elt.getKey() = " + elt.getKey());
-                //int classHandle = rtia.getObjectClassHandle(elt.getKey());
-
                 // The attribute handle set to declare all subscribed attributes
                 // for one object class.
                 AttributeHandleSet _attributesLocal = RtiFactoryFactory
@@ -3403,44 +3403,6 @@ implements TimeRegulator {
                 _rtia.subscribeObjectClassAttributes(classHandle, _attributesLocal);
                 System.out.println("setupHlaSubscribers: subscribeObjectClassAttributes: register classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
             }
-            /*
-            // 3. Declare to the Federation the HLA attributes to subscribe to.
-            // If these attributes belongs to the same object class then only
-            // one subscribeObjectClass() call is performed.
-            Iterator<Entry<String, LinkedList<String>>> it3 = classInstanceNameHlaSubscriberTable
-                    .entrySet().iterator();
-
-            while (it3.hasNext()) {
-                Map.Entry<String, LinkedList<String>> elt = it3.next();
-                // elt.getKey()   => HLA class instance name.
-                // elt.getValue() => list of HlaSubscriber actor full names.
-                LinkedList<String> hlaSubscribersFullnames = elt.getValue();
-
-                // XXX: FIXME: GiL: optimize as we already get the objectClassHandle ?
-                //System.out.println("setupHlaSubscribers: elt.getKey() = " + elt.getKey());
-                //int classHandle = rtia.getObjectClassHandle(elt.getKey());
-
-                // The attribute handle set to declare all subscribed attributes
-                // for one object class.
-                AttributeHandleSet _attributesLocal = RtiFactoryFactory
-                        .getRtiFactory().createAttributeHandleSet();
-
-                for (String sSub : hlaSubscribersFullnames) {
-                    //_attributesLocal.add((Integer) _hlaAttributesToSubscribeTo.get(sSub)[4]);
-                    _attributesLocal.add(_getAttributeHandleFromTab(_hlaAttributesToSubscribeTo.get(sSub)));
-                }
-
-                // At this point, all HlaSubscribers have been initialized and own their
-                // corresponding HLA class handle and HLA attribute handle. Just retrieve
-                // the first from the list to get those information.
-                Object[] tObj = _hlaAttributesToSubscribeTo.get(hlaSubscribersFullnames.getFirst());
-                int classHandle = _getClassHandleFromTab(tObj);
-
-                _rtia.subscribeObjectClassAttributes(classHandle, _attributesLocal);
-                System.out.println("setupHlaSubscribers: subscribeObjectClassAttributes: register classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
-            }
-             */
         } // end 'private void setupHlaSubscribers(RTIambassador rtia) ...'
-
     } // end 'private class PtolemyFederateAmbassadorInner extends NullFederateAmbassador { ...'
 }

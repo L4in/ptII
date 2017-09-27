@@ -110,6 +110,7 @@ public class CertiRtig extends NamedObj {
      *  failed or if the RTIG subprocess it not running.
      */
     public void exec() throws IllegalActionException {
+        // XXX: FIXME: remove debug print
         System.out.println("CertiRtig: " + _hlaManager.getFullName() +  ": About to invoke rtig: "
                 + "\ncommand: " + java.util.Arrays.toString(_commandArray)
                 + "\nenvironment: " + java.util.Arrays.toString(_environmentArray)
@@ -195,7 +196,8 @@ public class CertiRtig extends NamedObj {
         _environmentArray = new String[1];
         String osName = StringUtilities.getProperty("os.name");
 
-        System.out.println("CertRtig: the os.name property is: " + osName);
+        // XXX: FIXME: remove debug print
+        System.out.println("CertiRtig: the os.name property is: " + osName);
 
         // Only set the environment variable that is appropriate for
         // the platform.

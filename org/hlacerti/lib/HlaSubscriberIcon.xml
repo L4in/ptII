@@ -25,56 +25,12 @@
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
         </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="class:">
-        </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[-200.0, -6.0]">
-        </property>
-    </property>
-    <property name="ParameterValue1" class="ptolemy.vergil.kernel.attributes.AttributeValueAttribute">
-        <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
-        </property>
-        <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
-        </property>
-        <property name="attributeName" class="ptolemy.kernel.util.StringAttribute" value="classObjectName">
-        </property>
-        <property name="displayWidth" class="ptolemy.data.expr.Parameter" value="20">
-        </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[-150.0, -6.0]">
-        </property>
-    </property>
-    <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-        <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
-        </property>
-        <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
-        </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="instance:">
-        </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[-200.0, 6.0]">
-        </property>
-    </property>
-    <property name="ParameterValue2" class="ptolemy.vergil.kernel.attributes.AttributeValueAttribute">
-        <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
-        </property>
-        <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
-        </property>
-        <property name="attributeName" class="ptolemy.kernel.util.StringAttribute" value="classInstanceName">
-        </property>
-        <property name="displayWidth" class="ptolemy.data.expr.Parameter" value="25">
-        </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[-150.0, 6.0]">
-        </property>
-    </property>
-    <property name="Annotation3" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-        <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
-        </property>
-        <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
-        </property>
         <property name="text" class="ptolemy.kernel.util.StringAttribute" value="attribute:">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-200.0, -16.0]">
         </property>
     </property>
-    <property name="ParameterValue3" class="ptolemy.vergil.kernel.attributes.AttributeValueAttribute">
+    <property name="ParameterValue1" class="ptolemy.vergil.kernel.attributes.AttributeValueAttribute">
         <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
@@ -84,6 +40,50 @@
         <property name="displayWidth" class="ptolemy.data.expr.Parameter" value="20">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-150.0, -16.0]">
+        </property>
+    </property>
+    <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
+        <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
+        </property>
+        <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
+        </property>
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="class:">
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[-200.0, -8.0]">
+        </property>
+    </property>
+    <property name="ParameterValue2" class="ptolemy.vergil.kernel.attributes.AttributeValueAttribute">
+        <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
+        </property>
+        <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
+        </property>
+        <property name="attributeName" class="ptolemy.kernel.util.StringAttribute" value="classObjectName">
+        </property>
+        <property name="displayWidth" class="ptolemy.data.expr.Parameter" value="20">
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[-150.0, -8.0]">
+        </property>
+    </property>
+    <property name="Annotation3" class="ptolemy.vergil.kernel.attributes.TextAttribute">
+        <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
+        </property>
+        <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
+        </property>
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="instance:">
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[-200.0, 0.0]">
+        </property>
+    </property>
+    <property name="ParameterValue3" class="ptolemy.vergil.kernel.attributes.AttributeValueAttribute">
+        <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
+        </property>
+        <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
+        </property>
+        <property name="attributeName" class="ptolemy.kernel.util.StringAttribute" value="classInstanceName">
+        </property>
+        <property name="displayWidth" class="ptolemy.data.expr.Parameter" value="25">
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[-150.0, 0.0]">
         </property>
     </property>
 </property>

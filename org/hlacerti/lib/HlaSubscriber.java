@@ -76,11 +76,12 @@ import ptolemy.kernel.util.Workspace;
  * value in the subscriber tokens queue and to program its next firing
  * times, using the _fireAt() method.</p>
  *
- * <p>The name of this actor is mapped to the name of the HLA attribute in the
- * federation and need to match the Federate Object Model (FOM) specified for
- * the Federation. The data type of the output port has to be the same type of
- * the HLA attribute. The parameter <i>classObjectHandle</i> needs to match the
- * attribute object class describes in the FOM.
+ * <p>The parameter <i>attributeName</i> of this actor is mapped to
+ * the name of the HLA attribute of an HLA object class in the federation.
+ * This parameter needs to match the Federate Object Model (FOM) specified
+ * for this federation. The data type of the output port has to be the same
+ * type of the HLA attribute. The parameter <i>classObjectName</i> needs to
+ * match the object class describes in the FOM.
  *
  *  @author Gilles Lasnier, Contributors: Patricia Derler, David Come
  *  @version $Id$
@@ -143,6 +144,7 @@ public class HlaSubscriber extends TypedAtomicActor {
         classInstanceName.setExpression("\"myClassInstanceName\"");
         attributeChanged(classInstanceName);
 
+        // HLA attribute name.
         attributeName = new Parameter(this, "attributeName");
         attributeName.setDisplayName("Name of the attribute to receive");
         attributeName.setTypeEquals(BaseType.STRING);
@@ -162,34 +164,32 @@ public class HlaSubscriber extends TypedAtomicActor {
     ///////////////////////////////////////////////////////////////////
     ////                         public variables                  ////
 
-    /** The object class of the HLA attribute to publish. */
-    public Parameter classObjectName;
-
-    /** The name of the HLA class instance this publisher belongs to. */
-    public Parameter classInstanceName;
-
-    /** The HLA attribute the HLASubscriber is interested in. */
+    /** The HLA attribute name the HLASubscriber is mapped to. */
     public Parameter attributeName;
 
-    /** Indicate if the event is wrapped in a CERTI message buffer. */
-    public Parameter useCertiMessageBuffer;
+    /** The object class of the HLA attribute to subscribe to. */
+    public Parameter classObjectName;
 
-    /** Parameter used to set up the type of the output port. Synced with
-     * output port's type (changes go both way).
-     */
-    public StringParameter typeSelector;
+    /** The name of the HLA class instance for this HlaSubscriber. */
+    public Parameter classInstanceName;
 
     /** The output port. */
-    public TypedIOPort output = null;
+    public TypedIOPort output;
+
+    /** The type of the output port specified through the user interface. */
+    public StringParameter typeSelector;
+    
+    /** Indicate if the event is wrapped in a CERTI message buffer. */
+    public Parameter useCertiMessageBuffer;
 
     ///////////////////////////////////////////////////////////////////
     ////                         public methods                    ////
 
     /** Call the attributeChanged method of the parent. Check if the
-     *  user as set the object class of the HLA attribute to subscribe to.
+     *  user as set all information relative to HLA to subscribe to.
      *  @param attribute The attribute that changed.
-     *  @exception IllegalActionException If there is zero or more than one
-     *  {@link HlaManager} per Ptolemy model.
+     *  @exception IllegalActionException If one of the parameters
+     *  is empty.
      */
     @Override
     public void attributeChanged(Attribute attribute)
@@ -213,6 +213,7 @@ public class HlaSubscriber extends TypedAtomicActor {
             }
         } else if (attribute == typeSelector) {
             String newPotentialTypeName = typeSelector.stringValue();
+            // XXX: FIXME: What is the purpose of this test ?
             if (newPotentialTypeName == null) {
                 return;
             }
@@ -458,25 +459,23 @@ public class HlaSubscriber extends TypedAtomicActor {
         return _useCertiMessageBuffer;
     }
 
-    /**
-     * Return the kind of HLA Attribute handled by the HLASubscriber.
-     * @return The kind of HLA Attribute the HLASuscriber is handling.
-     * @exception IllegalActionException if a bad token string value is provided
+    /** Return the HLA attribute name handled by the HlaSubscriber.
+     *  @return the HLA attribute name.
+     *  @exception IllegalActionException if a bad token string value is provided
      */
     public String getAttributeName() throws IllegalActionException {
-        String parameter = "";
+        String name = "";
         try {
-            parameter = ((StringToken) attributeName.getToken()).stringValue();
+            name = ((StringToken) attributeName.getToken()).stringValue();
         } catch (IllegalActionException illegalActionException) {
             throw new IllegalActionException(this,
                     "Bad attributeName token string value");
         }
-        return parameter;
+        return name;
     }
 
-    /**
-     * Return the name of the HLA class instance this HlaPublisher belongs to.
-     * @return A string that represents the HLA class instance.
+    /** Return HLA class instance name this HlaPublisher belongs to.
+     * @return the HLA class instance name.
      * @throws IllegalActionException if a bad token string value is provided
      */
     public String getClassInstanceName() throws IllegalActionException {
@@ -490,10 +489,10 @@ public class HlaSubscriber extends TypedAtomicActor {
         return name;   
     }
     
-    /**
-     * Return the class object name of HLA attribute handled by the HlaSubscriber.
-     * @return The class object name of HLA attribute handled by this HlaSubscriber.
-     * @exception IllegalActionException if a bad token string value is provided
+    /** Return the HLA class object name (in FOM) of the HLA attribute handled
+     *  by the HlaSubscriber.
+     *  @return The HLA class object name.
+     *  @exception IllegalActionException if a bad token string value is provided
      */
     public String getClassObjectName() throws IllegalActionException {
         String name = "";
@@ -506,8 +505,9 @@ public class HlaSubscriber extends TypedAtomicActor {
         return name;
     }
 
-    /**
-     * TBC
+    /** Manage the correct termination of the {@link HlaSubscriber}. Reset
+     *  HLA handles and object instance ID.
+     *  @exception IllegalActionException If the parent class throws it
      */
     @Override
     public void wrapup() throws IllegalActionException {
