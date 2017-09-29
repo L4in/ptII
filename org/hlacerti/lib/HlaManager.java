@@ -1,6 +1,6 @@
 /* This attribute implements a HLA Manager to cooperate with a HLA/CERTI Federation.
 
-@Copyright (c) 2013-2016 The Regents of the University of California.
+@Copyright (c) 2013-2017 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -763,18 +763,28 @@ implements TimeRegulator {
                         + _federateAmbassador.logicalTimeHLA);
             }
         }
+
         Time currentTime = _getModelTime();
 
+        // If the proposerTime has exceed the simulation stop time
+        // so it has no need to ask for the HLA service
+        // then return the _stopTime.
+
+        // Test if we have exceed the simulation stop time.
         if (proposedTime.compareTo(_stopTime) > 0) {
+            // XXX: FIXME: clarify SKIP RTI
             if (_debugging) {
                 _debug("    proposeTime(" + proposedTimeInString + ") -"
-                        + " called but the proposedTime is bigger than the stopTime -> SKIP RTI -> returning stopTime");
+                        + " called but the proposedTime is bigger than the stopTime"
+                        + " -> SKIP RTI -> returning stopTime");
             }
             return _stopTime;
         }
+
+        // XXX: FIXME: see why this is called again after STOPTIME ?
+        // XXX: FIXME: may be to removed since the above if test ?
         // This test is used to avoid exception when the RTIG subprocess is
         // shutdown before the last call of this method.
-        // GL: FIXME: see Ptolemy team why this is called again after STOPTIME ?
         if (_rtia == null) {
             if (_debugging) {
                 _debug("    proposeTime(" + proposedTimeInString
@@ -875,7 +885,9 @@ implements TimeRegulator {
                         _debug("    proposeTime(" + proposedTimeInString + ") -"
                                 + " NoSuchElementException " + " for _rtia");
                     }
+
                     return proposedTime;
+
                 } catch (SpecifiedSaveLabelDoesNotExist ex) {
                     Logger.getLogger(HlaManager.class.getName())
                     .log(Level.SEVERE, null, ex);
@@ -1196,32 +1208,34 @@ implements TimeRegulator {
     ///////////////////////////////////////////////////////////////////
     ////                         private methods                   ////
 
-    /**
-     * make a conversion from ptolemy time to certi logical time
-     * @param pt ptolemy time
-     * @return certi logical time
+    /** Convert Ptolemy time to CERTI logical time.
+     * @param pt The Ptolemy time.
+     * @return the time converted to CERTI (HLA) logical time.
      */
     private CertiLogicalTime _convertToCertiLogicalTime(Time pt) {
 
         return new CertiLogicalTime(pt.getDoubleValue() * _hlaTimeUnitValue);
     }
 
-    /**
-     * Make a conversion from certi logical time to ptolemy time
-     * @param ct certi logical time
-     * @return ptolemy time
-     * @exception IllegalActionException
+    /** Convert CERTI (HLA) logical time to Ptolemy time.
+     *  @param ct The CERTI (HLA) logical time.
+     *  @return the time converted to Ptolemy time.
+     *  @exception IllegalActionException If the given double time value does
+     *  not match the time resolution.
      */
     private Time _convertToPtolemyTime(CertiLogicalTime ct)
             throws IllegalActionException {
         return new Time(_director, ct.getTime() / _hlaTimeUnitValue);
     }
 
-    /**
-     * RTI service for event-based federate (NER or NERA)
-     * is used for proposing a time to advance to.
-     * @param proposedTime time stamp of lastFoundEvent
-     * @return
+    /** Time advancement method for event-based federates. This method
+     *  uses NER or NERA RTI services to propose a time to advance to
+     *  in a HLA simulation
+     *  This method implements the algorithm 3 "NER proposeTime(t')"
+     *  from [citeFestscrhiftLeeRapportInterneDisc-2017].
+     *  @param proposedTime time stamp of the next Ptolemy event.
+     *  @return the granted time from the HLA simulation.
+     *  @throws IllegalActionException
      */
     private Time _eventsBasedTimeAdvance(Time proposedTime)
             throws IllegalActionException, InvalidFederationTime,
@@ -1231,53 +1245,60 @@ implements TimeRegulator {
             RestoreInProgress, RTIinternalError, ConcurrentAccessAttempted,
             SpecifiedSaveLabelDoesNotExist {
 
-        CertiLogicalTime certiProposedTime = _convertToCertiLogicalTime(
-                proposedTime);
+        // FIXME: XXX: why this kind of representation ? toString() ?
+        // Custom string representation of proposedTime.
+        String strProposedTime = _printTimes(proposedTime);
 
-        String proposedTimeInString = _printTimes(proposedTime);
-        _storeTimes("NER(" + proposedTimeInString + ")");
+        // XXX: FIXME: GiL: begin HLA Reporter code ?
+        //_storeTimes("NER(" + proposedTimeInString + ")");
+        // XXX: FIXME: GiL: end HLA Reporter code ?
 
-        if (_hlaLookAHead > 0) {
-            // Event-based + lookahead > 0 => NER.
-            if (_debugging) {
-                _debug("        proposeTime(t(lastFoundEvent)="
-                        + proposedTimeInString + ") - _eventsBasedTimeAdvance("
-                        + proposedTimeInString + ")"
-                        + " - calling CERTI NER(proposedTime*hlaTimeUnitValue = "
-                        + certiProposedTime.getTime() + ")");
-            }
+        if (_debugging) {
+            _debug("_eventsBasedTimeAdvance(): strProposedTime"
+                    + " proposedTime=" + proposedTime.toString()
+                    + " - calling CERTI NER()");
+        }
+
+        // Algorithm 3 - NER
+
+        // f() => _convertToPtolemyTime()
+        // g() => _convertToCertiLogicalTime()
+
+        // r
+        Double r = 0.001;
+
+        // t => Ptolemy time => getModelTime()
+        Time ptolemyTime = _director.getModelTime();
+
+        // t' => proposedTime
+
+        // h => HLA logical time => _federateAmbassador.logicalTimeHLA
+        CertiLogicalTime hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.logicalTimeHLA;
+
+        // g(t') => certiProposedTime
+        CertiLogicalTime certiProposedTime = 
+                _convertToCertiLogicalTime(proposedTime);
+
+        // algo3: 1: if g(t') > h then
+        if (certiProposedTime.isGreaterThan(hlaLogicaltime)) {
+            // algo3: 2: NER(g(t 0 ))
             _rtia.nextEventRequest(certiProposedTime);
-
-            _numberOfNERs++;
-            _timeOfTheLastAdvanceRequest = System.nanoTime();
-
-        } else {
-            // Event-based + lookahead = 0 => NERA + NER.
-            // Start the time advancement loop with one NERA call.
-            if (_debugging) {
-                _debug("        proposeTime(t(lastFoundEvent)="
-                        + proposedTimeInString + ") - _eventsBasedTimeAdvance("
-                        + proposedTimeInString + ")- "
-                        + "call CERTI NERA(proposedTime*hlaTimeUnitValue = "
-                        + certiProposedTime.getTime() + ")");
-            }
-            _rtia.nextEventRequestAvailable(certiProposedTime);
-            _numberOfNERs++;
-            _timeOfTheLastAdvanceRequest = System.nanoTime();
 
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
+
+            // algo3: 3: while not granted do
             while (!(_federateAmbassador.timeAdvanceGrant)) {
                 if (_debugging) {
                     _debug("        proposeTime(t(lastFoundEvent)="
-                            + proposedTimeInString
+                            + strProposedTime
                             + ") - _eventsBasedTimeAdvance("
-                            + proposedTimeInString + ") - "
+                            + strProposedTime + ") - "
                             + " waiting for CERTI TAG("
                             + certiProposedTime.getTime()
                             + ") by calling tick2()");
                 }
-                _rtia.tick2();
+                _rtia.tick2(); // algo3: 4: tick()  > Wait TAG(h'')
 
                 // XXX: FIXME: GiL: begin HLA Reporter code ?
                 _numberOfTicks2++;
@@ -1285,25 +1306,105 @@ implements TimeRegulator {
                         _numberOfTicks.get(_numberOfTAGs) + 1);
                 // XXX: FIXME: GiL: end HLA Reporter code ?
 
+            } // algo3: 5: end while
+
+            // algo3: 6: h <- h''    => Update HLA time
+            _federateAmbassador.logicalTimeHLA = (CertiLogicalTime) _federateAmbassador.grantedHlalogicalTime;
+
+            // algo3: 7: if receivedRAV then  <= FIXME: XXX: not implemented ?
+
+            // algo3: 8: t'' <- f(h'')
+            Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.grantedHlalogicalTime);
+
+            // algo3: 9: if t 00 > t then  => True in the general case
+            if (newPtolemyTime.compareTo(ptolemyTime) > 0) {
+                // algo3: 10: t' <- t''
+                proposedTime = newPtolemyTime;
+            } else {  // algo3: 11: else
+                // algo3: 12: t' <- t'' + r
+                proposedTime = newPtolemyTime.add(r);
+            } // algo3: 13: end if
+
+            // algo3: 14: putRAVonHlaSubs(t')
+            System.out.println("_eventsBasedTimeAdvance: call _putReflectedAttributesOnHlaSubscribers()");
+            // Store reflected attributes RAV as events on HLASubscriber actors.
+            _putReflectedAttributesOnHlaSubscribers(proposedTime);
+
+            // algo3: 15: end if => if receivedRAV then  <= FIXME: XXX: not implemented ?
+
+        } // algo3: 16: end if
+
+        return proposedTime;
+
+        /*
+        // old algo
+            if (_hlaLookAHead > 0) {
+                // Event-based + lookahead > 0 => NER.
+                if (_debugging) {
+                    _debug("        proposeTime(t(lastFoundEvent)="
+                            + strProposedTime + ") - _eventsBasedTimeAdvance("
+                            + strProposedTime + ")"
+                            + " - calling CERTI NER(proposedTime*hlaTimeUnitValue = "
+                            + proposedTimeAsHlaLogTime.getTime() + ")");
+                }
+                _rtia.nextEventRequest(proposedTimeAsHlaLogTime);
+
+                _numberOfNERs++;
+                _timeOfTheLastAdvanceRequest = System.nanoTime();
+
+            } else {
+                // Event-based + lookahead = 0 => NERA + NER.
+                // Start the time advancement loop with one NERA call.
+                if (_debugging) {
+                    _debug("        proposeTime(t(lastFoundEvent)="
+                            + strProposedTime + ") - _eventsBasedTimeAdvance("
+                            + strProposedTime + ")- "
+                            + "call CERTI NERA(proposedTime*hlaTimeUnitValue = "
+                            + proposedTimeAsHlaLogTime.getTime() + ")");
+                }
+                _rtia.nextEventRequestAvailable(proposedTimeAsHlaLogTime);
+                _numberOfNERs++;
+                _timeOfTheLastAdvanceRequest = System.nanoTime();
+
+                // Wait the time grant from the HLA/CERTI Federation (from the RTI).
+                _federateAmbassador.timeAdvanceGrant = false;
+                while (!(_federateAmbassador.timeAdvanceGrant)) {
+                    if (_debugging) {
+                        _debug("        proposeTime(t(lastFoundEvent)="
+                                + strProposedTime
+                                + ") - _eventsBasedTimeAdvance("
+                                + strProposedTime + ") - "
+                                + " waiting for CERTI TAG("
+                                + proposedTimeAsHlaLogTime.getTime()
+                                + ") by calling tick2()");
+                    }
+                    _rtia.tick2();
+
+                    // XXX: FIXME: GiL: begin HLA Reporter code ?
+                    _numberOfTicks2++;
+                    _numberOfTicks.set(_numberOfTAGs,
+                            _numberOfTicks.get(_numberOfTAGs) + 1);
+                    // XXX: FIXME: GiL: end HLA Reporter code ?
+
+
+                }
+
+                // End the loop with one NER call.
+                if (_debugging) {
+                    _debug("        proposeTime(t(lastFoundEvent)="
+                            + strProposedTime + ") - _eventsBasedTimeAdvance("
+                            + strProposedTime + ")"
+                            + " - calling CERTI NER(proposedTime*hlaTimeUnitValue = "
+                            + proposedTimeAsHlaLogTime.getTime() + ")");
+                }
+                _rtia.nextEventRequest(proposedTimeAsHlaLogTime);
+
+                // XXX: FIXME: GiL: begin HLA Reporter code ?
+                _numberOfNERs++;
+                _timeOfTheLastAdvanceRequest = System.nanoTime();
+                // XXX: FIXME: GiL: end HLA Reporter code ?
 
             }
-
-            // End the loop with one NER call.
-            if (_debugging) {
-                _debug("        proposeTime(t(lastFoundEvent)="
-                        + proposedTimeInString + ") - _eventsBasedTimeAdvance("
-                        + proposedTimeInString + ")"
-                        + " - calling CERTI NER(proposedTime*hlaTimeUnitValue = "
-                        + certiProposedTime.getTime() + ")");
-            }
-            _rtia.nextEventRequest(certiProposedTime);
-
-            // XXX: FIXME: GiL: begin HLA Reporter code ?
-            _numberOfNERs++;
-            _timeOfTheLastAdvanceRequest = System.nanoTime();
-            // XXX: FIXME: GiL: end HLA Reporter code ?
-
-        }
 
         // XXX: FIXME: GiL: begin HLA Reporter code ?
         int cntTick = 0;
@@ -1314,10 +1415,10 @@ implements TimeRegulator {
         while (!(_federateAmbassador.timeAdvanceGrant)) {
             if (_debugging) {
                 _debug("        proposeTime(t(lastFoundEvent)="
-                        + proposedTimeInString + ") - _eventsBasedTimeAdvance("
-                        + proposedTimeInString + ") - "
+                        + strProposedTime + ") - _eventsBasedTimeAdvance("
+                        + strProposedTime + ") - "
                         + " waiting for CERTI TAG("
-                        + certiProposedTime.getTime() + ") by calling tick2()");
+                        + proposedTimeAsHlaLogTime.getTime() + ") by calling tick2()");
             }
             _rtia.tick2();
 
@@ -1334,8 +1435,8 @@ implements TimeRegulator {
 
         // If we get any rav-event
         if (_debugging) {
-            _debug("        proposeTime(" + proposedTimeInString
-                    + ") - _eventBasedTimeAdvance(" + proposedTimeInString
+            _debug("        proposeTime(" + strProposedTime
+                    + ") - _eventBasedTimeAdvance(" + strProposedTime
                     + ")  - Checking if we've received any RAV events.");
         }
 
@@ -1354,9 +1455,9 @@ implements TimeRegulator {
                 Time breakpoint = _convertToPtolemyTime(hlaTimeGranted);
                 if (_debugging) {
                     _debug("        proposeTime(t(lastFoundEvent)="
-                            + proposedTimeInString
+                            + strProposedTime
                             + ") - _eventsBasedTimeAdvance("
-                            + proposedTimeInString
+                            + strProposedTime
                             + ") - RAV event detected -> TAG(" + hlaTimeGranted
                             + ") received, model moves to the breakpoint time = "
                             + _printTimes(breakpoint));
@@ -1368,8 +1469,7 @@ implements TimeRegulator {
                         "The breakpoint time is not a valid Ptolemy time");
             }
         }
-
-        return proposedTime;
+        return proposedTime;*/
     }
 
     /**
@@ -1491,7 +1591,7 @@ implements TimeRegulator {
                     if (cntTick != 1) {
                         System.out.println("_timeSteppedBasedTimeAdvance: call _putReflectedAttributesOnHlaSubscribers()");
                         // Store reflected attributes as events on HLASubscriber actors.
-                        _putReflectedAttributesOnHlaSubscribers();
+                        _putReflectedAttributesOnHlaSubscribers(proposedTime);
                         // If the new rav-event will arrive before our lastFoundEvent,
                         if (hlaNextPointInTime.compareTo(proposedTime) < 0)
                             proposedTime = hlaNextPointInTime;
@@ -1699,7 +1799,7 @@ implements TimeRegulator {
      *  output port of their corresponding {@link HLASubscriber} actors
      *  @exception IllegalActionException If the parent class throws it.
      */
-    private void _putReflectedAttributesOnHlaSubscribers()
+    private void _putReflectedAttributesOnHlaSubscribers(Time proposedTime)
             throws IllegalActionException {
         // Reflected HLA attributes, e.g. updated values of HLA attributes
         // received by callbacks (from the RTI) from the whole HLA/CERTI
@@ -1721,24 +1821,29 @@ implements TimeRegulator {
             System.out.println("_putReflectedAttributesOnHlaSubscribers: key " + elt.getKey());
             System.out.println("_putReflectedAttributesOnHlaSubscribers: value " + elt.getValue().toString());
 
-            //multiple events can occur at the same time
+            // Multiple events can occur at the same time.
             LinkedList<TimedEvent> events = elt.getValue();
             while (events.size() > 0) {
 
-                TimedEvent ravevent = events.get(0);
+                HlaTimedEvent ravEvent = (HlaTimedEvent) events.get(0);
 
-                // All rav-events received by HlaSubscriber actors, RAV(tau) with tau < hlaCurrentTime
+                // All RAV-events received by HlaSubscriber actors, RAV(tau) with tau < hlaCurrentTime
                 // are put in the event queue with timestamp hlaCurrentTime
                 if (_timeStepped) {
-                    ravevent.timeStamp = _getHlaCurrentTime();
+                    ravEvent.timeStamp = _getHlaCurrentTime();
+                } else {
+                    // FIXME: XXX: Ask what to exactly with the proposedTime value ?
+                    // Update RAV-event received.
+                    ravEvent.timeStamp = proposedTime;
                 }
+                
                 // If any rav-event received by HlaSubscriber actors, RAV(tau) with tau < ptolemy startTime
                 // are put in the event queue with timestamp startTime
                 //FIXME: Or should it be an exception because there is something wrong with
                 //the overall simulation ??
-                if (ravevent.timeStamp
+                if (ravEvent.timeStamp
                         .compareTo(_director.getModelStartTime()) < 0) {
-                    ravevent.timeStamp = _director.getModelStartTime();
+                    ravEvent.timeStamp = _director.getModelStartTime();
                 }
 
                 // Get the HLA subscriber actor to which the event is destined to.
@@ -1751,14 +1856,14 @@ implements TimeRegulator {
 
                 System.out.println("_putReflectedAttributesOnHlaSubscribers: HlaSubscriber = " + hs.getFullName());
 
-                hs.putReflectedHlaAttribute(ravevent);
+                hs.putReflectedHlaAttribute(ravEvent);
 
-                System.out.println("_putReflectedAttributesOnHlaSubscribers(): put event: HlaAttribute = " + hs.getDisplayName() + ", timestamp = " +_printTimes(ravevent.timeStamp));
+                System.out.println("_putReflectedAttributesOnHlaSubscribers(): put event: HlaAttribute = " + hs.getDisplayName() + ", timestamp = " +_printTimes(ravEvent.timeStamp));
 
                 if (_debugging) {
                     _debug("    _putReflectedAttributesOnHlaSubscribers() - put Event: folRAV( Hla attribute = "
                             + hs.getDisplayName() + ", timestamp = "
-                            + _printTimes(ravevent.timeStamp) + ") "
+                            + _printTimes(ravEvent.timeStamp) + ") "
                             + " in the Hla Subscriber");
                 }
 
@@ -1933,6 +2038,7 @@ implements TimeRegulator {
      */
     private Boolean _isCreator;
 
+    /** The simulation stop time. */
     private Time _stopTime;
 
     /** Represents the number of next event request this federate has made.
@@ -2022,7 +2128,7 @@ implements TimeRegulator {
      * Map between an Class ID given by the RTI and all we need to know
      * about it in the model
      */
-    private HashMap<Integer, StructuralInformation> _structuralInformation;
+    //private HashMap<Integer, StructuralInformation> _structuralInformation;
 
     /** Map class intance name and object instance ID. Those information are set
      *  using discoverObjectInstance() callback and used by the RAV service.
@@ -2360,10 +2466,13 @@ implements TimeRegulator {
          */
         public Boolean timeAdvanceGrant;
 
-        /** Indicates the current HLA logical time of the Federate. This value
+        /** Indicates the current HLA logical time of the Federate. */
+        public LogicalTime logicalTimeHLA;
+
+        /** Indicates the granted HLA logical time of the Federate. This value
          *  is set by callback by the RTI.
          */
-        public LogicalTime logicalTimeHLA;
+        public LogicalTime grantedHlalogicalTime;
 
         /** Indicates if the request of synchronization by the Federate is
          *  validated by the HLA/CERTI Federation. This value is set by callback
@@ -2487,6 +2596,7 @@ implements TimeRegulator {
                         "LookAhead field in HLAManager must be greater than 0.");
             }
             logicalTimeHLA = new CertiLogicalTime(startTime);
+            grantedHlalogicalTime = new CertiLogicalTime(0);
 
             effectiveLookAHead = new CertiLogicalTimeInterval(
                     lookAHead * _hlaTimeUnitValue);
@@ -2580,11 +2690,10 @@ implements TimeRegulator {
                                         (BaseType) _getTypeFromTab(tObj),
                                         theAttributes.getValue(i));
 
-                                te = new OriginatedEvent(ts, new Object[] {
+                                te = new HlaTimedEvent(ts, new Object[] {
                                         (BaseType) _getTypeFromTab(tObj),
                                         value }, theObject);
 
-                                //_fromFederationEvents.get(hs.getIdentity())
                                 _fromFederationEvents.get(hs.getFullName()).add(te);
                                 if (_debugging) {
                                     _debug("    reflectAttributeValues() - pRAV("
@@ -2750,131 +2859,6 @@ implements TimeRegulator {
                     e.printStackTrace();
                 }
             }
-
-            /*
-            //if we discover it means we registered
-            // it meands there is a class to instanciate and then classToInstantiate is not null
-            final CompositeActor classToInstantiate = (CompositeActor) _structuralInformation
-                    .get(classHandle).classToInstantiate;
-            _noObjectDicovered = false;
-
-
-            //Build a change request
-            ChangeRequest request = new ChangeRequest(this,
-                    "Adding " + objectName, true) {
-                //
-                 // Sum up of the structural change :
-                 // Get the class instantiate and its container
-                 // If no free actor, instantiate one otherwise use an existing one
-                 // Map the actor (set its name, ObjectHandle and put it in _hlaAttributesSubscribedTo)
-                 //
-                @Override
-                protected void _execute() throws IllegalActionException {
-
-                    CompositeActor container = (CompositeActor) classToInstantiate
-                            .getContainer();
-                    CompositeActor newActor = null;
-                    try {
-                        Instantiable instance = null;
-                        StructuralInformation info = _structuralInformation
-                                .get(classHandle);
-                        LinkedList<ComponentEntity> actors = info.freeActors;
-
-                        //if it is a new actor, then we has to connect the ports
-                        if (actors.size() == 0) {
-                            instance = classToInstantiate.instantiate(container,
-                                    objectName);
-                            newActor = (CompositeActor) instance;
-
-                            LinkedList<IOPort> outputPortList = (LinkedList<IOPort>) newActor
-                                    .outputPortList();
-
-                            container.notifyConnectivityChange();
-
-                            for (IOPort out : outputPortList) {
-                                ComponentRelation r = null;
-                                HashSet<IOPort> ports = info
-                                        .getPortReceiver(out.getName());
-
-                                //if we dont know what to do with the port, just skip it
-                                if (ports == null) {
-                                    continue;
-                                }
-
-                                for (IOPort recv : ports) {
-                                    if (r == null) {
-                                        //connect output port to new relation
-                                        r = container.connect(out, recv,
-                                                objectName + " "
-                                                        + out.getName());
-                                    } else {
-                                        //connect destination to relation
-                                        recv.link(r);
-                                    }
-                                }
-                            }
-                            if (_debugging) {
-                                _debug(" discoverObjectInstance() - New object will do object "
-                                        + objectName);
-                            }
-
-                        } else {
-                            //retrieve and remove head
-                            instance = actors.poll();
-                            if (instance == null) {
-                                throw new IllegalActionException(
-                                        "A null actor requested to be inserted in the model");
-                            } else {
-                                newActor = (CompositeActor) instance;
-                                newActor.setDisplayName(objectName);
-                                if (_debugging) {
-                                    _debug(instance.getName()
-                                            + "  discoverObjectInstance() - will do object "
-                                            + objectName);
-                                }
-                            }
-                        }
-
-                        //if the actor as an attribute called temp block
-                        //then set it up to the actual name
-                        {
-                            Attribute name = newActor
-                                    .getAttribute("objectName");
-                            if (name != null) {
-                                Parameter p = (Parameter) name;
-                                p.setTypeEquals(BaseType.STRING);
-                                p.setExpression("\"" + objectName + "\"");
-                            }
-                        }
-
-                        // List all HlaSubscriber inside the instance and set them up
-                        List<HlaSubscriber> subscribers = newActor
-                                .entityList(HlaSubscriber.class);
-                        for (int i = 0; i < subscribers.size(); ++i) {
-                            HlaSubscriber sub = subscribers.get(i);
-                            sub.objectName
-                                    .setExpression("\"" + objectName + "\"");
-                            ;
-                            sub.setObjectHandle(objectHandle);
-                            _hlaAttributesSubscribedTo.put(sub.getIdentity(),
-                                    new Object[] { sub.output,
-                                            sub.output.getType(), "", //empty string because it is parameter no longer used, but
-                                            // some functions rely on classHandle and attributeHandle
-                                            // being at index 3 and 4
-                                            classHandle,
-                                            sub.getAttributeHandle() });
-                            _fromFederationEvents.put(sub.getIdentity(),
-                                    new LinkedList<TimedEvent>());
-                        }
-                    } catch (NameDuplicationException
-                            | CloneNotSupportedException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            };
-            request.setPersistent(false);
-            requestChange(request);
-             */
             /*        if (_debugging) {
                 String toLog = "INNER"
                         + " discoverObjectInstance() - the object " + objectName
@@ -2925,16 +2909,20 @@ implements TimeRegulator {
         public void timeAdvanceGrant(LogicalTime theTime)
                 throws InvalidFederationTime, TimeAdvanceWasNotInProgress,
                 FederateInternalError {
-            double time = ((CertiLogicalTime) theTime).getTime();
 
-            logicalTimeHLA = new CertiLogicalTime(time);
-            //* ((CertiLogicalTime) theTime).getTime());
+            // FIXME: XXX: Why ?
+            //double time = ((CertiLogicalTime) theTime).getTime();
+            //logicalTimeHLA = new CertiLogicalTime(time);
+
+            //logicalTimeHLA = (CertiLogicalTime) theTime;
+            grantedHlalogicalTime = (CertiLogicalTime) theTime;
+            timeAdvanceGrant = true;
+
             // Time spent between the last TAR or NER and the TAG.
             _TAGDelay.add((System.nanoTime() - _timeOfTheLastAdvanceRequest)
                     / Math.pow(10, 9));
 
             _timeOfTheLastAdvanceRequest = 0;
-            timeAdvanceGrant = true;
 
             _numberOfTAGs++;
             _numberOfTicks.add(0);
