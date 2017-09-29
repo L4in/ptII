@@ -755,12 +755,12 @@ implements TimeRegulator {
                 _debug("starting proposeTime(t(lastFoundEvent)="
                         + proposedTimeInString + ") - current status - "
                         + "t_ptII = " + _printTimes(_director.getModelTime())
-                        + "; t_hla = " + _federateAmbassador.logicalTimeHLA);
+                        + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             } else {
                 _debug("starting proposeTime(" + proposedTimeInString
                         + ")) - current status - " + "t_ptII = "
                         + _printTimes(_director.getModelTime()) + "; t_hla = "
-                        + _federateAmbassador.logicalTimeHLA);
+                        + _federateAmbassador.hlaLogicalTime);
             }
         }
 
@@ -931,7 +931,7 @@ implements TimeRegulator {
         if (_debugging) {
             _debug("starting updateHlaAttribute() - current status t_ptII = "
                     + _printTimes(currentTime) + "; t_hla = "
-                    + _federateAmbassador.logicalTimeHLA
+                    + _federateAmbassador.hlaLogicalTime
                     + " - A HLA value from ptolemy has been"
                     + " encoded as CERTI MessageBuffer");
         }
@@ -970,7 +970,7 @@ implements TimeRegulator {
             // case 2: hlaCurrentTime <= currentTime < hlaCurrentTime + lookAhead
             //         In order not to break the lookahead rule, we must delay the uav.
             //         tau <- hlaCurrentTime + lookahead
-            CertiLogicalTime certiCurrentTime = (CertiLogicalTime) _federateAmbassador.logicalTimeHLA;
+            CertiLogicalTime certiCurrentTime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
             Time hlaCurrentTime = _convertToPtolemyTime(certiCurrentTime);
             /*            if (currentTime.compareTo(hlaCurrentTime.add(_hlaTimeStep))==0) {
                 hlaCurrentTime= hlaCurrentTime.add(_hlaTimeStep);
@@ -1273,7 +1273,7 @@ implements TimeRegulator {
         // t' => proposedTime
 
         // h => HLA logical time => _federateAmbassador.logicalTimeHLA
-        CertiLogicalTime hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.logicalTimeHLA;
+        CertiLogicalTime hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
 
         // g(t') => certiProposedTime
         CertiLogicalTime certiProposedTime = 
@@ -1309,12 +1309,12 @@ implements TimeRegulator {
             } // algo3: 5: end while
 
             // algo3: 6: h <- h''    => Update HLA time
-            _federateAmbassador.logicalTimeHLA = (CertiLogicalTime) _federateAmbassador.grantedHlalogicalTime;
+            _federateAmbassador.hlaLogicalTime = (CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime;
 
             // algo3: 7: if receivedRAV then  <= FIXME: XXX: not implemented ?
 
             // algo3: 8: t'' <- f(h'')
-            Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.grantedHlalogicalTime);
+            Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime);
 
             // algo3: 9: if t 00 > t then  => True in the general case
             if (newPtolemyTime.compareTo(ptolemyTime) > 0) {
@@ -1581,6 +1581,10 @@ implements TimeRegulator {
 
                     _numberOfTicks.set(_numberOfTAGs, _numberOfTicks.get(_numberOfTAGs) + cntTick);
 
+                    // If we reach here, it means a TAG callback has been received, so update
+                    // the logicalTimeHla with the grantedHlaLogicalTime.
+                    _federateAmbassador.hlaLogicalTime = (CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime;
+
                     // If we get any rav-event
                     if (_debugging) {
                         _debug("        proposeTime(" + proposedTimeInString
@@ -1809,7 +1813,7 @@ implements TimeRegulator {
         if (_debugging) {
             _debug("starting _putReflectedAttributesOnHlaSubscribers() - current status - "
                     + "t_ptII = " + _printTimes(_director.getModelTime())
-                    + "; t_hla = " + _federateAmbassador.logicalTimeHLA);
+                    + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
         }
 
         Iterator<Entry<String, LinkedList<TimedEvent>>> it = _fromFederationEvents
@@ -1896,7 +1900,7 @@ implements TimeRegulator {
      * @return hla current time
      */
     private Time _getHlaCurrentTime() throws IllegalActionException {
-        CertiLogicalTime certiCurrentTime = (CertiLogicalTime) _federateAmbassador.logicalTimeHLA;
+        CertiLogicalTime certiCurrentTime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
         return _convertToPtolemyTime(certiCurrentTime);
     }
 
@@ -2306,7 +2310,7 @@ implements TimeRegulator {
         // Declare the Federate time regulator (if true).
         if (_isTimeRegulator) {
             try {
-                _rtia.enableTimeRegulation(_federateAmbassador.logicalTimeHLA,
+                _rtia.enableTimeRegulation(_federateAmbassador.hlaLogicalTime,
                         _federateAmbassador.effectiveLookAHead);
             } catch (RTIexception e) {
                 throw new IllegalActionException(this, e, e.getMessage());
@@ -2467,12 +2471,12 @@ implements TimeRegulator {
         public Boolean timeAdvanceGrant;
 
         /** Indicates the current HLA logical time of the Federate. */
-        public LogicalTime logicalTimeHLA;
+        public LogicalTime hlaLogicalTime;
 
         /** Indicates the granted HLA logical time of the Federate. This value
          *  is set by callback by the RTI.
          */
-        public LogicalTime grantedHlalogicalTime;
+        public LogicalTime grantedHlaLogicalTime;
 
         /** Indicates if the request of synchronization by the Federate is
          *  validated by the HLA/CERTI Federation. This value is set by callback
@@ -2595,8 +2599,8 @@ implements TimeRegulator {
                 throw new IllegalActionException(null, null, null,
                         "LookAhead field in HLAManager must be greater than 0.");
             }
-            logicalTimeHLA = new CertiLogicalTime(startTime);
-            grantedHlalogicalTime = new CertiLogicalTime(0);
+            hlaLogicalTime = new CertiLogicalTime(startTime);
+            grantedHlaLogicalTime = new CertiLogicalTime(0);
 
             effectiveLookAHead = new CertiLogicalTimeInterval(
                     lookAHead * _hlaTimeUnitValue);
@@ -2627,7 +2631,7 @@ implements TimeRegulator {
             if (_debugging) {
                 _debug("starting reflectAttributeValues() - current status - "
                         + "t_ptII = " + _printTimes(_director.getModelTime())
-                        + "; t_hla = " + _federateAmbassador.logicalTimeHLA);
+                        + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             }
 
             System.out.println("callback: reflectAttributeValues:"
@@ -2915,7 +2919,7 @@ implements TimeRegulator {
             //logicalTimeHLA = new CertiLogicalTime(time);
 
             //logicalTimeHLA = (CertiLogicalTime) theTime;
-            grantedHlalogicalTime = (CertiLogicalTime) theTime;
+            grantedHlaLogicalTime = (CertiLogicalTime) theTime;
             timeAdvanceGrant = true;
 
             // Time spent between the last TAR or NER and the TAG.
@@ -2928,12 +2932,12 @@ implements TimeRegulator {
             _numberOfTicks.add(0);
 
             if (_debugging) {
-                _debug("timeAdvanceGrant() - TAG(" + logicalTimeHLA.toString()
+                _debug("timeAdvanceGrant() - TAG(" + hlaLogicalTime.toString()
                 + "(HLA Time Unit)) received");
             }
             // XXX: FIXME: GiL: debug
             System.out.println("DBG == _TAGDelay => " + _TAGDelay);
-            System.out.println("DBG == timeAdvanceGrant() - TAG(" + logicalTimeHLA.toString() + "(HLA Time Unit)) received");
+            System.out.println("DBG == timeAdvanceGrant() - TAG(" + hlaLogicalTime.toString() + "(HLA Time Unit)) received");
         }
 
         // HLA Federation Management services (callbacks).
