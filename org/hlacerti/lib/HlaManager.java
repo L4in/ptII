@@ -1281,11 +1281,11 @@ implements TimeRegulator {
 
         // algo3: 1: if g(t') > h then
         if (certiProposedTime.isGreaterThan(hlaLogicaltime)) {
-            // algo3: 2: NER(g(t 0 ))
-            _rtia.nextEventRequest(certiProposedTime);
-
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
+            
+            // algo3: 2: NER(g(t'))
+            _rtia.nextEventRequest(certiProposedTime);
 
             // algo3: 3: while not granted do
             while (!(_federateAmbassador.timeAdvanceGrant)) {
@@ -1483,8 +1483,104 @@ implements TimeRegulator {
             FederationTimeAlreadyPassed, TimeAdvanceAlreadyInProgress,
             FederateNotExecutionMember, SaveInProgress,
             EnableTimeRegulationPending, EnableTimeConstrainedPending,
-            RestoreInProgress, RTIinternalError, ConcurrentAccessAttempted {
+            RestoreInProgress, RTIinternalError, ConcurrentAccessAttempted,
+            SpecifiedSaveLabelDoesNotExist {
 
+        // FIXME: XXX: why this kind of representation ? toString() ?
+        // Custom string representation of proposedTime.
+        String strProposedTime = _printTimes(proposedTime);
+
+        if (_debugging) {
+            _debug("_timeSteppedBasedTimeAdvance(): strProposedTime"
+                    + " proposedTime=" + proposedTime.toString()
+                    + " - calling CERTI TAR()");
+        }
+
+        // Algorithm 4 - TAR
+        // f() => _convertToPtolemyTime()
+        // g() => _convertToCertiLogicalTime()
+
+        // t => Ptolemy time => getModelTime()
+        Time ptolemyTime = _director.getModelTime();
+
+        // t' => proposedTime
+
+        // h => HLA logical time => _federateAmbassador.logicalTimeHLA
+        CertiLogicalTime hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
+
+        // TS => _hlaTimeStep
+        
+        // g(t') => certiProposedTime
+        CertiLogicalTime certiProposedTime = 
+                _convertToCertiLogicalTime(proposedTime);
+
+        // h + TS => tarTime
+        CertiLogicalTime tarContractTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
+
+        // algo4: 1: if g(t') > h + TS then
+        while (certiProposedTime.isGreaterThan(tarContractTime)) {
+            // Wait the time grant from the HLA/CERTI Federation (from the RTI).
+            _federateAmbassador.timeAdvanceGrant = false;
+            
+            // algo4: 2: TAR(g(t'))
+            _rtia.timeAdvanceRequest(tarContractTime);
+
+            // algo4: 3: while not granted do
+            while (!(_federateAmbassador.timeAdvanceGrant)) {
+                if (_debugging) {
+                    _debug("        proposeTime(t(lastFoundEvent)="
+                            + strProposedTime
+                            + ") - _timeSteppedBasedTimeAdvance("
+                            + strProposedTime + ") - "
+                            + " waiting for CERTI TAG("
+                            + tarContractTime.getTime()
+                            + ") by calling tick2()");
+                }
+                _rtia.tick2(); // algo4: 4: tick()  > Wait TAG()
+
+                // XXX: FIXME: GiL: begin HLA Reporter code ?
+                _numberOfTicks2++;
+                _numberOfTicks.set(_numberOfTAGs,
+                        _numberOfTicks.get(_numberOfTAGs) + 1);
+                // XXX: FIXME: GiL: end HLA Reporter code ?
+
+            } // algo4: 5: end while
+
+            // algo4: 6: h <- h + TS    => Update HLA time
+            _federateAmbassador.hlaLogicalTime = tarContractTime;
+
+            // algo4: 7: if receivedRAV then  <= FIXME: XXX: not implemented ?
+
+            // algo4: 8: t'' <- f(h)
+            Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.hlaLogicalTime);
+
+            // algo4: 9: if t'' > t' then  => Update t’ if the received time is smaller, otherwise keeps t’
+            if (newPtolemyTime.compareTo(proposedTime) < 0) {
+                // algo4: 10: t' <- t''
+                proposedTime = newPtolemyTime;
+            } // algo4: 11: end if
+
+            // algo4: 12: putRAVonHlaSubs(t')
+            System.out.println("_eventsBasedTimeAdvance: call _putReflectedAttributesOnHlaSubscribers()");
+            // Store reflected attributes RAV as events on HLASubscriber actors.
+            _putReflectedAttributesOnHlaSubscribers(proposedTime);
+
+            // algo4: 13: return t'
+            return proposedTime;
+
+            // algo4: 14: if receivedRAV then  <= FIXME: XXX: not implemented ?
+        } // algo4: 15: end while
+
+        if (_debugging) {
+            _debug("        proposeTime(" + strProposedTime
+                    + ") - _timeSteppedBasedTimeAdvance(" + strProposedTime
+                    + ") - TAR not successful");
+        }
+
+        // algo4: 16: return t' => Update PtII time
+        return proposedTime;
+        
+        /*
         String proposedTimeInString = _printTimes(proposedTime);
         if (_hlaTimeStep > 0) {
 
@@ -1670,7 +1766,7 @@ implements TimeRegulator {
                     + ") - TAR not successful");
         }
         return null;
-
+*/
     }
 
     /** The method {@link #_populatedHlaValueTables()} populates the tables
