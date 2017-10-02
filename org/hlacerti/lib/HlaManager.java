@@ -673,11 +673,8 @@ implements TimeRegulator {
         // (constrained by and/or participate to the time management).
         _initializeTimeAspects();
 
-        System.out.println("HlaManager: initialize(): debug: before _doInitialSynchronization()");
         // Set initial synchronization point.
         _doInitialSynchronization();
-        System.out.println("HlaManager: initialize(): debug: after _doInitialSynchronization()");
-
     }
 
     // XXX: FIXME: check if usage is required ?
@@ -962,6 +959,7 @@ implements TimeRegulator {
             // So, we chose tau <- currentTime + lookahead and we respect the condition
             // above.
             uavTimeStamp = currentTime.add(_hlaLookAHead);
+            System.out.println("DEBUG CIELE: goes here uavtimestamp=" + uavTimeStamp);
         } else {
             // In the TAR case, currentTime >= hlaCurrentTime.
             // So, we have two possible cases:
@@ -1264,9 +1262,10 @@ implements TimeRegulator {
         // f() => _convertToPtolemyTime()
         // g() => _convertToCertiLogicalTime()
 
-        // r
-        Double r = 0.001;
-
+        // r => director global time resolution
+        Double r = _director.getTimeResolution();
+        System.out.println("_eventsBasedTimeAdvance: resolution r = " + r.toString());
+        
         // t => Ptolemy time => getModelTime()
         Time ptolemyTime = _director.getModelTime();
 
@@ -1283,7 +1282,7 @@ implements TimeRegulator {
         if (certiProposedTime.isGreaterThan(hlaLogicaltime)) {
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
-            
+
             // algo3: 2: NER(g(t'))
             _rtia.nextEventRequest(certiProposedTime);
 
@@ -1336,140 +1335,65 @@ implements TimeRegulator {
 
         return proposedTime;
 
-        /*
-        // old algo
-            if (_hlaLookAHead > 0) {
-                // Event-based + lookahead > 0 => NER.
-                if (_debugging) {
-                    _debug("        proposeTime(t(lastFoundEvent)="
-                            + strProposedTime + ") - _eventsBasedTimeAdvance("
-                            + strProposedTime + ")"
-                            + " - calling CERTI NER(proposedTime*hlaTimeUnitValue = "
-                            + proposedTimeAsHlaLogTime.getTime() + ")");
-                }
-                _rtia.nextEventRequest(proposedTimeAsHlaLogTime);
-
-                _numberOfNERs++;
-                _timeOfTheLastAdvanceRequest = System.nanoTime();
-
-            } else {
-                // Event-based + lookahead = 0 => NERA + NER.
-                // Start the time advancement loop with one NERA call.
-                if (_debugging) {
-                    _debug("        proposeTime(t(lastFoundEvent)="
-                            + strProposedTime + ") - _eventsBasedTimeAdvance("
-                            + strProposedTime + ")- "
-                            + "call CERTI NERA(proposedTime*hlaTimeUnitValue = "
-                            + proposedTimeAsHlaLogTime.getTime() + ")");
-                }
-                _rtia.nextEventRequestAvailable(proposedTimeAsHlaLogTime);
-                _numberOfNERs++;
-                _timeOfTheLastAdvanceRequest = System.nanoTime();
-
-                // Wait the time grant from the HLA/CERTI Federation (from the RTI).
-                _federateAmbassador.timeAdvanceGrant = false;
-                while (!(_federateAmbassador.timeAdvanceGrant)) {
-                    if (_debugging) {
-                        _debug("        proposeTime(t(lastFoundEvent)="
-                                + strProposedTime
-                                + ") - _eventsBasedTimeAdvance("
-                                + strProposedTime + ") - "
-                                + " waiting for CERTI TAG("
-                                + proposedTimeAsHlaLogTime.getTime()
-                                + ") by calling tick2()");
-                    }
-                    _rtia.tick2();
-
-                    // XXX: FIXME: GiL: begin HLA Reporter code ?
-                    _numberOfTicks2++;
-                    _numberOfTicks.set(_numberOfTAGs,
-                            _numberOfTicks.get(_numberOfTAGs) + 1);
-                    // XXX: FIXME: GiL: end HLA Reporter code ?
-
-
-                }
-
-                // End the loop with one NER call.
-                if (_debugging) {
-                    _debug("        proposeTime(t(lastFoundEvent)="
-                            + strProposedTime + ") - _eventsBasedTimeAdvance("
-                            + strProposedTime + ")"
-                            + " - calling CERTI NER(proposedTime*hlaTimeUnitValue = "
-                            + proposedTimeAsHlaLogTime.getTime() + ")");
-                }
-                _rtia.nextEventRequest(proposedTimeAsHlaLogTime);
-
-                // XXX: FIXME: GiL: begin HLA Reporter code ?
-                _numberOfNERs++;
-                _timeOfTheLastAdvanceRequest = System.nanoTime();
-                // XXX: FIXME: GiL: end HLA Reporter code ?
-
-            }
-
-        // XXX: FIXME: GiL: begin HLA Reporter code ?
-        int cntTick = 0;
-        // XXX: FIXME: GiL: end HLA Reporter code ?
-
-        // Wait the time grant from the HLA/CERTI Federation (from the RTI).
-        _federateAmbassador.timeAdvanceGrant = false;
-        while (!(_federateAmbassador.timeAdvanceGrant)) {
-            if (_debugging) {
-                _debug("        proposeTime(t(lastFoundEvent)="
-                        + strProposedTime + ") - _eventsBasedTimeAdvance("
-                        + strProposedTime + ") - "
-                        + " waiting for CERTI TAG("
-                        + proposedTimeAsHlaLogTime.getTime() + ") by calling tick2()");
-            }
-            _rtia.tick2();
-
-            // XXX: FIXME: GiL: begin HLA Reporter code ?
-            _numberOfTicks2++;
-            cntTick++;
-            // XXX: FIXME: GiL: end HLA Reporter code ?
-
+/*
+        if (_debugging) {
+            _debug("        proposeTime(t(lastFoundEvent)="
+                    + strProposedTime + ") - _eventsBasedTimeAdvance("
+                    + strProposedTime + ")"
+                    + " - calling CERTI NER(proposedTime*hlaTimeUnitValue = "
+                    + proposedTimeAsHlaLogTime.getTime() + ")");
         }
 
+        if (_debugging) {
+            _debug("        proposeTime(t(lastFoundEvent)="
+                    + strProposedTime + ") - _eventsBasedTimeAdvance("
+                    + strProposedTime + ")- "
+                    + "call CERTI NERA(proposedTime*hlaTimeUnitValue = "
+                    + proposedTimeAsHlaLogTime.getTime() + ")");
+        }
 
-        _numberOfTicks.set(_numberOfTAGs,
-                _numberOfTicks.get(_numberOfTAGs) + cntTick);
+        if (_debugging) {
+            _debug("        proposeTime(t(lastFoundEvent)="
+                    + strProposedTime
+                    + ") - _eventsBasedTimeAdvance("
+                    + strProposedTime + ") - "
+                    + " waiting for CERTI TAG("
+                    + proposedTimeAsHlaLogTime.getTime()
+                    + ") by calling tick2()");
+        }
 
-        // If we get any rav-event
+        if (_debugging) {
+            _debug("        proposeTime(t(lastFoundEvent)="
+                    + strProposedTime + ") - _eventsBasedTimeAdvance("
+                    + strProposedTime + ")"
+                    + " - calling CERTI NER(proposedTime*hlaTimeUnitValue = "
+                    + proposedTimeAsHlaLogTime.getTime() + ")");
+        }
+
+        if (_debugging) {
+            _debug("        proposeTime(t(lastFoundEvent)="
+                    + strProposedTime + ") - _eventsBasedTimeAdvance("
+                    + strProposedTime + ") - "
+                    + " waiting for CERTI TAG("
+                    + proposedTimeAsHlaLogTime.getTime() + ") by calling tick2()");
+        }
+
         if (_debugging) {
             _debug("        proposeTime(" + strProposedTime
                     + ") - _eventBasedTimeAdvance(" + strProposedTime
                     + ")  - Checking if we've received any RAV events.");
         }
 
-        // XXX: FIXME: GiL: reviewing the code, cntTick is always != 1, so why ?
-        if (cntTick != 1) {
-            System.out.println("_eventsBasedTimeAdvance: call _putReflectedAttributesOnHlaSubscribers()");
-            // Store reflected attributes RAV as events on HLASubscriber actors.
-            _putReflectedAttributesOnHlaSubscribers();
-
-            // At this step we are sure that the HLA logical time of the
-            // Federate has been updated (by the reception of the TAG callback
-            // (timeAdvanceGrant()) and its value is the proposedTime or
-            // less, so we have a breakpoint time.
-            try {
-                CertiLogicalTime hlaTimeGranted = (CertiLogicalTime) _federateAmbassador.logicalTimeHLA;
-                Time breakpoint = _convertToPtolemyTime(hlaTimeGranted);
-                if (_debugging) {
-                    _debug("        proposeTime(t(lastFoundEvent)="
-                            + strProposedTime
-                            + ") - _eventsBasedTimeAdvance("
-                            + strProposedTime
-                            + ") - RAV event detected -> TAG(" + hlaTimeGranted
-                            + ") received, model moves to the breakpoint time = "
-                            + _printTimes(breakpoint));
-                }
-                // So we'd like to propose the breakpoint time instead.
-                proposedTime = breakpoint;
-            } catch (IllegalActionException e) {
-                throw new IllegalActionException(this, e,
-                        "The breakpoint time is not a valid Ptolemy time");
-            }
+        if (_debugging) {
+            _debug("        proposeTime(t(lastFoundEvent)="
+                    + strProposedTime
+                    + ") - _eventsBasedTimeAdvance("
+                    + strProposedTime
+                    + ") - RAV event detected -> TAG(" + hlaTimeGranted
+                    + ") received, model moves to the breakpoint time = "
+                    + _printTimes(breakpoint));
         }
-        return proposedTime;*/
+*/              
     }
 
     /**
@@ -1509,7 +1433,7 @@ implements TimeRegulator {
         CertiLogicalTime hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
 
         // TS => _hlaTimeStep
-        
+
         // g(t') => certiProposedTime
         CertiLogicalTime certiProposedTime = 
                 _convertToCertiLogicalTime(proposedTime);
@@ -1521,7 +1445,7 @@ implements TimeRegulator {
         while (certiProposedTime.isGreaterThan(tarContractTime)) {
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
-            
+
             // algo4: 2: TAR(g(t'))
             _rtia.timeAdvanceRequest(tarContractTime);
 
@@ -1579,194 +1503,6 @@ implements TimeRegulator {
 
         // algo4: 16: return t' => Update PtII time
         return proposedTime;
-        
-        /*
-        String proposedTimeInString = _printTimes(proposedTime);
-        if (_hlaTimeStep > 0) {
-
-            // Calculate the next point in time for making a TAR(hlaNextPointInTime)
-            // or TARA(hlaNextPointInTime)
-            Time hlaNextPointInTime = _getHlaNextPointInTime();
-            CertiLogicalTime certiNextPointInTime = _convertToCertiLogicalTime(
-                    hlaNextPointInTime);
-
-            // There are two types of events in a federate model:
-            // - rav et uav events via RTI
-            // - all events in ptolemy eventQueue
-
-            if (_hlaLookAHead > 0) {
-                // Time-stepped + lookahead > 0 => TAR.
-                // LastFoundEvent is the earlist event in calendar queue,
-                // We'd like to see if it is still the earlist one after
-                // a registration of a rav-event.
-
-                // There are two cases:
-                // case 1:
-                // WHILE time stamp of LastFoundEvent(proposedTime) > hlaNextPointInTime,
-                // THEN TAR(hlaNextPointInTime) service is called.
-                //      Tick() doesn't stop Until it receives a TAG(hlaNextPointInTime),
-                //      At the end of tick,
-                //      IF we get any RAV(t)
-                //             all rav should be put in the queue
-                //             with a time stamp delay to hlaNextPointInTime;
-                //             IF hlaNextPointInTime < proposedTime which means LastFoundEvent
-                //             is no more our earliest event;
-                //             THEN proposedTime should be replaced by hlaNextPointInTime.
-                //             END IF
-                //      END IF
-                // END WHILE
-                // case 2: LastFoundEvent is directly or indirectly(via case 1)
-                //         in (hlacurrentTime, hlaNextPointInTime)
-                //         we don't want to advance the certi time.
-                //         so return proposedTime, this event is valid to execute.
-
-                // case 1:
-
-                // Before the loop, is proposeTime < hlaNextPointInTime ?
-                //if (_debugging) {
-                //	_debug("Comparing proposeTime " + proposedTimeInString
-                //	       + "and hlaNextPointInTime "
-                //	       + hlaNextPointInTime.getDoubleValue());
-                //}
-
-                while (proposedTime.compareTo(hlaNextPointInTime) > 0) {
-                    if (_debugging) {
-                        _debug("        proposeTime(" + proposedTimeInString
-                                + ") - _timeSteppedBasedTimeAdvance("
-                                + proposedTimeInString
-                                + ") - the lastFoundEvent's "
-                                + "timestamp >= hlaNextPointInTime- calling CERTI TAR(proposedTime*hlaTimeUnitValue = "
-                                + certiNextPointInTime.getTime() + ")");
-                    }
-                    _rtia.timeAdvanceRequest(certiNextPointInTime);
-                    _numberOfTARs++;
-                    _timeOfTheLastAdvanceRequest = System.nanoTime();
-
-                    // Wait the time grant from the HLA/CERTI Federation (from the RTI).
-                    _federateAmbassador.timeAdvanceGrant = false;
-                    int cntTick = 0;
-                    while (!(_federateAmbassador.timeAdvanceGrant)) {
-                        if (_debugging) {
-                            _debug("        proposeTime(" + proposedTimeInString
-                                    + ") - _timeSteppedBasedTimeAdvance("
-                                    + proposedTimeInString + ") - "
-                                    + " waiting for CERTI TAG("
-                                    + certiNextPointInTime.getTime()
-                                    + ") by calling tick2()");
-                        }
-
-                        try {
-                            _rtia.tick2();
-
-                            _numberOfTicks2++;
-                            cntTick++;
-
-                        } catch (RTIexception e) {
-                            if (_debugging) {
-                                _debug("        proposeTime("
-                                        + proposedTimeInString
-                                        + ") - _timeSteppedBasedTimeAdvance("
-                                        + proposedTimeInString
-                                        + ") - Failed to make "
-                                        + "tick2() - there is a problem with the RTIambassador");
-                            }
-                            throw new IllegalActionException(this, e,
-                                    e.getMessage());
-                        }
-                    }
-
-                    _numberOfTicks.set(_numberOfTAGs, _numberOfTicks.get(_numberOfTAGs) + cntTick);
-
-                    // If we reach here, it means a TAG callback has been received, so update
-                    // the logicalTimeHla with the grantedHlaLogicalTime.
-                    _federateAmbassador.hlaLogicalTime = (CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime;
-
-                    // If we get any rav-event
-                    if (_debugging) {
-                        _debug("        proposeTime(" + proposedTimeInString
-                                + ") - _timeSteppedBasedTimeAdvance("
-                                + proposedTimeInString
-                                + ")  - Checking if we've received any RAV events.");
-                    }
-                    if (cntTick != 1) {
-                        System.out.println("_timeSteppedBasedTimeAdvance: call _putReflectedAttributesOnHlaSubscribers()");
-                        // Store reflected attributes as events on HLASubscriber actors.
-                        _putReflectedAttributesOnHlaSubscribers(proposedTime);
-                        // If the new rav-event will arrive before our lastFoundEvent,
-                        if (hlaNextPointInTime.compareTo(proposedTime) < 0)
-                            proposedTime = hlaNextPointInTime;
-                    }
-                    // Advance the hlaNextPointInTime
-                    hlaNextPointInTime = _getHlaNextPointInTime();
-                    certiNextPointInTime = _convertToCertiLogicalTime(
-                            hlaNextPointInTime);
-                }
-
-                // case 2:
-                if (_debugging) {
-                    _debug("        proposeTime(" + proposedTimeInString
-                            + ") - _timeSteppedBasedTimeAdvance("
-                            + proposedTimeInString + ") - the lastFoundEvent "
-                            + "(timeStamp = " + proposedTimeInString
-                            + ") has its timeStamp < nextPointInTime - no TAR will be made and the event will be processed.");
-                }
-                return proposedTime;
-
-            } else {
-                // Time-stepped + lookahead = 0 => TARA + TAR.
-                // Start the loop with one TARA call.
-                if (_debugging) {
-                    _debug("        proposeTime(" + proposedTimeInString
-                            + ") - _timeSteppedBasedTimeAdvance("
-                            + proposedTimeInString + ") -"
-                            + " waiting for CERTI TAG("
-                            + certiNextPointInTime.getTime()
-                            + ") by calling tick2()");
-                }
-                _rtia.timeAdvanceRequest(certiNextPointInTime);
-
-                _numberOfTARs++;
-                _timeOfTheLastAdvanceRequest = System.nanoTime();
-
-                try {
-                    _rtia.tick2();
-
-                    _numberOfTicks2++;
-                    _numberOfTicks.set(_numberOfTAGs,
-                            _numberOfTicks.get(_numberOfTAGs) + 1);
-                } catch (SpecifiedSaveLabelDoesNotExist e) {
-                    throw new IllegalActionException(this, e,
-                            "SpecifiedSaveLabelDoesNotExist ");
-                } catch (ConcurrentAccessAttempted e) {
-                    throw new IllegalActionException(this, e,
-                            "ConcurrentAccessAttempted ");
-                } catch (RTIinternalError e) {
-                    throw new IllegalActionException(this, e,
-                            "RTIinternalError ");
-                }
-
-                // End the loop with one TAR call.
-                if (_debugging) {
-                    _debug("        proposeTime(" + proposedTimeInString
-                            + ") - _timeSteppedBasedTimeAdvance("
-                            + proposedTimeInString + ") - "
-                            + " calling CERTI TAR(proposedTime*hlaTimeUnitValue = "
-                            + certiNextPointInTime.getTime() + ")");
-                }
-                _rtia.timeAdvanceRequest(certiNextPointInTime);
-
-                _numberOfTARs++;
-                _timeOfTheLastAdvanceRequest = System.nanoTime();
-            }
-        }
-
-        if (_debugging) {
-            _debug("        proposeTime(" + proposedTimeInString
-                    + ") - _timeSteppedBasedTimeAdvance(" + proposedTimeInString
-                    + ") - TAR not successful");
-        }
-        return null;
-*/
     }
 
     /** The method {@link #_populatedHlaValueTables()} populates the tables
@@ -1815,8 +1551,6 @@ implements TimeRegulator {
                     });
         }
 
-        System.out.println("_populateHlaAttributeTables: _hlaAttributesToPublish = " + _hlaAttributesToPublish.toString());
-
         // HlaSubscribers.
         _hlaAttributesToSubscribeTo.clear();
         List<HlaSubscriber> _hlaSubscribers = getHlaSubscribers(ce);
@@ -1860,7 +1594,8 @@ implements TimeRegulator {
             _fromFederationEvents.put(hs.getFullName(), new LinkedList<TimedEvent>());
         }
 
-        System.out.println("_populateHlaAttributeTables: _hlaAttributesToSubscribeTo = " + _hlaAttributesToSubscribeTo.toString());
+        //System.out.println("_populateHlaAttributeTables: _hlaAttributesToPublish = " + _hlaAttributesToPublish.toString());
+        //System.out.println("_populateHlaAttributeTables: _hlaAttributesToSubscribeTo = " + _hlaAttributesToSubscribeTo.toString());
 
     }
 
@@ -1874,11 +1609,12 @@ implements TimeRegulator {
         // List all classes from top level model.
         List<CompositeEntity> entities = ce.entityList();
         for (ComponentEntity classElt : entities) {
-            System.out.println("getHlaSubscribers: classElt in entities ="
-                    + " " + classElt.getClassName()
-                    + " " + classElt.getDisplayName() 
-                    + " " + classElt.toString() 
-                    + " container = " + classElt.getContainer().toString());
+            
+            //System.out.println("getHlaSubscribers: classElt in entities ="
+            //        + " " + classElt.getClassName()
+            //        + " " + classElt.getDisplayName() 
+            //        + " " + classElt.toString() 
+            //        + " container = " + classElt.getContainer().toString());
 
             // XXX: FIXME: GiL: to optimize with Ptolemy's 
             if (classElt instanceof HlaSubscriber) {
@@ -1918,8 +1654,8 @@ implements TimeRegulator {
         while (it.hasNext()) {
             Map.Entry<String, LinkedList<TimedEvent>> elt = it.next();
 
-            System.out.println("_putReflectedAttributesOnHlaSubscribers: key " + elt.getKey());
-            System.out.println("_putReflectedAttributesOnHlaSubscribers: value " + elt.getValue().toString());
+            //System.out.println("_putReflectedAttributesOnHlaSubscribers: key " + elt.getKey());
+            //System.out.println("_putReflectedAttributesOnHlaSubscribers: value " + elt.getValue().toString());
 
             // Multiple events can occur at the same time.
             LinkedList<TimedEvent> events = elt.getValue();
@@ -1936,8 +1672,8 @@ implements TimeRegulator {
                     // Update RAV-event received.
                     ravEvent.timeStamp = proposedTime;
                 }
-                
-                // If any rav-event received by HlaSubscriber actors, RAV(tau) with tau < ptolemy startTime
+
+                // If any RAV-event received by HlaSubscriber actors, RAV(tau) with tau < ptolemy startTime
                 // are put in the event queue with timestamp startTime
                 //FIXME: Or should it be an exception because there is something wrong with
                 //the overall simulation ??
@@ -1947,17 +1683,16 @@ implements TimeRegulator {
                 }
 
                 // Get the HLA subscriber actor to which the event is destined to.
-                String identity = elt.getKey();
-                System.out.println("_putReflectedAttributesOnHlaSubscribers: identity = " + identity);
+                String actorName = elt.getKey();
+                //System.out.println("_putReflectedAttributesOnHlaSubscribers: get HlaSubscriber = " + actorName);
 
                 TypedIOPort tiop = _getPortFromTab(
-                        _hlaAttributesToSubscribeTo.get(identity));
+                        _hlaAttributesToSubscribeTo.get(actorName));
+                
                 HlaSubscriber hs = (HlaSubscriber) tiop.getContainer();
-
-                System.out.println("_putReflectedAttributesOnHlaSubscribers: HlaSubscriber = " + hs.getFullName());
-
                 hs.putReflectedHlaAttribute(ravEvent);
 
+                System.out.println("_putReflectedAttributesOnHlaSubscribers: HlaSubscriber = " + hs.getFullName());
                 System.out.println("_putReflectedAttributesOnHlaSubscribers(): put event: HlaAttribute = " + hs.getDisplayName() + ", timestamp = " +_printTimes(ravEvent.timeStamp));
 
                 if (_debugging) {
@@ -2224,12 +1959,6 @@ implements TimeRegulator {
     /** The RTIG subprocess. */
     private CertiRtig _certiRtig;
 
-    /**
-     * Map between an Class ID given by the RTI and all we need to know
-     * about it in the model
-     */
-    //private HashMap<Integer, StructuralInformation> _structuralInformation;
-
     /** Map class intance name and object instance ID. Those information are set
      *  using discoverObjectInstance() callback and used by the RAV service.
      */
@@ -2477,12 +2206,9 @@ implements TimeRegulator {
     ///////////////////////////////////////////////////////////////////
     ////                    private static methods                 ////
 
-    /*
-     * This set of function is just here to hide (a bit) the fact we are using
-     * an array of Object as value for  _hlaAttributesToPublish
-     * and for _hlaAttributesSubscribedTo. So instead of using magic indexes
-     * and do each time the downgrade, you can use these functions.
-     */
+    /* Getter functions to ease access to information stored in an object
+     * array about _hlaAttributesToPublish and _hlaAttributesSubscribedTo
+     * tables. */
 
     /**
      * 
@@ -2494,7 +2220,6 @@ implements TimeRegulator {
     }
 
     /**
-     * 
      * @param tab
      * @return
      */
@@ -2503,7 +2228,6 @@ implements TimeRegulator {
     }
 
     /**
-     * 
      * @param tab
      * @return
      */
@@ -2512,7 +2236,6 @@ implements TimeRegulator {
     }
 
     /**
-     * 
      * @param tab
      * @return
      */
@@ -2521,7 +2244,6 @@ implements TimeRegulator {
     }
 
     /**
-     * 
      * @param tab
      * @return
      */
@@ -2530,7 +2252,6 @@ implements TimeRegulator {
     }
 
     /**
-     * 
      * @param tab
      * @return
      */
@@ -2636,7 +2357,7 @@ implements TimeRegulator {
              */
             int numberOfDecimalDigits;
             if (_timeStepped) {
-                System.out.println("PtolemyFederateAmbassadorInner: initialize(): hlaTimeStep=" + _hlaTimeStep);
+                System.out.println("INNTER initialize(): hlaTimeStep=" + _hlaTimeStep);
                 String s = _hlaTimeStep.toString();
                 s = s.substring(s.indexOf(".") + 1);
                 int n1 = s.length();
@@ -2671,13 +2392,17 @@ implements TimeRegulator {
             if (!_hlaAttributesToPublish.isEmpty()){
                 _setupHlaPublishers(rtia);
             } else {
-                System.out.println("PtolemyFederateAmbassadorInner: initialize(): _hlaAttributesToPublish is empty");
+                if (_debugging) {
+                    _debug("INNER initialize(): _hlaAttributesToPublish is empty");
+                }
             }
             // Configure HlaSubscriber actors from model */
             if (!_hlaAttributesToSubscribeTo.isEmpty()) {
                 _setupHlaSubscribers(rtia);
             } else {
-                System.out.println("PtolemyFederateAmbassadorInner: initialize(): _hlaAttributesToSubscribeTo is empty");
+                if (_debugging) {
+                    _debug("INNER initialize(): _hlaAttributesToSubscribeTo is empty");
+                }
             }
 
         }
@@ -2721,26 +2446,24 @@ implements TimeRegulator {
                         FederateOwnsAttributes, InvalidFederationTime,
                         FederateInternalError {
 
-            // XXX: FIXME: GiL: what is the purpose of this boolean ?
-            //boolean done = false;
-
             if (_debugging) {
-                _debug("starting reflectAttributeValues() - current status - "
+                _debug("INNER reflectAttributeValues(): starting - "
+                        + "current status - "
                         + "t_ptII = " + _printTimes(_director.getModelTime())
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             }
 
-            System.out.println("callback: reflectAttributeValues:"
-                    + " theObject=" + theObject + " theAttributes" + theAttributes + " userSuppliedTag=" + userSuppliedTag + " theTime=" + theTime);
             try {
                 // Get the object class handle corresponding to
-                // received "theObject" id.
+                // the received "theObject" id.
                 int classHandle = _objectIdToClassHandle.get(theObject);
                 String classInstanceName = _discoverObjectInstanceMap.get(theObject);
-
+                /*
+                System.out.println("callback: reflectAttributeValues:"
+                    + " theObject=" + theObject + " theAttributes" + theAttributes + " userSuppliedTag=" + userSuppliedTag + " theTime=" + theTime);
                 System.out.println("callback: reflectAttributeValues: _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
                 System.out.println("callback: reflectAttributeValues: _discoverObjectInstanceMap.get(theObject) classInstanceName = " + classInstanceName);
-
+                 */
                 for (int i = 0; i < theAttributes.size(); i++) {
 
                     Iterator<Entry<String, Object[]>> ot = _hlaAttributesToSubscribeTo
@@ -2755,30 +2478,26 @@ implements TimeRegulator {
                         Object value = null;
                         HlaSubscriber hs = (HlaSubscriber) _getPortFromTab(tObj).getContainer();
 
-                        System.out.println("callback: reflectAttributeValues: hlaSubscriber=" + hs.getFullName());
-                        System.out.println("callback: reflectAttributeValues: hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
-                        System.out.println("callback: reflectAttributeValues: hlaSubscriber classInstanceName " + hs.getClassInstanceName());
-                        System.out.println("callback: reflectAttributeValues: hlaSubscriber classHandle " + hs.getClassHandle());
-                        System.out.println("callback: reflectAttributeValues: hlaSubscriber attributeName in FOM " + hs.getAttributeName());
-                        System.out.println("callback: reflectAttributeValues: hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
+                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber=" + hs.getFullName());
+                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
+                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber classInstanceName " + hs.getClassInstanceName());
+                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber classHandle " + hs.getClassHandle());
+                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber attributeName in FOM " + hs.getAttributeName());
+                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
 
-                        System.out.println("callback: reflectAttributeValues: theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
-                        System.out.println("callback: reflectAttributeValues: classHandle = " + classHandle);
-                        System.out.println("callback: reflectAttributeValues: classInstanceName = " + classInstanceName);
-                        System.out.println("callback: reflectAttributeValues: (objectInstanceId) theObject = " + theObject);
+                        System.out.println("INNER reflectAttributeValues(): theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
+                        System.out.println("INNER reflectAttributeValues(): classHandle = " + classHandle);
+                        System.out.println("INNER reflectAttributeValues(): classInstanceName = " + classInstanceName);
+                        System.out.println("INNER reflectAttributeValues(): (objectInstanceId) theObject = " + theObject);
 
-                        // The tuple (attributeHandle, classHandle) allows to
-                        // identify the object attribute
-                        // (i.e. one of the HlaSubscribers)
+                        // The tuple (attributeHandle, classHandle,
+                        // classInstanceName) allows to identify the
+                        // object attribute (i.e. one of the HlaSubscribers)
                         // where the updated value has to be put.
-                        //if (theAttributes.getAttributeHandle(i) == _getAttributeHandleFromTab(tObj)
-                        //        && _getClassHandleFromTab(tObj) == classHandle
-                        //        && hs.getClassInstanceName() == classInstanceName) {
-                        // && hs.XXX == theObject {
+                        // XXX: FIXME: class instance name is used to map with corresponding HlaSubscrbier ?
                         if (theAttributes.getAttributeHandle(i) == hs.getAttributeHandle()
                                 && classHandle == hs.getClassHandle()
                                 && hs.getClassInstanceName().compareTo(classInstanceName) == 0) {
-                            // && hs.XXX == theObject {
                             try {
 
                                 double timeValue = ((CertiLogicalTime) theTime)
@@ -2805,14 +2524,10 @@ implements TimeRegulator {
                                             + ") has been received and stored for "
                                             + hs.getDisplayName());
                                 }
-                                System.out.println("callback: reflectAttributeValues: HLA attribute = " + hs.getAttributeName());
-                                System.out.println("callback: reflectAttributeValues: timestamp = " + _printTimes(te.timeStamp));
-                                System.out.println("callback: reflectAttributeValues: val = " + value.toString());
-                                System.out.println("callback: reflectAttributeValues: received and stored for = " + hs.getFullName());
-
-
-                                // XXX: FIXME: GiL: what is the purpose of this boolean ?
-                                //done = true;
+                                System.out.println("INNER reflectAttributeValues(): HLA attribute = " + hs.getAttributeName());
+                                System.out.println("INNER reflectAttributeValues(): timestamp = " + _printTimes(te.timeStamp));
+                                System.out.println("INNER reflectAttributeValues(): val = " + value.toString());
+                                System.out.println("INNER reflectAttributeValues(): received and stored for = " + hs.getFullName());
 
                                 /*
                                 // XXX: FIXME: GiL: begin HLA Reporter code ?
@@ -2922,11 +2637,12 @@ implements TimeRegulator {
                 String classInstanceName) throws CouldNotDiscover,
         ObjectClassNotKnown, FederateInternalError {
 
+            /*
             System.out.println("callback: discoverObjectInstance:"
                     + " objectInstanceId=" + objectInstanceId
                     + " classHandle=" + classHandle
                     + " classIntanceName=" + classInstanceName);
-
+             */
             if (_discoverObjectInstanceMap.containsKey(objectInstanceId)) {
                 System.out.println("callback: discoverObjectInstance: found an instance class already registered: "
                         + classInstanceName);
@@ -2937,7 +2653,7 @@ implements TimeRegulator {
                 _objectIdToClassHandle.put(objectInstanceId, classHandle);
             }
 
-            // 1. Get classHandle and attributeHandle IDs for each attribute
+            // Get classHandle and attributeHandle IDs for each attribute
             // value to subscribe (i.e. HlaSubcriber). Update the HlaSubcribers.
             Iterator<Entry<String, Object[]>> it1 = _hlaAttributesToSubscribeTo
                     .entrySet().iterator();
@@ -2959,13 +2675,14 @@ implements TimeRegulator {
                     e.printStackTrace();
                 }
             }
-            /*        if (_debugging) {
-                String toLog = "INNER"
-                        + " discoverObjectInstance() - the object " + objectName
-                        + " has been discovered" + " (ID=" + objectHandle
-                        + ", class'ID=" + classHandle + ")";
-                _debug(toLog);
-            }*/
+
+            if (_debugging) {
+                _debug("INNER"
+                        + " discoverObjectInstance() - the object" 
+                        + " objectInstanceId=" + objectInstanceId
+                        + " classHandle=" + classHandle
+                        + " classIntanceName=" + classInstanceName);
+            }
         }
 
         // HLA Time Management services (callbacks).
@@ -3010,11 +2727,6 @@ implements TimeRegulator {
                 throws InvalidFederationTime, TimeAdvanceWasNotInProgress,
                 FederateInternalError {
 
-            // FIXME: XXX: Why ?
-            //double time = ((CertiLogicalTime) theTime).getTime();
-            //logicalTimeHLA = new CertiLogicalTime(time);
-
-            //logicalTimeHLA = (CertiLogicalTime) theTime;
             grantedHlaLogicalTime = (CertiLogicalTime) theTime;
             timeAdvanceGrant = true;
 
@@ -3028,12 +2740,10 @@ implements TimeRegulator {
             _numberOfTicks.add(0);
 
             if (_debugging) {
-                _debug("timeAdvanceGrant() - TAG(" + hlaLogicalTime.toString()
+                _debug("timeAdvanceGrant() - _TAGDelay => " + _TAGDelay);
+                _debug("timeAdvanceGrant() - TAG(" + grantedHlaLogicalTime.toString()
                 + "(HLA Time Unit)) received");
             }
-            // XXX: FIXME: GiL: debug
-            System.out.println("DBG == _TAGDelay => " + _TAGDelay);
-            System.out.println("DBG == timeAdvanceGrant() - TAG(" + hlaLogicalTime.toString() + "(HLA Time Unit)) received");
         }
 
         // HLA Federation Management services (callbacks).
@@ -3106,7 +2816,7 @@ implements TimeRegulator {
             // For each HlaPublisher actors deployed in the model we declare
             // to the HLA/CERTI Federation a HLA attribute to publish.
 
-            System.out.println("ciele_debug: setupHlaPublishers: step 1");
+            //System.out.println("ciele_debug: setupHlaPublishers: step 1");
 
             // 1. Get classHandle and attributeHandle IDs for each attribute
             //    value to publish (i.e. HlaPublisher). Update the HlaPublishers
@@ -3142,18 +2852,19 @@ implements TimeRegulator {
                 // Retrieve HLA attribute handle from RTI.
                 int attributeHandle = Integer.MIN_VALUE;
                 try {
-                    System.out.println("setupHlaPublishers: container name = " + pub.getFullName());
-                    System.out.println("setupHlaPublishers: object name = " + pub.getAttributeName());
+                    //System.out.println("setupHlaPublishers: container name = " + pub.getFullName());
+                    //System.out.println("setupHlaPublishers: object name = " + pub.getAttributeName());
 
                     attributeHandle = rtia
                             .getAttributeHandle(pub.getAttributeName(), classHandle);
 
-                    System.out.println("setupHlaPublishers: attributeHandle = " + attributeHandle);
+                    //System.out.println("setupHlaPublishers: attributeHandle = " + attributeHandle);
                 } catch (IllegalActionException e) {
                     // XXX: FIXME: getAttributeName() exception.
                     System.out.println("setupHlaPublishers: getAttributeName() " + e.getMessage());
                 }
 
+                System.out.println("setupHlaPublishers: container name = " + pub.getFullName());
                 System.out.println("setupHlaPublishers: classHandle = " + classHandle);
                 System.out.println("setupHlaPublishers: attributeHandle = " + attributeHandle);
 
@@ -3182,7 +2893,7 @@ implements TimeRegulator {
                         attributeHandle });
             }
 
-            System.out.println("ciele_debug: setupHlaPublishers: classInstanceName list: step 2.1");
+            //System.out.println("ciele_debug: setupHlaPublishers: classInstanceName list: step 2.1");
 
             // 2.1 Create a table of HlaPublishers indexed by their corresponding
             //     classInstanceName (no duplication).
@@ -3207,7 +2918,7 @@ implements TimeRegulator {
                 }
             }
 
-            System.out.println("ciele_debug: setupHlaPublishers: classHandle list: step 2.2");
+            //System.out.println("ciele_debug: setupHlaPublishers: classHandle list: step 2.2");
 
             // 2.2 Create a table of HlaPublishers indexed by their corresponding
             //     class handle (no duplication).
@@ -3232,7 +2943,7 @@ implements TimeRegulator {
                 }
             }
 
-            System.out.println("ciele_debug: setupHlaPublishers: step 3");
+            //System.out.println("ciele_debug: setupHlaPublishers: step 3");
 
             // 3. Declare to the Federation the HLA attributes to publish. If
             //    these attributes belongs to the same object class then only
@@ -3325,7 +3036,7 @@ implements TimeRegulator {
             // For each HlaSubscriber actors deployed in the model we declare
             // to the HLA/CERTI Federation a HLA attribute to subscribe to.
 
-            System.out.println("ciele_debug: setupHlaSubscribers: step 1");
+            //System.out.println("ciele_debug: setupHlaSubscribers: step 1");
 
             // 1. Get classHandle and attributeHandle IDs for each attribute
             // value to subscribe (i.e. HlaSubcriber). Update the HlaSubcribers.
@@ -3347,9 +3058,9 @@ implements TimeRegulator {
                 // Retrieve HLA class handle from RTI.
                 int classHandle = Integer.MIN_VALUE;
                 try {
-                    System.out.println("setupHlaSubscribers: objectClassName (in FOM) = " + (String) tObj[2]);
+                    //System.out.println("setupHlaSubscribers: objectClassName (in FOM) = " + (String) tObj[2]);
                     classHandle = rtia.getObjectClassHandle(_getClassObjectNameFromTab(tObj));
-                    System.out.println("setupHlaSubscribers: classHandle = " + classHandle);
+                    //System.out.println("setupHlaSubscribers: classHandle = " + classHandle);
                 } catch (Exception e) {
                     // XXX: FIXME: GiL: so what???
                     System.out.println("setupHlaSubscribers: attempt to reference a HLA class not in FOM (see fed file), so just skip it.");
@@ -3359,12 +3070,12 @@ implements TimeRegulator {
                 // Retrieve HLA attribute handle from RTI.
                 int attributeHandle = Integer.MIN_VALUE;
                 try {
-                    System.out.println("setupHlaSubscribers: container name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getFullName());
-                    System.out.println("setupHlaSubscribers: object name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getAttributeName());
+                    //System.out.println("setupHlaSubscribers: container name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getFullName());
+                    //System.out.println("setupHlaSubscribers: object name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getAttributeName());
 
                     attributeHandle = rtia.getAttributeHandle(sub.getAttributeName(), classHandle);
 
-                    System.out.println("setupHlaSubscribers: objAttributeHandle = " + attributeHandle);
+                    //System.out.println("setupHlaSubscribers: objAttributeHandle = " + attributeHandle);
                 } catch (Exception e) {
                     // XXX: FIXME: GiL: so what???
                     System.out.println("setupHlaSubscribers: getAttributeHandle() " + e.getMessage());
@@ -3400,7 +3111,7 @@ implements TimeRegulator {
                 sub.setAttributeHandle(attributeHandle);
             }
 
-            System.out.println("ciele_debug: setupHlaSubscribers: step 2.1");
+            //System.out.println("ciele_debug: setupHlaSubscribers: step 2.1");
 
             // 2.1 Create a table of HlaSubscribers indexed by their corresponding
             //     instance class name (no duplication).
@@ -3429,7 +3140,7 @@ implements TimeRegulator {
                 }
             }
 
-            System.out.println("ciele_debug: setupHlaSubscribers: step 2.2");
+            //System.out.println("ciele_debug: setupHlaSubscribers: step 2.2");
 
             // 2.2 Create a table of HlaSubscribers indexed by their corresponding
             //     class handle (no duplication).
@@ -3458,7 +3169,7 @@ implements TimeRegulator {
                 }
             }
 
-            System.out.println("ciele_debug: setupHlaSubscribers: step 3");
+            //System.out.println("ciele_debug: setupHlaSubscribers: step 3");
 
             // 3. Declare to the Federation the HLA attributes to subscribe to.
             // If these attributes belongs to the same object class then only
@@ -3489,7 +3200,7 @@ implements TimeRegulator {
                 int classHandle = _getClassHandleFromTab(tObj);
 
                 _rtia.subscribeObjectClassAttributes(classHandle, _attributesLocal);
-                System.out.println("setupHlaSubscribers: subscribeObjectClassAttributes: register classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
+                //System.out.println("setupHlaSubscribers: subscribeObjectClassAttributes: register classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
             }
         } // end 'private void setupHlaSubscribers(RTIambassador rtia) ...'
     } // end 'private class PtolemyFederateAmbassadorInner extends NullFederateAmbassador { ...'
