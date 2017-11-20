@@ -36,6 +36,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,12 +58,15 @@ import hla.rti.ArrayIndexOutOfBounds;
 import hla.rti.AttributeHandleSet;
 import hla.rti.AttributeNotDefined;
 import hla.rti.AttributeNotKnown;
+import hla.rti.AttributeNotOwned;
 import hla.rti.ConcurrentAccessAttempted;
 import hla.rti.CouldNotDiscover;
+import hla.rti.CouldNotOpenFED;
 import hla.rti.EnableTimeConstrainedPending;
 import hla.rti.EnableTimeConstrainedWasNotPending;
 import hla.rti.EnableTimeRegulationPending;
 import hla.rti.EnableTimeRegulationWasNotPending;
+import hla.rti.ErrorReadingFED;
 import hla.rti.EventRetractionHandle;
 import hla.rti.FederateAmbassador;
 import hla.rti.FederateInternalError;
@@ -267,22 +271,18 @@ implements TimeRegulator {
         // XXX: FIXME: GiL: end HLA Reporter code ?
          */
 
-        // XXX: FIXME: GiL: check usage ?
-        //_noObjectDicovered = true;
-        //_structuralInformation = new HashMap<Integer, StructuralInformation>();
         _registerObjectInstanceMap = new HashMap<String, Integer>();
         _discoverObjectInstanceMap = new HashMap<Integer, String>();
-
 
         _rtia = null;
         _federateAmbassador = null;
 
-        _hlaAttributesToPublish = new HashMap<String, Object[]>();
+        _hlaAttributesToPublish     = new HashMap<String, Object[]>();
         _hlaAttributesToSubscribeTo = new HashMap<String, Object[]>();
-        _fromFederationEvents = new HashMap<String, LinkedList<TimedEvent>>();
-        _objectIdToClassHandle = new HashMap<Integer, Integer>();
+        _fromFederationEvents       = new HashMap<String, LinkedList<TimedEvent>>();
+        _objectIdToClassHandle      = new HashMap<Integer, Integer>();
 
-        _hlaTimeStep = null;
+        _hlaTimeStep  = null;
         _hlaLookAHead = null;
 
         // HLA Federation management parameters.
@@ -426,8 +426,7 @@ implements TimeRegulator {
         TimeAdvancementRequest;
 
         /** Override the toString of enum class.
-         *  @return The string associated for each enum value.
-         */
+         *  @return The string associated for each enum value. */
         @Override
         public String toString() {
             switch (this) {
@@ -543,32 +542,32 @@ implements TimeRegulator {
         // XXX: FIXME: GiL: end HLA Reporter code ?
          */
 
-        newObject._hlaAttributesToPublish = new HashMap<String, Object[]>();
+        newObject._hlaAttributesToPublish     = new HashMap<String, Object[]>();
         newObject._hlaAttributesToSubscribeTo = new HashMap<String, Object[]>();
 
         newObject._rtia = null;
+
         newObject._federateAmbassador = null;
-        newObject._federateName = _federateName;
-        newObject._federationName = _federationName;
+        newObject._federateName       = _federateName;
+        newObject._federationName     = _federationName;
 
-        newObject._isTimeConstrained = _isTimeConstrained;
-        newObject._isTimeRegulator = _isTimeRegulator;
+        newObject._isTimeConstrained  = _isTimeConstrained;
+        newObject._isTimeRegulator    = _isTimeRegulator;
 
-        newObject._requireSynchronization = _requireSynchronization;
+        newObject._requireSynchronization   = _requireSynchronization;
         newObject._synchronizationPointName = _synchronizationPointName;
-        newObject._isCreator = _isCreator;
-        newObject._eventBased = _eventBased;
+        newObject._isCreator   = _isCreator;
+
+        newObject._eventBased  = _eventBased;
         newObject._timeStepped = _timeStepped;
 
-        newObject._fromFederationEvents = new HashMap<String, LinkedList<TimedEvent>>();
-        newObject._objectIdToClassHandle = new HashMap<Integer, Integer>();
-        //newObject._structuralInformation = new HashMap<Integer, StructuralInformation>();
+        newObject._fromFederationEvents      = new HashMap<String, LinkedList<TimedEvent>>();
+
+        newObject._objectIdToClassHandle     = new HashMap<Integer, Integer>();
         newObject._registerObjectInstanceMap = new HashMap<String, Integer>();
         newObject._discoverObjectInstanceMap = new HashMap<Integer, String>();
 
         newObject._hlaTimeUnitValue = _hlaTimeUnitValue;
-
-        //newObject._noObjectDicovered = _noObjectDicovered;
 
         try {
             newObject._hlaTimeStep = ((DoubleToken) hlaTimeStep.getToken())
@@ -619,7 +618,7 @@ implements TimeRegulator {
         try {
             factory = RtiFactoryFactory.getRtiFactory();
         } catch (RTIinternalError e) {
-            throw new IllegalActionException(this, e, "RTIinternalError ");
+            throw new IllegalActionException(this, e, "RTIinternalError: " + e.getMessage());
         }
 
         try {
@@ -644,9 +643,17 @@ implements TimeRegulator {
             if (_debugging) {
                 _debug("initialize() - WARNING: FederationExecutionAlreadyExists");
             }
-        } catch (Exception e) {
-            throw new IllegalActionException(this, e, e.getMessage());
-        }
+        } catch (CouldNotOpenFED e) {
+            throw new IllegalActionException(this, e, "CouldNotOpenFED: " + e.getMessage());
+        } catch (ErrorReadingFED e) {
+            throw new IllegalActionException(this, e, "ErrorReadingFED: " + e.getMessage());
+        } catch (RTIinternalError e) {
+            throw new IllegalActionException(this, e, "RTIinternalError: " + e.getMessage());
+        } catch (ConcurrentAccessAttempted e) {
+            throw new IllegalActionException(this, e, "ConcurrentAccessAttempted: " + e.getMessage());
+        } catch (MalformedURLException e) {
+            throw new IllegalActionException(this, e, "MalformedURLException: " + e.getMessage());
+        } 
 
         _federateAmbassador = new PtolemyFederateAmbassadorInner();
 
@@ -659,14 +666,14 @@ implements TimeRegulator {
                 _debug("initialize() - federation joined");
             }
         } catch (RTIexception e) {
-            throw new IllegalActionException(this, e, e.getMessage());
+            throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
         }
 
         // Initialize the Federate Ambassador.
         try {
             _federateAmbassador.initialize(_rtia);
         } catch (RTIexception e) {
-            throw new IllegalActionException(this, e, e.getMessage());
+            throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
         }
 
         // Initialize HLA time management aspects for a Federate
@@ -678,9 +685,11 @@ implements TimeRegulator {
     }
 
     // XXX: FIXME: check if usage is required ?
-    /** Return true. This function is not used in this implementation
-     *  of TimeRegulator interface. It must return true otherwise the
-     *  proposeTime() will enter in an infinite loop.
+    /** Return always true. 
+     * 
+     *  This function is not used in this implementation of TimeRegulator
+     *  interface. It must return true otherwise the proposeTime() will
+     *  enter in an infinite loop.
      *  @return true always return true
      */
     @Override
@@ -745,25 +754,25 @@ implements TimeRegulator {
      */
     @Override
     public Time proposeTime(Time proposedTime) throws IllegalActionException {
+        Time currentTime = _getModelTime();
+
         //This variable is used to avoid rounding the Time more than once
         String proposedTimeInString = _printTimes(proposedTime);
         if (_debugging) {
             if (_eventBased) {
                 _debug("starting proposeTime(t(lastFoundEvent)="
                         + proposedTimeInString + ") - current status - "
-                        + "t_ptII = " + _printTimes(_director.getModelTime())
+                        + "t_ptII = " + _printTimes(currentTime)
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             } else {
                 _debug("starting proposeTime(" + proposedTimeInString
                         + ")) - current status - " + "t_ptII = "
-                        + _printTimes(_director.getModelTime()) + "; t_hla = "
+                        + _printTimes(currentTime) + "; t_hla = "
                         + _federateAmbassador.hlaLogicalTime);
             }
         }
 
-        Time currentTime = _getModelTime();
-
-        // If the proposerTime has exceed the simulation stop time
+        // If the proposeTime has exceed the simulation stop time
         // so it has no need to ask for the HLA service
         // then return the _stopTime.
 
@@ -805,6 +814,7 @@ implements TimeRegulator {
                         + " the proposedTime -> SKIP RTI -> returning currentTime");
             }
             try {
+                // XXX: FIXME: GiL, why tick2() hangs the simulation ?
                 _rtia.tick();
 
                 if (_timeOfTheLastAdvanceRequest > 0) {
@@ -816,9 +826,9 @@ implements TimeRegulator {
 
             } catch (ConcurrentAccessAttempted e) {
                 throw new IllegalActionException(this, e,
-                        "ConcurrentAccessAttempted ");
+                        "ConcurrentAccessAttempted: " + e.getMessage());
             } catch (RTIinternalError e) {
-                throw new IllegalActionException(this, e, "RTIinternalError ");
+                throw new IllegalActionException(this, e, "RTIinternalError: " + e.getMessage());
             }
 
             return currentTime;
@@ -848,46 +858,47 @@ implements TimeRegulator {
                     }
                 } catch (InvalidFederationTime e) {
                     throw new IllegalActionException(this, e,
-                            "InvalidFederationTime ");
+                            "InvalidFederationTime: " + e.getMessage());
                 } catch (FederationTimeAlreadyPassed e) {
                     throw new IllegalActionException(this, e,
-                            "FederationTimeAlreadyPassed ");
+                            "FederationTimeAlreadyPassed: " + e.getMessage());
                 } catch (TimeAdvanceAlreadyInProgress e) {
                     throw new IllegalActionException(this, e,
-                            "TimeAdvanceAlreadyInProgress ");
+                            "TimeAdvanceAlreadyInProgress: " + e.getMessage());
                 } catch (EnableTimeRegulationPending e) {
                     throw new IllegalActionException(this, e,
-                            "EnableTimeRegulationPending ");
+                            "EnableTimeRegulationPending: " + e.getMessage());
                 } catch (EnableTimeConstrainedPending e) {
                     throw new IllegalActionException(this, e,
-                            "EnableTimeConstrainedPending ");
+                            "EnableTimeConstrainedPending: " + e.getMessage());
                 } catch (FederateNotExecutionMember e) {
                     throw new IllegalActionException(this, e,
-                            "FederateNotExecutionMember ");
+                            "FederateNotExecutionMember: " + e.getMessage());
                 } catch (SaveInProgress e) {
                     throw new IllegalActionException(this, e,
-                            "SaveInProgress ");
+                            "SaveInProgress: " + e.getMessage());
                 } catch (RestoreInProgress e) {
                     throw new IllegalActionException(this, e,
-                            "RestoreInProgress ");
+                            "RestoreInProgress: " + e.getMessage());
                 } catch (RTIinternalError e) {
                     throw new IllegalActionException(this, e,
-                            "RTIinternalError ");
+                            "RTIinternalError: " + e.getMessage());
                 } catch (ConcurrentAccessAttempted e) {
                     throw new IllegalActionException(this, e,
-                            "ConcurrentAccessAttempted ");
+                            "ConcurrentAccessAttempted: " + e.getMessage());
                 } catch (NoSuchElementException e) {
-                    // GL: FIXME: to investigate.
                     if (_debugging) {
                         _debug("    proposeTime(" + proposedTimeInString + ") -"
                                 + " NoSuchElementException " + " for _rtia");
                     }
-
+                    // FIXME: XXX: GiL: explain properly that we want to do here...
                     return proposedTime;
 
-                } catch (SpecifiedSaveLabelDoesNotExist ex) {
+                } catch (SpecifiedSaveLabelDoesNotExist e) {
                     Logger.getLogger(HlaManager.class.getName())
-                    .log(Level.SEVERE, null, ex);
+                    .log(Level.SEVERE, null, e);
+                    throw new IllegalActionException(this, e,
+                            "SpecifiedSaveLabelDoesNotExist: " + e.getMessage());
                 }
             }
         }
@@ -907,15 +918,8 @@ implements TimeRegulator {
     public void updateHlaAttribute(HlaPublisher hp, Token in, String senderName)
             throws IllegalActionException {
 
-        // XXX: FIXME: GiL: changer senderName => classInstancename
-        // XXX: FIXME: GiL: why superdensetime here ?
-        SuperdenseTime currentSuperdenseTime = _getModelSuperdenseTime();
-
-        // XXX: FIXME: GiL: why here ?
-        Time currentTime = new Time(_director,
-                currentSuperdenseTime.timestamp().getDoubleValue());
-
-        int microstep = currentSuperdenseTime.index();
+        // Get current model time.
+        Time currentTime = _getModelTime();
 
         // The following operations build the different arguments required
         // to use the updateAttributeValues() (UAV) service provided by HLA/CERTI.
@@ -937,7 +941,7 @@ implements TimeRegulator {
             suppAttributes = RtiFactoryFactory.getRtiFactory()
                     .createSuppliedAttributes();
         } catch (RTIinternalError e) {
-            throw new IllegalActionException(this, e, "RTIinternalError ");
+            throw new IllegalActionException(this, e, "RTIinternalError: " + e.getMessage());
         }
         suppAttributes.add(_getAttributeHandleFromTab(tObj), bAttributeValue);
 
@@ -979,11 +983,10 @@ implements TimeRegulator {
             }
         }
         CertiLogicalTime ct = _convertToCertiLogicalTime(uavTimeStamp);
-        try {
-            int objectInstanceId = _registerObjectInstanceMap.get(senderName);
 
+        int objectInstanceId = _registerObjectInstanceMap.get(senderName);
 
-            /*
+        /*
             // XXX: FIXME: GiL: begin HLA Reporter code ?
             int indexOfAttribute = 0;
             String attributeName = _getPortFromTab(tObj).getContainer()
@@ -1026,23 +1029,48 @@ implements TimeRegulator {
                 }
             }
             // XXX: FIXME: GiL: end HLA Reporter code ?
-             */
-            System.out.println("updateHlaAttribute: UAV -"
-                    + " id = " + objectInstanceId + " suppAttributes = " + suppAttributes + " tag = " + tag + " ct = " + ct);
+         */
+        System.out.println("updateHlaAttribute: UAV -"
+                + " id = " + objectInstanceId + " suppAttributes = " + suppAttributes + " tag = " + tag + " ct = " + ct);
+        try {
             _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, ct);
+        } catch (ObjectNotKnown e) {
+            throw new IllegalActionException(this, e,
+                    "ObjectNotKnown: " + e.getMessage());
+        } catch (AttributeNotDefined e) {
+            throw new IllegalActionException(this, e,
+                    "AttributeNotDefined: " + e.getMessage());
+        } catch (AttributeNotOwned e) {
+            throw new IllegalActionException(this, e,
+                    "AttributeNotOwned: " + e.getMessage());
+        } catch (InvalidFederationTime e) {
+            throw new IllegalActionException(this, e,
+                    "InvalidFederationTime: " + e.getMessage());
+        } catch (FederateNotExecutionMember e) {
+            throw new IllegalActionException(this, e,
+                    "FederateNotExecutionMember: " + e.getMessage());
+        } catch (SaveInProgress e) {
+            throw new IllegalActionException(this, e,
+                    "SaveInProgress: " + e.getMessage());
+        } catch (RestoreInProgress e) {
+            throw new IllegalActionException(this, e,
+                    "RestoreInProgress: " + e.getMessage());
+        } catch (RTIinternalError e) {
+            throw new IllegalActionException(this, e,
+                    "RTIinternalError: " + e.getMessage());
+        } catch (ConcurrentAccessAttempted e) {
+            throw new IllegalActionException(this, e,
+                    "ConcurrentAccessAttempted: " + e.getMessage());
+        }
 
-            // XXX: FIXME: GiL: begin HLA Reporter code ?
-            //_numberOfUAVs++;
-            // XXX: FIXME: GiL: end HLA Reporter code ?
-            if (_debugging) {
-                _debug("    updateHlaAttribute() - sending UAV( hla attribute = "
-                        + _getPortFromTab(tObj).getContainer().getFullName()
-                        + ",timestamp=" + ct.getTime() + ", value=" + in.toString()
-                        + ")");
-            }
-
-        } catch (Exception e) {
-            throw new IllegalActionException(this, e, e.getMessage());
+        // XXX: FIXME: GiL: begin HLA Reporter code ?
+        //_numberOfUAVs++;
+        // XXX: FIXME: GiL: end HLA Reporter code ?
+        if (_debugging) {
+            _debug("    updateHlaAttribute() - sending UAV( hla attribute = "
+                    + _getPortFromTab(tObj).getContainer().getFullName()
+                    + ",timestamp=" + ct.getTime() + ", value=" + in.toString()
+                    + ")");
         }
     }
 
@@ -1089,7 +1117,7 @@ implements TimeRegulator {
             try {
                 _rtia.unsubscribeObjectClass(_getClassHandleFromTab(obj));
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, e.getMessage());
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
             }
             if (_debugging) {
                 _debug("wrapup() - unsubscribe "
@@ -1104,7 +1132,7 @@ implements TimeRegulator {
             try {
                 _rtia.unpublishObjectClass(_getClassHandleFromTab(obj));
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, e.getMessage());
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
             }
             if (_debugging) {
                 _debug("wrapup() - unpublish "
@@ -1119,7 +1147,7 @@ implements TimeRegulator {
             _rtia.resignFederationExecution(
                     ResignAction.DELETE_OBJECTS_AND_RELEASE_ATTRIBUTES);
         } catch (RTIexception e) {
-            throw new IllegalActionException(this, e, e.getMessage());
+            throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
         }
         if (_debugging) {
             _debug("wrapup() - Resign Federation execution");
@@ -1142,10 +1170,10 @@ implements TimeRegulator {
                 }
                 canDestroyRtig = true;
             } catch (RTIinternalError e) {
-                throw new IllegalActionException(this, e, "RTIinternalError ");
+                throw new IllegalActionException(this, e, "RTIinternalError: " + e.getMessage());
             } catch (ConcurrentAccessAttempted e) {
                 throw new IllegalActionException(this, e,
-                        "ConcurrentAccessAttempted ");
+                        "ConcurrentAccessAttempted: " + e.getMessage());
             }
             if (_debugging) {
                 _debug("wrapup() - "
@@ -1311,31 +1339,33 @@ implements TimeRegulator {
             // algo3: 7: if receivedRAV then  <= FIXME: XXX: not implemented ?
             //if (_federateAmbassador.hasReceivedRAV) {
 
-                // algo3: 8: t'' <- f(h'')
-                Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime);
+            // algo3: 8: t'' <- f(h'')
+            Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime);
 
-                // algo3: 9: if t 00 > t then  => True in the general case
-                if (newPtolemyTime.compareTo(ptolemyTime) > 0) {
-                    // algo3: 10: t' <- t''
-                    proposedTime = newPtolemyTime;
-                } else {  // algo3: 11: else
-                    // algo3: 12: t' <- t'' + r
-                    
-                    //proposedTime = newPtolemyTime.add(r);
-                    proposedTime = ptolemyTime.add(r); // FIXME: XXX: GiL: modif. from mail JC 24/10/2017
-                    
-                } // algo3: 13: end if
+            // algo3: 9: if t 00 > t then  => True in the general case
+            if (newPtolemyTime.compareTo(ptolemyTime) > 0) {
+                // algo3: 10: t' <- t''
+                proposedTime = newPtolemyTime;
+            } else {  // algo3: 11: else
+                // algo3: 12: t' <- t'' + r
 
-                // algo3: 14: putRAVonHlaSubs(t')
-                // Store reflected attributes RAV as events on HLASubscriber actors.
-                _putReflectedAttributesOnHlaSubscribers(proposedTime);
+                //proposedTime = newPtolemyTime.add(r);
+                proposedTime = ptolemyTime.add(r); // FIXME: XXX: GiL: modif. from mail JC 24/10/2017
+
+            } // algo3: 13: end if
+
+            // algo3: 14: putRAVonHlaSubs(t')
+            // Store reflected attributes RAV as events on HLASubscriber actors.
+            _putReflectedAttributesOnHlaSubscribers(proposedTime);
+
+            //    _federateAmbassador.hasReceivedRAV = false;
 
             //} // algo3: 15: end if => if receivedRAV then  <= FIXME: XXX: not implemented ?
 
         } // algo3: 16: end if
 
         return proposedTime;
-          
+
     }
 
     /**
@@ -1345,12 +1375,7 @@ implements TimeRegulator {
      * @return a valid time to advance to
      */
     private Time _timeSteppedBasedTimeAdvance(Time proposedTime)
-            throws IllegalActionException, InvalidFederationTime,
-            FederationTimeAlreadyPassed, TimeAdvanceAlreadyInProgress,
-            FederateNotExecutionMember, SaveInProgress,
-            EnableTimeRegulationPending, EnableTimeConstrainedPending,
-            RestoreInProgress, RTIinternalError, ConcurrentAccessAttempted,
-            SpecifiedSaveLabelDoesNotExist {
+            throws IllegalActionException {
 
         // FIXME: XXX: why this kind of representation ? toString() ?
         // Custom string representation of proposedTime.
@@ -1389,7 +1414,13 @@ implements TimeRegulator {
             _federateAmbassador.timeAdvanceGrant = false;
 
             // algo4: 2: TAR(g(t'))
-            _rtia.timeAdvanceRequest(tarContractTime);
+            try {
+                _rtia.timeAdvanceRequest(tarContractTime);
+            } catch (InvalidFederationTime | FederationTimeAlreadyPassed | TimeAdvanceAlreadyInProgress
+                    | EnableTimeRegulationPending | EnableTimeConstrainedPending | FederateNotExecutionMember
+                    | SaveInProgress | RestoreInProgress | RTIinternalError | ConcurrentAccessAttempted e) {
+                throw new IllegalActionException(this, e, e.getMessage());
+            }
 
             // algo4: 3: while not granted do
             while (!(_federateAmbassador.timeAdvanceGrant)) {
@@ -1402,7 +1433,12 @@ implements TimeRegulator {
                             + tarContractTime.getTime()
                             + ") by calling tick2()");
                 }
-                _rtia.tick2(); // algo4: 4: tick()  > Wait TAG()
+
+                try {
+                    _rtia.tick2();
+                } catch (SpecifiedSaveLabelDoesNotExist | ConcurrentAccessAttempted | RTIinternalError e) {
+                    throw new IllegalActionException(this, e, e.getMessage());
+                } // algo4: 4: tick()  > Wait TAG()
 
                 // XXX: FIXME: GiL: begin HLA Reporter code ?
                 _numberOfTicks2++;
@@ -1418,30 +1454,31 @@ implements TimeRegulator {
             // algo4: 7: if receivedRAV then  <= FIXME: XXX: to discuss ?
             //if (_federateAmbassador.hasReceivedRAV) {
 
-                // algo4: 8: t'' <- f(h)
-                Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.hlaLogicalTime);
+            // algo4: 8: t'' <- f(h)
+            Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.hlaLogicalTime);
 
-                // algo4: 9: if t'' > t' then  => Update t’ if the received time is smaller, otherwise keeps t’
-                if (newPtolemyTime.compareTo(proposedTime) < 0) {
-                    // algo4: 10: t' <- t''
-                    proposedTime = newPtolemyTime;
-                } // algo4: 11: end if
+            // algo4: 9: if t'' > t' then  => Update t’ if the received time is smaller, otherwise keeps t’
+            if (newPtolemyTime.compareTo(proposedTime) < 0) {
+                // algo4: 10: t' <- t''
+                proposedTime = newPtolemyTime;
+            } // algo4: 11: end if
 
-                // algo4: 12: putRAVonHlaSubs(t')
-                // Store reflected attributes RAV as events on HLASubscriber actors.
-                _putReflectedAttributesOnHlaSubscribers(proposedTime);
+            // algo4: 12: putRAVonHlaSubs(t')
+            // Store reflected attributes RAV as events on HLASubscriber actors.
+            _putReflectedAttributesOnHlaSubscribers(proposedTime);
 
-                // algo4: 13: return t'
-                return proposedTime;
+            //_federateAmbassador.hasReceivedRAV = false;
+
+            // algo4: 13: return t'
+            return proposedTime;
 
             //} // algo4: 14: if receivedRAV then  <= FIXME: XXX: to discuss ?
 
         } // algo4: 15: end while
 
         if (_debugging) {
-            _debug("        proposeTime(" + strProposedTime
-                    + ") - _timeSteppedBasedTimeAdvance(" + strProposedTime
-                    + ") - TAR not successful");
+            _debug("        proposeTime(" + strProposedTime + ") "
+                    + "- _timeSteppedBasedTimeAdvance(" + strProposedTime + ")");
         }
 
         // algo4: 16: return t' => Update PtII time
@@ -1547,7 +1584,7 @@ implements TimeRegulator {
      */
     private List<HlaSubscriber> getHlaSubscribers(CompositeEntity ce) {
         // The list of HLA subscribers to return.
-        LinkedList<HlaSubscriber> hlaSubcribers = new LinkedList<HlaSubscriber>();
+        LinkedList<HlaSubscriber> hlaSubscribers = new LinkedList<HlaSubscriber>();
 
         // List all classes from top level model.
         List<CompositeEntity> entities = ce.entityList();
@@ -1561,14 +1598,14 @@ implements TimeRegulator {
 
             // XXX: FIXME: GiL: to optimize with Ptolemy's 
             if (classElt instanceof HlaSubscriber) {
-                hlaSubcribers.add((HlaSubscriber) classElt);
+                hlaSubscribers.add((HlaSubscriber) classElt);
             }
             else if (classElt instanceof ptolemy.actor.TypedCompositeActor) {
-                hlaSubcribers.addAll(getHlaSubscribers((CompositeEntity) classElt));
+                hlaSubscribers.addAll(getHlaSubscribers((CompositeEntity) classElt));
             }
         }
 
-        return hlaSubcribers;
+        return hlaSubscribers;
     }
 
     /** This method is called when a time advancement phase is performed. Every
@@ -1691,7 +1728,7 @@ implements TimeRegulator {
         _numberOfTicks2 = 0;
         _numberOfNERs = 0;
         _numberOfTAGs = 0;
-        _runtime = 0;
+        //_runtime = 0;
         _timeOfTheLastAdvanceRequest = 0;
         _numberOfOtherTicks = 0;
 
@@ -1708,8 +1745,8 @@ implements TimeRegulator {
         //    _UAVsValues[i] = new StringBuffer("");
         //    System.out.println(_nameOfTheAttributesToPublish[i]);
         //}
-        _tPTII = new StringBuffer("");
-        _tHLA = new StringBuffer("");
+        //_tPTII = new StringBuffer("");
+        //_tHLA = new StringBuffer("");
 
         _reasonsToPrintTheTime = new StringBuffer("");
         //_pUAVsTimes = new StringBuffer("");
@@ -1770,7 +1807,6 @@ implements TimeRegulator {
             _reasonsToPrintTheTime.append(reason + ";");
 
         } catch (IllegalActionException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -1857,48 +1893,12 @@ implements TimeRegulator {
 
     private StringBuffer _reasonsToPrintTheTime;
 
-    /** Represents a text file that is going to keep track of the number of HLA calls of the
-     * federate.
-     */
-    private File _file;
-
-    /** Represents a ".csv" file that is going to keep track of the number of HLA calls of the
-     * federate.
-     */
-    private File _csvFile;
-
-    /** Represents a ".csv" file that is going to keep track of the number of HLA calls of the
-     * federate.
-     */
-    private File _reportFile;
-
-    /**
-     * Represents the file that tracks the values that have been updated and the time of their update.
-     */
-    //private File _UAVsValuesFile;
-    //private Date _date;
     private String _decimalFormat;
-    //FIXME: add comments
-    //private StringBuffer[] _UAVsValues;
-    //private int _numberOfAttributesToPublish;
-    //private int _numberOfAttributesSubscribedTo;
-    //private String[] _nameOfTheAttributesToPublish;
-    //private String[] _nameOfTheAttributesSubscribedTo;
-    //private StringBuffer _pUAVsTimes;
-    //private StringBuffer _preUAVsTimes;
-    //private File _RAVsValuesFile;
-    //private StringBuffer[] _RAVsValues;
-    //private StringBuffer _pRAVsTimes;
-    //private StringBuffer _folRAVsTimes;
+
     /** Represents the instant when the simulation is fully started
      * (when the last federate starts running).
      */
     private static double _startTime;
-
-    /** Records the last proposed time to avoid multiple HLA time advancement
-     *  requests at the same time.
-     */
-    //    private Time _lastProposedTime;
 
     /** A reference to the enclosing director. */
     private DEDirector _director;
@@ -1906,7 +1906,7 @@ implements TimeRegulator {
     /** The RTIG subprocess. */
     private CertiRtig _certiRtig;
 
-    /** Map class intance name and object instance ID. Those information are set
+    /** Map class instance name and object instance ID. Those information are set
      *  using discoverObjectInstance() callback and used by the RAV service.
      */
     private HashMap<Integer, String> _discoverObjectInstanceMap;
@@ -1923,11 +1923,6 @@ implements TimeRegulator {
      * The actual value for hlaTimeUnit parameter.
      */
     private double _hlaTimeUnitValue;
-
-    /**
-    Set to false once in discoverObjectInstance and resert to true in noNewActors
-     */
-    private boolean _noObjectDicovered;
 
     /**
      * The time of the last TAR or last NER.
@@ -1973,7 +1968,7 @@ implements TimeRegulator {
                 _rtia.registerFederationSynchronizationPoint(
                         _synchronizationPointName, rfspTag);
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, e.getMessage());
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
             }
 
             // Wait synchronization point callbacks.
@@ -1992,7 +1987,7 @@ implements TimeRegulator {
                     }
                     // XXX: FIXME: GiL: end HLA Reporter code ?
                 } catch (RTIexception e) {
-                    throw new IllegalActionException(this, e, e.getMessage());
+                    throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
                 }
             }
 
@@ -2018,7 +2013,7 @@ implements TimeRegulator {
                 // XXX: FIXME: GiL: end HLA Reporter code ?
 
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, e.getMessage());
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
             }
         }
 
@@ -2030,7 +2025,7 @@ implements TimeRegulator {
                         + _synchronizationPointName + " satisfied !");
             }
         } catch (RTIexception e) {
-            throw new IllegalActionException(this, e, e.getMessage());
+            throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
         }
 
         // Wait federation synchronization.
@@ -2053,7 +2048,7 @@ implements TimeRegulator {
                 // XXX: FIXME: GiL: end HLA Reporter code ?
 
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, e.getMessage());
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
             }
         }
     }
@@ -2074,7 +2069,7 @@ implements TimeRegulator {
             try {
                 _rtia.enableTimeConstrained();
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, e.getMessage());
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
             }
         }
 
@@ -2084,8 +2079,7 @@ implements TimeRegulator {
                 _rtia.enableTimeRegulation(_federateAmbassador.hlaLogicalTime,
                         _federateAmbassador.effectiveLookAHead);
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, e.getMessage());
-            }
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());            }
         }
 
         // Wait the response of the RTI towards Federate time policies that has
@@ -2108,7 +2102,7 @@ implements TimeRegulator {
                     // XXX: FIXME: GiL: end HLA Reporter code ?
 
                 } catch (RTIexception e) {
-                    throw new IllegalActionException(this, e, e.getMessage());
+                    throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
                 }
             }
 
@@ -2127,7 +2121,7 @@ implements TimeRegulator {
                     // XXX: FIXME: GiL: end HLA Reporter code ?
 
                 } catch (RTIexception e) {
-                    throw new IllegalActionException(this, e, e.getMessage());
+                    throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
                 }
             }
 
@@ -2144,7 +2138,7 @@ implements TimeRegulator {
             try {
                 _rtia.enableAsynchronousDelivery();
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, e.getMessage());
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
             }
         }
     }
@@ -2285,16 +2279,17 @@ implements TimeRegulator {
          *  @exception SaveInProgress
          *  @exception RestoreInProgress
          *  @exception ConcurrentAccessAttempted
-         *  All those exceptions are from the HLA/CERTI implementation.
+         *  All those exceptions above are from the HLA/CERTI implementation.
+         *  @exception IllegalActionException
+         *  All those exceptions above are from Ptolemy.
          */
         public void initialize(RTIambassador rtia) throws NameNotFound,
         ObjectClassNotDefined, FederateNotExecutionMember,
-        RTIinternalError, AttributeNotDefined, SaveInProgress,
-        RestoreInProgress, ConcurrentAccessAttempted {
+        RTIinternalError, SaveInProgress,
+        RestoreInProgress, ConcurrentAccessAttempted, IllegalActionException {
 
             // Retrieve model stop time
             _stopTime = _director.getModelStopTime();
-
 
             // XXX: FIXME: GiL: begin HLA Reporter code ?
             _initializeReportVariables();
@@ -2409,10 +2404,11 @@ implements TimeRegulator {
                 // Get the object class handle corresponding to
                 // the received "theObject" id.
                 int classHandle = _objectIdToClassHandle.get(theObject);
+
                 String classInstanceName = _discoverObjectInstanceMap.get(theObject);
                 /*
                 System.out.println("callback: reflectAttributeValues:"
-                    + " theObject=" + theObject + " theAttributes" + theAttributes + " userSuppliedTag=" + userSuppliedTag + " theTime=" + theTime);
+                        + " theObject=" + theObject + " theAttributes" + theAttributes + " userSuppliedTag=" + userSuppliedTag + " theTime=" + theTime);
                 System.out.println("callback: reflectAttributeValues: _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
                 System.out.println("callback: reflectAttributeValues: _discoverObjectInstanceMap.get(theObject) classInstanceName = " + classInstanceName);
                  */
@@ -2562,23 +2558,17 @@ implements TimeRegulator {
                                 // XXX: FIXME: GiL: end HLA Reporter code ?
                                  */
                             } catch (IllegalActionException e) {
-                                e.printStackTrace();
-                            }
+                                throw new IllegalActionException(null, e, "IllegalActionException: " + e.getMessage());                            }
                         }
                     }
                 }
             } catch (ArrayIndexOutOfBounds e) {
+                // FIXME: XXX: Gil: encapsulate in RTI exception ?
                 e.printStackTrace();
             }
-            /*This may trigger, not 100% sure. If so, need to review the code
-            to store RAV no matter what*/
-            /* if (!done) {
-                throw new FederateInternalError(
-                        "Received a RAV but could not put in "
-                                + "anyobject. Means the ChangeRequest has not been processed yet");
-            }*/ 
             catch (IllegalActionException e1) {
-                // TODO Auto-generated catch block
+                // FIXME: XXX: Gil: encapsulate in RTI exception ?
+                System.out.println("INNER reflectAttributeValues(): EXCEPTION IllegalActionException");
                 e1.printStackTrace();
             }
         }
@@ -2608,7 +2598,7 @@ implements TimeRegulator {
             }
 
             // Get classHandle and attributeHandle IDs for each attribute
-            // value to subscribe (i.e. HlaSubcriber). Update the HlaSubcribers.
+            // value to subscribe to (i.e. HlaSubscriber). Update the HlaSubcribers.
             Iterator<Entry<String, Object[]>> it1 = _hlaAttributesToSubscribeTo
                     .entrySet().iterator();
 
@@ -2625,7 +2615,7 @@ implements TimeRegulator {
                         sub.setObjectInstanceId(objectInstanceId);
                     }
                 } catch (IllegalActionException e) {
-                    // TODO Auto-generated catch block
+                    // FIXME: XXX: Gil: encapsulate in RTI exception ?
                     e.printStackTrace();
                 }
             }
@@ -2762,10 +2752,10 @@ implements TimeRegulator {
         ///////////////////////////////////////////////////////////////////
         ////                         private methods                   ////
 
-        private void _setupHlaPublishers(RTIambassador rtia) throws NameNotFound,
+        private void _setupHlaPublishers(RTIambassador rtia) throws
         ObjectClassNotDefined, FederateNotExecutionMember,
-        RTIinternalError, AttributeNotDefined, SaveInProgress,
-        RestoreInProgress, ConcurrentAccessAttempted {
+        RTIinternalError, SaveInProgress,
+        RestoreInProgress, ConcurrentAccessAttempted, IllegalActionException {
 
             // For each HlaPublisher actors deployed in the model we declare
             // to the HLA/CERTI Federation a HLA attribute to publish.
@@ -2797,10 +2787,8 @@ implements TimeRegulator {
 
                 try {
                     classHandle = rtia.getObjectClassHandle(_getClassObjectNameFromTab(tObj));
-                } catch (Exception e) {
-                    // XXX: FIXME: GiL: so what???
-                    System.out.println("setupHlaPublishers: attempt to reference a HLA class not in FOM (see fed file), so just skip it.");
-                    continue;
+                } catch (NameNotFound e) {
+                    throw new IllegalActionException(null, e, "NameNotFound: " + e.getMessage() + " is not a HLA class from the FOM (see .fed file).");
                 }
 
                 // Retrieve HLA attribute handle from RTI.
@@ -2813,9 +2801,8 @@ implements TimeRegulator {
                             .getAttributeHandle(pub.getAttributeName(), classHandle);
 
                     //System.out.println("setupHlaPublishers: attributeHandle = " + attributeHandle);
-                } catch (IllegalActionException e) {
-                    // XXX: FIXME: getAttributeName() exception.
-                    System.out.println("setupHlaPublishers: getAttributeName() " + e.getMessage());
+                } catch (NameNotFound e) {
+                    throw new IllegalActionException(null, e, "NameNotFound: " + e.getMessage() + " is not a HLA attribute value from the FOM (see .fed file).");
                 }
 
                 //System.out.println("setupHlaPublishers: container name = " + pub.getFullName());
@@ -2918,7 +2905,11 @@ implements TimeRegulator {
 
                 // Fill the attribute handle set with all attribute to publish.
                 for (String sPub : hlaPublishersFullnames) {
-                    _attributesLocal.add(_getAttributeHandleFromTab(_hlaAttributesToPublish.get(sPub)));
+                    try {
+                        _attributesLocal.add(_getAttributeHandleFromTab(_hlaAttributesToPublish.get(sPub)));
+                    } catch (AttributeNotDefined e) {
+                        throw new IllegalActionException(null, e, "AttributeNotDefined: " + e.getMessage());
+                    }
                 }
 
                 // At this point, all HlaPublishers have been initialized and own their
@@ -2932,8 +2923,9 @@ implements TimeRegulator {
                     //System.out.println("setupHlaPublishers: publish classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
                     rtia.publishObjectClass(classHandle, _attributesLocal);
                 } catch (OwnershipAcquisitionPending e) {
-                    System.out.println("setupHlaPublishers: exception OwnershipAcquisitionPending " + e.getMessage());
-                    e.printStackTrace();
+                    throw new IllegalActionException(null, e, "OwnershipAcquisitionPending: " + e.getMessage());
+                } catch (AttributeNotDefined e) {
+                    throw new IllegalActionException(null, e, "AttributeNotDefined: " + e.getMessage());
                 }
             }
 
@@ -2969,9 +2961,9 @@ implements TimeRegulator {
 
                         _registerObjectInstanceMap.put(classInstanceName, objectInstanceId);
                     } catch (ObjectClassNotPublished e) {
-                        e.printStackTrace();
+                        throw new IllegalActionException(null, e, "ObjectClassNotPublished: " + e.getMessage());
                     } catch (ObjectAlreadyRegistered e) {
-                        e.printStackTrace();
+                        throw new IllegalActionException(null, e, "ObjectAlreadyRegistered: " + e.getMessage());
                     } // end catch ...
                 } // end if ...
             }
@@ -2980,17 +2972,18 @@ implements TimeRegulator {
         /**
          * Configure the different HLASubscribers (ie will make them subscribe
          * to what they should)
+         * @throws IllegalActionException 
          */
-        private void _setupHlaSubscribers(RTIambassador rtia) throws NameNotFound,
-        ObjectClassNotDefined, FederateNotExecutionMember,
-        RTIinternalError, AttributeNotDefined, SaveInProgress,
-        RestoreInProgress, ConcurrentAccessAttempted {
+        private void _setupHlaSubscribers(RTIambassador rtia) throws
+        ObjectClassNotDefined, FederateNotExecutionMember, RTIinternalError,
+        SaveInProgress, RestoreInProgress, ConcurrentAccessAttempted,
+        IllegalActionException {
             // XXX: FIXME: check mixing between tObj[] and HlaSubcriber getter/setter.
 
             // For each HlaSubscriber actors deployed in the model we declare
             // to the HLA/CERTI Federation a HLA attribute to subscribe to.
 
-            //System.out.println("ciele_debug: setupHlaSubscribers: step 1");
+            System.out.println("ciele_debug: setupHlaSubscribers: step 1");
 
             // 1. Get classHandle and attributeHandle IDs for each attribute
             // value to subscribe (i.e. HlaSubcriber). Update the HlaSubcribers.
@@ -3011,31 +3004,32 @@ implements TimeRegulator {
 
                 // Retrieve HLA class handle from RTI.
                 int classHandle = Integer.MIN_VALUE;
+
                 try {
-                    //System.out.println("setupHlaSubscribers: objectClassName (in FOM) = " + (String) tObj[2]);
+                    System.out.println("setupHlaSubscribers: objectClassName (in FOM) = " + (String) tObj[2]);
                     classHandle = rtia.getObjectClassHandle(_getClassObjectNameFromTab(tObj));
-                    //System.out.println("setupHlaSubscribers: classHandle = " + classHandle);
-                } catch (Exception e) {
+                    System.out.println("setupHlaSubscribers: classHandle = " + classHandle);
+                } catch (NameNotFound e) {
                     // XXX: FIXME: GiL: so what???
-                    System.out.println("setupHlaSubscribers: attempt to reference a HLA class not in FOM (see fed file), so just skip it.");
-                    continue;
+                    throw new IllegalActionException(null, e, "NameNotFound: " + e.getMessage() + " is not a HLA class from the FOM (see .fed file).");
                 }
 
                 // Retrieve HLA attribute handle from RTI.
                 int attributeHandle = Integer.MIN_VALUE;
                 try {
-                    //System.out.println("setupHlaSubscribers: container name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getFullName());
-                    //System.out.println("setupHlaSubscribers: object name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getAttributeName());
+                    System.out.println("setupHlaSubscribers: container name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getFullName());
+                    System.out.println("setupHlaSubscribers: object name = " + ((HlaSubscriber)((TypedIOPort) tObj[0]).getContainer()).getAttributeName());
 
                     attributeHandle = rtia.getAttributeHandle(sub.getAttributeName(), classHandle);
 
-                    //System.out.println("setupHlaSubscribers: objAttributeHandle = " + attributeHandle);
-                } catch (Exception e) {
+                    System.out.println("setupHlaSubscribers: objAttributeHandle = " + attributeHandle);
+                } catch (IllegalActionException e) {
                     // XXX: FIXME: GiL: so what???
                     System.out.println("setupHlaSubscribers: getAttributeHandle() " + e.getMessage());
                     System.out.println("setupHlaSubscribers: getAttributeHandle() failed");
+                } catch (NameNotFound e) {
+                    throw new IllegalActionException(null, e, "NameNotFound: " + e.getMessage() + " is not a HLA attribute value from the FOM (see .fed file).");
                 }
-
                 // Subscribe to HLA attribute information (for subscription)
                 // from HLA services. In this case, the tObj[] object as
                 // the following structure:
@@ -3065,39 +3059,10 @@ implements TimeRegulator {
                 sub.setAttributeHandle(attributeHandle);
             }
 
-            //System.out.println("ciele_debug: setupHlaSubscribers: step 2.1");
+            System.out.println("ciele_debug: setupHlaSubscribers: step 2.2");
 
-            // 2.1 Create a table of HlaSubscribers indexed by their corresponding
-            //     instance class name (no duplication).
-            HashMap<String, LinkedList<String>> classInstanceNameHlaSubscriberTable = null;
-            classInstanceNameHlaSubscriberTable = new HashMap<String, LinkedList<String>>();
-
-            Iterator<Entry<String, Object[]>> it21 = _hlaAttributesToSubscribeTo
-                    .entrySet().iterator();
-
-            while (it21.hasNext()) {
-                Map.Entry<String, Object[]> elt = it21.next();
-                // elt.getKey()   => HlaSubscriber actor full name.
-                // elt.getValue() => tObj[] array.
-                Object[] tObj = elt.getValue();
-
-                // The classInstanceName where the HLA attribute belongs to (see FOM).
-                String classInstanceName = _getClassInstanceNameFromTab(tObj);
-
-                if (classInstanceNameHlaSubscriberTable.containsKey(classInstanceName)) {
-                    classInstanceNameHlaSubscriberTable.get(classInstanceName).add(
-                            elt.getKey());
-                } else {
-                    LinkedList<String> list = new LinkedList<String>();
-                    list.add(elt.getKey());
-                    classInstanceNameHlaSubscriberTable.put(classInstanceName, list);
-                }
-            }
-
-            //System.out.println("ciele_debug: setupHlaSubscribers: step 2.2");
-
-            // 2.2 Create a table of HlaSubscribers indexed by their corresponding
-            //     class handle (no duplication).
+            // 2 Create a table of HlaSubscribers indexed by their corresponding
+            //   class handle (no duplication).
             HashMap<Integer, LinkedList<String>> classHandleHlaSubscriberTable = null;
             classHandleHlaSubscriberTable = new HashMap<Integer, LinkedList<String>>();
 
@@ -3110,7 +3075,7 @@ implements TimeRegulator {
                 // elt.getValue() => tObj[] array.
                 Object[] tObj = elt.getValue();
 
-                // The classInstanceName where the HLA attribute belongs to (see FOM).
+                // The class handle where the HLA attribute belongs to (see FOM).
                 int classHandle = _getClassHandleFromTab(tObj);
 
                 if (classHandleHlaSubscriberTable.containsKey(classHandle)) {
@@ -3123,7 +3088,7 @@ implements TimeRegulator {
                 }
             }
 
-            //System.out.println("ciele_debug: setupHlaSubscribers: step 3");
+            System.out.println("ciele_debug: setupHlaSubscribers: step 3");
 
             // 3. Declare to the Federation the HLA attributes to subscribe to.
             // If these attributes belongs to the same object class then only
@@ -3143,8 +3108,11 @@ implements TimeRegulator {
                         .getRtiFactory().createAttributeHandleSet();
 
                 for (String sSub : hlaSubscribersFullnames) {
-                    //_attributesLocal.add((Integer) _hlaAttributesToSubscribeTo.get(sSub)[4]);
-                    _attributesLocal.add(_getAttributeHandleFromTab(_hlaAttributesToSubscribeTo.get(sSub)));
+                    try {
+                        _attributesLocal.add(_getAttributeHandleFromTab(_hlaAttributesToSubscribeTo.get(sSub)));
+                    } catch (AttributeNotDefined e) {
+                        throw new IllegalActionException(null, e, "AttributeNotDefined: " + e.getMessage());
+                    }
                 }
 
                 // At this point, all HlaSubscribers have been initialized and own their
@@ -3152,9 +3120,13 @@ implements TimeRegulator {
                 // the first from the list to get those information.
                 Object[] tObj = _hlaAttributesToSubscribeTo.get(hlaSubscribersFullnames.getFirst());
                 int classHandle = _getClassHandleFromTab(tObj);
+                try {
+                    _rtia.subscribeObjectClassAttributes(classHandle, _attributesLocal);
+                } catch (AttributeNotDefined e) {
+                    throw new IllegalActionException(null, e, "AttributeNotDefined: " + e.getMessage());
+                }
 
-                _rtia.subscribeObjectClassAttributes(classHandle, _attributesLocal);
-                //System.out.println("setupHlaSubscribers: subscribeObjectClassAttributes: register classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
+                System.out.println("setupHlaSubscribers: subscribeObjectClassAttributes: register classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
             }
         } // end 'private void setupHlaSubscribers(RTIambassador rtia) ...'
     } // end 'private class PtolemyFederateAmbassadorInner extends NullFederateAmbassador { ...'
