@@ -282,6 +282,9 @@ implements TimeRegulator {
         _fromFederationEvents       = new HashMap<String, LinkedList<TimedEvent>>();
         _objectIdToClassHandle      = new HashMap<Integer, Integer>();
 
+        // XXX: FIXME: joker support
+        _usedJokerFilterMap = new HashMap<String, Boolean>();
+
         _hlaTimeStep  = null;
         _hlaLookAHead = null;
 
@@ -568,6 +571,10 @@ implements TimeRegulator {
         newObject._discoverObjectInstanceMap = new HashMap<Integer, String>();
 
         newObject._hlaTimeUnitValue = _hlaTimeUnitValue;
+
+        // XXX: FIXME: joker support
+        newObject._usedJokerFilterMap = new HashMap<String, Boolean>();
+        newObject._usedJoker = false;
 
         try {
             newObject._hlaTimeStep = ((DoubleToken) hlaTimeStep.getToken())
@@ -1198,6 +1205,9 @@ implements TimeRegulator {
         _fromFederationEvents.clear();
         _objectIdToClassHandle.clear();
 
+        // XXX: FIXME: joker support
+        _usedJokerFilterMap.clear();
+
         if (_debugging) {
             _debug("-----------------------");
         }
@@ -1229,6 +1239,10 @@ implements TimeRegulator {
      *  the RTI).
      */
     protected HashMap<Integer, Integer> _objectIdToClassHandle;
+
+    // XXX: FIXME: joker support
+    /** Table of used joker filter. */
+    protected HashMap<String, Boolean> _usedJokerFilterMap;
 
     ///////////////////////////////////////////////////////////////////
     ////                         private methods                   ////
@@ -1392,7 +1406,7 @@ implements TimeRegulator {
         // g() => _convertToCertiLogicalTime()
 
         // t => Ptolemy time => getModelTime()
-        Time ptolemyTime = _director.getModelTime();
+        //Time ptolemyTime = _director.getModelTime();
 
         // t' => proposedTime
 
@@ -1533,6 +1547,10 @@ implements TimeRegulator {
 
         // HlaSubscribers.
         _hlaAttributesToSubscribeTo.clear();
+
+        // XXX: FIXME: joker support
+        _usedJoker = false;
+
         List<HlaSubscriber> _hlaSubscribers = getHlaSubscribers(ce);
 
         for (HlaSubscriber hs : _hlaSubscribers) {
@@ -1572,11 +1590,34 @@ implements TimeRegulator {
             // (received by callbacks) from the RTI, is indexed by the HLA
             // Subscriber actors present in the model.
             _fromFederationEvents.put(hs.getFullName(), new LinkedList<TimedEvent>());
+
+            // XXX: FIXME: joker support
+            String classInstanceOrJokerName = hs.getClassInstanceName();
+            
+            if (classInstanceOrJokerName.contains(_jokerFilter)) {
+                _usedJoker = true;
+            }
+
+            System.out.println("debug=" + classInstanceOrJokerName + "uses joker filter?=" + classInstanceOrJokerName.contains(_jokerFilter));            
+
+            if (_usedJoker) {
+                if (!classInstanceOrJokerName.contains(_jokerFilter)) {
+                    throw new IllegalActionException(this,
+                            "Cannot mix class instance name and joker filter in HLA Subscribers "
+                                    + "please check: " + hs.getFullName());
+                } else {
+                    // Add a new discovered joker to the joker table.
+                    _usedJokerFilterMap.put(classInstanceOrJokerName, false);
+                 }
+            }
+
         }
 
         //System.out.println("_populateHlaAttributeTables: _hlaAttributesToPublish = " + _hlaAttributesToPublish.toString());
         //System.out.println("_populateHlaAttributeTables: _hlaAttributesToSubscribeTo = " + _hlaAttributesToSubscribeTo.toString());
 
+        // XXX: FIXME: joker support
+        System.out.println("_populateHlaAttributeTables: _usedJokerFilterMap = " + _usedJokerFilterMap.toString());
     }
 
     /**
@@ -1815,7 +1856,7 @@ implements TimeRegulator {
     ///////////////////////////////////////////////////////////////////
     ////                         private variables                 ////
 
-    /** Name of the current Ptolemy federate ({@link HlaManager}).*/
+    /** Name of the current Ptolemy federate ({@link HlaManager}). */
     private String _federateName;
 
     /**-Name of the HLA/CERTI federation to create or to join. */
@@ -1948,6 +1989,13 @@ implements TimeRegulator {
 
     private int _numberOfUAVs;
 
+    // XXX: FIXME: joker support
+    /** The reserved keyword to filter HLA subscribers using joker wildcard. */
+    private static final String _jokerFilter = "joker_";
+
+    /** Indicates if the 'joker' filter is used for HLA class instance name by HLA subscribers actors. */
+    private boolean _usedJoker;
+
     ///////////////////////////////////////////////////////////////////
     ////                    private  methods                 ////
 
@@ -2079,7 +2127,8 @@ implements TimeRegulator {
                 _rtia.enableTimeRegulation(_federateAmbassador.hlaLogicalTime,
                         _federateAmbassador.effectiveLookAHead);
             } catch (RTIexception e) {
-                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());            }
+                throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
+            }
         }
 
         // Wait the response of the RTI towards Federate time policies that has
@@ -2394,7 +2443,7 @@ implements TimeRegulator {
                         FederateInternalError {
 
             if (_debugging) {
-                _debug("INNER reflectAttributeValues(): starting - "
+                _debug("INNER callback: reflectAttributeValues: starting - "
                         + "current status - "
                         + "t_ptII = " + _printTimes(_director.getModelTime())
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
@@ -2404,14 +2453,15 @@ implements TimeRegulator {
                 // Get the object class handle corresponding to
                 // the received "theObject" id.
                 int classHandle = _objectIdToClassHandle.get(theObject);
+                System.out.println("INNER callback: reflectAttributeValues: classHandle = " + classHandle);
 
-                String classInstanceName = _discoverObjectInstanceMap.get(theObject);
-                /*
-                System.out.println("callback: reflectAttributeValues:"
+                String classInstanceOrJokerName = _discoverObjectInstanceMap.get(theObject);
+
+                System.out.println("INNER callback: reflectAttributeValues:"
                         + " theObject=" + theObject + " theAttributes" + theAttributes + " userSuppliedTag=" + userSuppliedTag + " theTime=" + theTime);
-                System.out.println("callback: reflectAttributeValues: _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
-                System.out.println("callback: reflectAttributeValues: _discoverObjectInstanceMap.get(theObject) classInstanceName = " + classInstanceName);
-                 */
+                System.out.println("INNER callback: reflectAttributeValues: _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
+                System.out.println("INNER callback: reflectAttributeValues: _discoverObjectInstanceMap.get(theObject) classInstanceOrJokerName = " + classInstanceOrJokerName);
+
                 for (int i = 0; i < theAttributes.size(); i++) {
 
                     Iterator<Entry<String, Object[]>> ot = _hlaAttributesToSubscribeTo
@@ -2425,19 +2475,19 @@ implements TimeRegulator {
                         TimedEvent te = null;
                         Object value = null;
                         HlaSubscriber hs = (HlaSubscriber) _getPortFromTab(tObj).getContainer();
-                        /*
-                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber=" + hs.getFullName());
-                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
-                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber classInstanceName " + hs.getClassInstanceName());
-                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber classHandle " + hs.getClassHandle());
-                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber attributeName in FOM " + hs.getAttributeName());
-                        System.out.println("INNER reflectAttributeValues(): hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
 
-                        System.out.println("INNER reflectAttributeValues(): theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
-                        System.out.println("INNER reflectAttributeValues(): classHandle = " + classHandle);
-                        System.out.println("INNER reflectAttributeValues(): classInstanceName = " + classInstanceName);
-                        System.out.println("INNER reflectAttributeValues(): (objectInstanceId) theObject = " + theObject);
-                         */
+                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber=" + hs.getFullName());
+                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
+                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classInstanceOrJokerName " + hs.getClassInstanceName());
+                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classHandle " + hs.getClassHandle());
+                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber attributeName in FOM " + hs.getAttributeName());
+                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
+
+                        System.out.println("INNER callback: reflectAttributeValues: theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
+                        System.out.println("INNER callback: reflectAttributeValues: classHandle = " + classHandle);
+                        System.out.println("INNER callback: reflectAttributeValues: classInstanceOrJokerName = " + classInstanceOrJokerName);
+                        System.out.println("INNER callback: reflectAttributeValues: (objectInstanceId) theObject = " + theObject);
+
                         // The tuple (attributeHandle, classHandle,
                         // classInstanceName) allows to identify the
                         // object attribute (i.e. one of the HlaSubscribers)
@@ -2445,7 +2495,7 @@ implements TimeRegulator {
                         // XXX: FIXME: class instance name is used to map with corresponding HlaSubscrbier ?
                         if (theAttributes.getAttributeHandle(i) == hs.getAttributeHandle()
                                 && classHandle == hs.getClassHandle()
-                                && hs.getClassInstanceName().compareTo(classInstanceName) == 0) {
+                                && (classInstanceOrJokerName != null && hs.getClassInstanceName().compareTo(classInstanceOrJokerName) == 0)) {
                             try {
 
                                 double timeValue = ((CertiLogicalTime) theTime)
@@ -2472,7 +2522,7 @@ implements TimeRegulator {
                                             + ") has been received and stored for "
                                             + hs.getDisplayName() + " " + hs.getFullName());
                                 }
-                                System.out.println("INNER reflectAttributeValues(): HLA attribute = " + hs.getAttributeName()
+                                System.out.println("INNER callback: reflectAttributeValues: HLA attribute = " + hs.getAttributeName()
                                 + " timestamp=" + _printTimes(te.timeStamp) + " val=" + value.toString() + " received and stored for = " + hs.getFullName());
 
                                 // XXX: FIXME: GiL: add this boolean to be conform to the algo, but
@@ -2558,7 +2608,8 @@ implements TimeRegulator {
                                 // XXX: FIXME: GiL: end HLA Reporter code ?
                                  */
                             } catch (IllegalActionException e) {
-                                throw new IllegalActionException(null, e, "IllegalActionException: " + e.getMessage());                            }
+                                throw new IllegalActionException(null, e, "IllegalActionException: " + e.getMessage());
+                            }
                         }
                     }
                 }
@@ -2568,7 +2619,7 @@ implements TimeRegulator {
             }
             catch (IllegalActionException e1) {
                 // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                System.out.println("INNER reflectAttributeValues(): EXCEPTION IllegalActionException");
+                System.out.println("INNER callback: reflectAttributeValues: EXCEPTION IllegalActionException");
                 e1.printStackTrace();
             }
         }
@@ -2578,46 +2629,91 @@ implements TimeRegulator {
          */
         @Override
         public void discoverObjectInstance(int objectInstanceId, int classHandle,
-                String classInstanceName) throws CouldNotDiscover,
+                String someName) throws CouldNotDiscover,
         ObjectClassNotKnown, FederateInternalError {
 
-            /*
-            System.out.println("callback: discoverObjectInstance:"
-                    + " objectInstanceId=" + objectInstanceId
-                    + " classHandle=" + classHandle
-                    + " classIntanceName=" + classInstanceName);
-             */
-            if (_discoverObjectInstanceMap.containsKey(objectInstanceId)) {
-                System.out.println("callback: discoverObjectInstance: found an instance class already registered: "
-                        + classInstanceName);
-                // XXX: FIXME: GiL: do something???
+            System.out.println("callback: discoverObjectInstance:" + " objectInstanceId=" + objectInstanceId + " classHandle=" + classHandle + " someName=" + someName);
 
-            } else {
-                _discoverObjectInstanceMap.put(objectInstanceId, classInstanceName);
-                _objectIdToClassHandle.put(objectInstanceId, classHandle);
-            }
+            String matchingName = null;
 
-            // Get classHandle and attributeHandle IDs for each attribute
-            // value to subscribe to (i.e. HlaSubscriber). Update the HlaSubcribers.
-            Iterator<Entry<String, Object[]>> it1 = _hlaAttributesToSubscribeTo
-                    .entrySet().iterator();
+            // XXX: FIXME: joker support
+            if (_usedJoker) {
+                String jokerFilter = null;
 
-            while (it1.hasNext()) {
-                Map.Entry<String, Object[]> elt = it1.next();
-                // elt.getKey()   => HlaSubscriber actor full name.
-                // elt.getValue() => tObj[] array.
-                Object[] tObj = elt.getValue();
+                // Find a valid non-used joker filter.
+                Iterator<Entry<String, Boolean>> it1 = _usedJokerFilterMap
+                        .entrySet().iterator();
 
-                // Get corresponding HlaSubscriber actor.
-                HlaSubscriber sub = (HlaSubscriber) ((TypedIOPort) tObj[0]).getContainer();
-                try {
-                    if (sub.getClassInstanceName().compareTo(classInstanceName) == 0) {
-                        sub.setObjectInstanceId(objectInstanceId);
+                while (it1.hasNext()) {
+                    Map.Entry<String, Boolean> elt = it1.next();
+                    // elt.getKey()   => joker filter.
+                    // elt.getValue() => joker is already used or not (boolean).
+                    if (!elt.getValue().booleanValue()) {
+                        jokerFilter = elt.getKey();
+                        _usedJokerFilterMap.put(jokerFilter, true);
+                        System.out.println("callback: discoverObjectInstance: found a free joker, break with jokerFilter=" + jokerFilter);
+                        break;
                     }
-                } catch (IllegalActionException e) {
-                    // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                    e.printStackTrace();
                 }
+
+                if (jokerFilter == null) {
+                    System.out.println("callback: discoverObjectInstance: no more filter available...");
+                    System.out.println("callback: discoverObjectInstance:" + " objectInstanceId=" + objectInstanceId + " classHandle=" + classHandle + " someName=" + someName + " will be ignored during the simulation.");
+
+                } else {
+                    _discoverObjectInstanceMap.put(objectInstanceId, jokerFilter);
+                    System.out.println("callback: discoverObjectInstance: objectInstanceId=" + objectInstanceId);
+                    System.out.println("callback: discoverObjectInstance: jokerFilter=" + jokerFilter);
+                    System.out.println("callback: discoverObjectInstance: matchingName=" + matchingName);
+                    
+                    matchingName = jokerFilter;
+                }
+            } else { 
+                // Nominal case, class instance name usage.
+                if (_discoverObjectInstanceMap.containsKey(objectInstanceId)) {
+                    System.out.println("callback: discoverObjectInstance: found an instance class already registered: "
+                            + someName);
+                    // XXX: FIXME: GiL: do something??? can this happen?
+                } else {
+                    _discoverObjectInstanceMap.put(objectInstanceId, someName);
+                    
+                    matchingName = someName;
+                }
+
+            }
+              
+            // Bind object instance id to class handle.
+            _objectIdToClassHandle.put(objectInstanceId, classHandle);  
+
+            // XXX: FIXME: joker support
+            if (matchingName != null) {
+                // Get classHandle and attributeHandle IDs for each attribute
+                // value to subscribe to (i.e. HlaSubscriber). Update the HlaSubcribers.
+                Iterator<Entry<String, Object[]>> it1 = _hlaAttributesToSubscribeTo
+                        .entrySet().iterator();
+
+                while (it1.hasNext()) {
+                    Map.Entry<String, Object[]> elt = it1.next();
+                    // elt.getKey()   => HlaSubscriber actor full name.
+                    // elt.getValue() => tObj[] array.
+                    Object[] tObj = elt.getValue();
+
+                    // Get corresponding HlaSubscriber actor.
+                    HlaSubscriber sub = (HlaSubscriber) ((TypedIOPort) tObj[0]).getContainer();
+                    try {
+                        if (sub.getClassInstanceName().compareTo(matchingName) == 0) {
+                            sub.setObjectInstanceId(objectInstanceId);
+
+                            System.out.println("callback: discoverObjectInstance: matchingName=" + matchingName);
+                            System.out.println("callback: discoverObjectInstance: hlaSub=" + sub.getFullName());
+
+                        }
+                    } catch (IllegalActionException e) {
+                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("callback: discoverObjectInstance: _usedJokerFilterMap = " + _usedJokerFilterMap.toString());
             }
 
             if (_debugging) {
@@ -2625,7 +2721,7 @@ implements TimeRegulator {
                         + " discoverObjectInstance() - the object" 
                         + " objectInstanceId=" + objectInstanceId
                         + " classHandle=" + classHandle
-                        + " classIntanceName=" + classInstanceName);
+                        + " classIntanceOrJokerName=" + someName);
             }
         }
 
@@ -3059,10 +3155,10 @@ implements TimeRegulator {
                 sub.setAttributeHandle(attributeHandle);
             }
 
-            System.out.println("ciele_debug: setupHlaSubscribers: step 2.2");
+            System.out.println("ciele_debug: setupHlaSubscribers: step 2");
 
-            // 2 Create a table of HlaSubscribers indexed by their corresponding
-            //   class handle (no duplication).
+            // 2. Create a table of HlaSubscribers indexed by their corresponding
+            //    class handle (no duplication).
             HashMap<Integer, LinkedList<String>> classHandleHlaSubscriberTable = null;
             classHandleHlaSubscriberTable = new HashMap<Integer, LinkedList<String>>();
 
