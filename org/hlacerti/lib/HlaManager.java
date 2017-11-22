@@ -1423,7 +1423,12 @@ implements TimeRegulator {
         CertiLogicalTime tarContractTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
 
         // algo4: 1: if g(t') > h + TS then
-        while (certiProposedTime.isGreaterThan(tarContractTime)) {
+        
+        // NOTE: Microstep reset problem
+        //  To retrieve the old behavior with the microstep reset problem, you may change the line below:
+        //  reset    => while (certiProposedTime.isGreaterThan(tarContractTime)) {
+        //  no reset => while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {
+        while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
 
