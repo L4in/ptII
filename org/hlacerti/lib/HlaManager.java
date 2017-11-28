@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
  */
-// force compil
+
 package org.hlacerti.lib;
 
 import java.io.BufferedWriter;
@@ -1510,19 +1510,45 @@ implements TimeRegulator {
      *  @exception IllegalActionException If a HLA attribute is declared twice.
      */
     private void _populateHlaAttributeTables() throws IllegalActionException {
-
-        //CompositeActor ca = (CompositeActor) this.getContainer();
         CompositeEntity ce = (CompositeEntity) getContainer();
 
         // HlaPublishers.
         _hlaAttributesToPublish.clear();
         List<HlaPublisher> _hlaPublishers = ce.entityList(HlaPublisher.class);
         for (HlaPublisher hp : _hlaPublishers) {
+            // FIXME: XXX: GiL: check if this case may occur. The HLA attribute
+            // name is no more associated to the
+            // HlaPublisher actor name. As Ptolemy do not accept two actors of
+            // the same at a same model level.
             if (_hlaAttributesToPublish.get(hp.getFullName()) != null) {
                 throw new IllegalActionException(this,
                         "A HLA attribute with the same name is already "
-                                + "registered for publication");
+                                + "registered for publication.");
             }
+            
+            // Note: asked by JC on 20171128, the current implementation is not
+            // optimized and may slow the model initialization step if there is
+            // a lot of actors.
+            // The HLA attribute is no more associated to the HlaPublisher
+            // actor name but instead to the attribute name parameter. Checks
+            // and throws an exception if two actors specify the same HLA
+            // attribute from a same HLA object class and a same HLA instance
+            // class name.
+            for (HlaPublisher hpIndex : _hlaPublishers) {
+                if (!hp.getFullName().equals(hpIndex.getFullName()) 
+                        && (hp.getAttributeName().compareTo(hpIndex.getAttributeName()) == 0)
+                        && (hp.getClassObjectName().compareTo(hpIndex.getClassObjectName()) == 0)
+                        && (hp.getClassInstanceName().compareTo(hpIndex.getClassInstanceName()) == 0)) {
+                    
+                    // FIXME: XXX: Highlight the faulty HlaPublisher actor here.
+                    
+                    throw new IllegalActionException(this,
+                            "A HlaPublisher with the same HLA information specified by the "
+                             + "HlaPublisher '" + hp.getFullName() 
+                             + "' \nis already registered for publication."); 
+                }
+            }
+            
             // Only one input port is allowed per HlaPublisher actor.
             TypedIOPort tIOPort = hp.inputPortList().get(0);
 
@@ -1562,8 +1588,32 @@ implements TimeRegulator {
             if (_hlaAttributesToSubscribeTo.get(hs.getFullName()) != null) {
                 throw new IllegalActionException(this,
                         "A HLA attribute with the same name is already "
-                                + "registered for subscription");
+                                + "registered for subscription.");
             }
+            
+            // Note: asked by JC on 20171128, the current implementation is not
+            // optimized and may slow the model initialization step if there is
+            // a lot of actors.
+            // The HLA attribute is no more associated to the HlaSubscriber
+            // actor name but instead to the attribute name parameter. Checks
+            // and throws an exception if two actors specify the same HLA
+            // attribute from a same HLA object class and a same HLA instance
+            // class name.
+            for (HlaSubscriber hsIndex : _hlaSubscribers) {
+                if (!hs.getFullName().equals(hsIndex.getFullName())
+                        && (hs.getAttributeName().compareTo(hsIndex.getAttributeName()) == 0)
+                        && (hs.getClassObjectName().compareTo(hsIndex.getClassObjectName()) == 0)
+                        && (hs.getClassInstanceName().compareTo(hsIndex.getClassInstanceName()) == 0)) {
+                    
+                    // FIXME: XXX: Highlight the faulty HlaSubscriber actor here.
+                    
+                    throw new IllegalActionException(this,
+                            "A HlaSubscriber with the same HLA information specified by the "
+                             + "HlaSubscriber '" + hs.getFullName() 
+                             + "' \nis already registered for subscription."); 
+                }
+            }
+            
             // Only one output port is allowed per HlaSubscriber actor.
             TypedIOPort tiop = hs.outputPortList().get(0);
 
