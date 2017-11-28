@@ -25,7 +25,7 @@
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
         </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="attribute:">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="attr.:">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-8.0, -16.0]">
         </property>
@@ -39,7 +39,7 @@
         </property>
         <property name="displayWidth" class="ptolemy.data.expr.Parameter" value="20">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[40.0, -16.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[23.0, -16.0]">
         </property>
     </property>
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
@@ -69,7 +69,7 @@
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 0.0, 1.0}">
         </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="instance:">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="inst.:">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-8.0, 0.0]">
         </property>
@@ -83,7 +83,7 @@
         </property>
         <property name="displayWidth" class="ptolemy.data.expr.Parameter" value="25">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[40.0, 0.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[23.0, 0.0]">
         </property>
     </property>
 </property>

@@ -105,6 +105,29 @@ public class HlaSubscriber extends TypedAtomicActor {
         // The single output port of the actor.
         output = new TypedIOPort(this, "output", false, true);
 
+        // HLA attribute name.
+        attributeName = new Parameter(this, "attributeName");
+        attributeName.setDisplayName("Name of the attribute to receive");
+        attributeName.setTypeEquals(BaseType.STRING);
+        attributeName.setExpression("\"HLAattributName\"");
+
+        // HLA object class in FOM.
+        classObjectName = new Parameter(this, "classObjectName");
+        classObjectName.setDisplayName("Object class in FOM");
+        classObjectName.setTypeEquals(BaseType.STRING);
+        classObjectName.setExpression("\"HLAobjectClass\"");
+        
+        // HLA class instance name.
+        classInstanceName = new Parameter(this, "classInstanceName");
+        classInstanceName.setDisplayName("Name of the HLA class instance");
+        classInstanceName.setTypeEquals(BaseType.STRING);
+        classInstanceName.setExpression("\"HLAclassInstanceName\"");
+
+        // Propagate parameter changes after parameter instantiations.
+        attributeChanged(classObjectName);
+        attributeChanged(classInstanceName);
+        attributeChanged(attributeName);
+
         // Basic token types available.
         typeSelector = new StringParameter(this, "typeSelector");
         typeSelector.setDisplayName("type of the parameter"); 
@@ -123,34 +146,13 @@ public class HlaSubscriber extends TypedAtomicActor {
         }
                 );
 
+        // CERTI message buffer encapsulation.
         useCertiMessageBuffer = new Parameter(this, "useCertiMessageBuffer");
         useCertiMessageBuffer.setTypeEquals(BaseType.BOOLEAN);
         useCertiMessageBuffer.setExpression("false");
         useCertiMessageBuffer.setDisplayName("use CERTI message buffer");
         attributeChanged(useCertiMessageBuffer);
-
-        classObjectName = new Parameter(this, "classObjectName");
-        classObjectName.setDisplayName("Object class in FOM");
-        classObjectName.setTypeEquals(BaseType.STRING);
-        classObjectName.setExpression("\"myObjectClass\"");
-
-        // HLA class instance name.
-        classInstanceName = new Parameter(this, "classInstanceName");
-        classInstanceName.setDisplayName("Name of the HLA class instance");
-        classInstanceName.setTypeEquals(BaseType.STRING);
-        classInstanceName.setExpression("\"myClassInstanceName\"");
-
-        // HLA attribute name.
-        attributeName = new Parameter(this, "attributeName");
-        attributeName.setDisplayName("Name of the attribute to receive");
-        attributeName.setTypeEquals(BaseType.STRING);
-        attributeName.setExpression("\"HLA attribute name\"");
-
-        // Propagate parameter changes after parameter instantiations.
-        attributeChanged(classObjectName);
-        attributeChanged(classInstanceName);
-        attributeChanged(attributeName);
-
+        
         // Initialize default private values.
         _reflectedAttributeValues = new LinkedList<HlaTimedEvent>();
         _useCertiMessageBuffer = false;
@@ -342,25 +344,25 @@ public class HlaSubscriber extends TypedAtomicActor {
             }
 
             // Either it is NOT a HlaTimedEvent and we let it go,
-            // either it is and it has to match the HLA object instance ID
-            // of this HlaSubscriber.
+            // either it is and it has to match the HLA object instance
+            // ID of this HlaSubscriber.
 
             // XXX: FIXME: what to do if this is not a HlaTimedEvent? (-1 case) 
-            //if (fromObjectInstanceId == -1 
-            //        || fromObjectInstanceId == _objectInstanceId) {
+            if (fromObjectInstanceId == -1 
+                    || fromObjectInstanceId == _objectInstanceId) {
                 this.outputPortList().get(0).send(0, content);
-            //}
 
-            if (_debugging) {
-                _debug(this.getDisplayName()
-                        + " Called fire() - An updated value"
-                        + " of the HLA attribute \"" + getAttributeName() + " from "
-                        + fromObjectInstanceId
-                        + "\" has been sent at \"" + te.timeStamp + "\" ("
-                        +content.toString()+")");
+                if (_debugging) {
+                    _debug(this.getDisplayName()
+                            + " Called fire() - An updated value"
+                            + " of the HLA attribute \"" + getAttributeName() + " from "
+                            + fromObjectInstanceId
+                            + "\" has been sent at \"" + te.timeStamp + "\" ("
+                            +content.toString()+")");
+                }
 
-            } //end debug
-            //} //end test fire
+            }
+
             it.remove();
         } //end if (te.timeStamp.compareTo(currentTime) == 0) { ...
 
@@ -373,7 +375,7 @@ public class HlaSubscriber extends TypedAtomicActor {
                 getDirector().fireAt(this, currentTime);
             }
             DEDirector dir = (DEDirector) getDirector();
-            System.out.println(this.getFullName() + ": microstep = " + dir.getIndex());
+            //System.out.println(this.getFullName() + ": microstep = " + dir.getIndex());
         }
     } // End of fire.
 
@@ -438,10 +440,17 @@ public class HlaSubscriber extends TypedAtomicActor {
         // Add the update value to the queue.
         _reflectedAttributeValues.add(event);
 
-        System.out.println(this.getFullName() 
-                + ": putReflectedHlaAttribute: event timestamp = " + event.timeStamp.toString());
-        System.out.println(this.getFullName() 
-                + ": putReflectedHlaAttribute: event value = " + event.contents.toString());
+        if (_debugging) {
+            _debug(this.getFullName() 
+                    + ": putReflectedHlaAttribute: event timestamp = " + event.timeStamp.toString());
+            _debug(this.getFullName() 
+                    + ": putReflectedHlaAttribute: event value = " + event.contents.toString());
+        }
+
+        //System.out.println(this.getFullName() 
+        //        + ": putReflectedHlaAttribute: event timestamp = " + event.timeStamp.toString());
+        //System.out.println(this.getFullName() 
+        //        + ": putReflectedHlaAttribute: event value = " + event.contents.toString());
 
         // Program the next firing time for the received update value.
         _fireAt(event.timeStamp);

@@ -87,34 +87,35 @@ public class HlaPublisher extends TypedAtomicActor {
         input = new TypedIOPort(this, "input", true, false);
         input.setMultiport(false);
 
+        // HLA attribute name.
+        attributeName = new Parameter(this, "attributeName");
+        attributeName.setDisplayName("Name of the attribute to receive");
+        attributeName.setTypeEquals(BaseType.STRING);
+        attributeName.setExpression("\"HLAattributName\"");
+        attributeChanged(attributeName);
 
         // HLA object class in FOM.
         classObjectName = new Parameter(this, "classObjectName");
         classObjectName.setDisplayName("Object class in FOM");
         classObjectName.setTypeEquals(BaseType.STRING);
-        classObjectName.setExpression("\"myObjectClass\"");
+        classObjectName.setExpression("\"HLAobjectClass\"");
         attributeChanged(classObjectName);
 
         // HLA class instance name.
         classInstanceName = new Parameter(this, "classInstanceName");
         classInstanceName.setDisplayName("Name of the HLA class instance");
         classInstanceName.setTypeEquals(BaseType.STRING);
-        classInstanceName.setExpression("\"myClassInstanceName\"");
+        classInstanceName.setExpression("\"HLAclassInstanceName\"");
         attributeChanged(classInstanceName);
 
-        // HLA attribute name.
-        attributeName = new Parameter(this, "attributeName");
-        attributeName.setDisplayName("Name of the attribute to receive");
-        attributeName.setTypeEquals(BaseType.STRING);
-        attributeName.setExpression("\"HLA attribute name\"");
-        attributeChanged(attributeName);
-
+        // CERTI message buffer encapsulation.
         useCertiMessageBuffer = new Parameter(this, "useCertiMessageBuffer");
         useCertiMessageBuffer.setTypeEquals(BaseType.BOOLEAN);
         useCertiMessageBuffer.setExpression("false");
         useCertiMessageBuffer.setDisplayName("use CERTI message buffer");
         attributeChanged(useCertiMessageBuffer);
 
+        // Initialize default private values.
         _hlaManager = null;
         _useCertiMessageBuffer = false;
     }
