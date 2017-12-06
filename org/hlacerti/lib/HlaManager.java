@@ -1445,9 +1445,13 @@ implements TimeRegulator {
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
 
-            // algo4: 2: TAR(g(t'))
+            // algo4: 2: TAR(h + TS))
             try {
                 _rtia.timeAdvanceRequest(tarContractTime);
+                if (_debugging) {
+                    _debug("  " + headMsg
+                            + " call CERTI TAR(" + tarContractTime.getTime() + ")");
+                }
             } catch (InvalidFederationTime | FederationTimeAlreadyPassed | TimeAdvanceAlreadyInProgress
                     | EnableTimeRegulationPending | EnableTimeConstrainedPending | FederateNotExecutionMember
                     | SaveInProgress | RestoreInProgress | RTIinternalError | ConcurrentAccessAttempted e) {
@@ -1465,6 +1469,7 @@ implements TimeRegulator {
                 try {
                     _rtia.tick2();
                 } catch (SpecifiedSaveLabelDoesNotExist | ConcurrentAccessAttempted | RTIinternalError e) {
+                    System.out.println("DEBUG DEBUG DEBUG DEBUG");
                     throw new IllegalActionException(this, e, e.getMessage());
                 } // algo4: 4: tick()  > Wait TAG()
 
@@ -1805,6 +1810,11 @@ implements TimeRegulator {
         // XXX: FIXME: GiL: at this point we have handled every events for all
         // registered HlaSubcribers, so we may clear the receivedRAV boolean.
         _federateAmbassador.hasReceivedRAV = false;
+        
+        if (_debugging) {
+            _debug("    _putReflectedAttributesOnHlaSubscribers(" + proposedTime.toString()
+            + ") - no more RAVs to deal with");
+        }
     }
 
     /**
@@ -2509,7 +2519,7 @@ implements TimeRegulator {
                         FederateInternalError {
 
             if (_debugging) {
-                _debug("INNER callback: reflectAttributeValues: starting - "
+                _debug("INNER callback: reflectAttributeValues(): starting - "
                         + "current status - "
                         + "t_ptII = " + _printTimes(_director.getModelTime())
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
@@ -2520,15 +2530,15 @@ implements TimeRegulator {
             int classHandle = _objectIdToClassHandle.get(theObject);
             String classInstanceOrJokerName = _discoverObjectInstanceMap.get(theObject);
 
-            System.out.println("INNER callback: reflectAttributeValues:"
+            System.out.println("INNER callback: reflectAttributeValues():"
                     + " theObject=" + theObject 
                     + " theAttributes" + theAttributes 
                     + " userSuppliedTag=" + userSuppliedTag 
                     + " theTime=" + theTime);
 
-            System.out.println("INNER callback: reflectAttributeValues: (objectInstanceId) theObject = " + theObject);
-            System.out.println("INNER callback: reflectAttributeValues: _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
-            System.out.println("INNER callback: reflectAttributeValues: _discoverObjectInstanceMap.get(theObject) classInstanceOrJokerName = " + classInstanceOrJokerName);
+            System.out.println("INNER callback: reflectAttributeValues(): (objectInstanceId) theObject = " + theObject);
+            System.out.println("INNER callback: reflectAttributeValues(): _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
+            System.out.println("INNER callback: reflectAttributeValues(): _discoverObjectInstanceMap.get(theObject) classInstanceOrJokerName = " + classInstanceOrJokerName);
 
             for (int i = 0; i < theAttributes.size(); i++) {
 
@@ -2546,24 +2556,24 @@ implements TimeRegulator {
 
                     try {
 /*
-                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber=" + hs.getFullName());
-                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
-                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classInstanceOrJokerName " + hs.getClassInstanceName());
-                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classHandle " + hs.getClassHandle());
-                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber attributeName in FOM " + hs.getAttributeName());
-                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
+                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber=" + hs.getFullName());
+                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
+                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber classInstanceOrJokerName " + hs.getClassInstanceName());
+                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber classHandle " + hs.getClassHandle());
+                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber attributeName in FOM " + hs.getAttributeName());
+                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
 */
-                    System.out.println("INNER callback: reflectAttributeValues: theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
-                    //System.out.println("INNER callback: reflectAttributeValues: classHandle = " + classHandle);
-                    //System.out.println("INNER callback: reflectAttributeValues: classInstanceOrJokerName = " + classInstanceOrJokerName);
-                    //System.out.println("INNER callback: reflectAttributeValues: (objectInstanceId) theObject = " + theObject);
+                    System.out.println("INNER callback: reflectAttributeValues(): theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
+                    //System.out.println("INNER callback: reflectAttributeValues(): classHandle = " + classHandle);
+                    //System.out.println("INNER callback: reflectAttributeValues(): classInstanceOrJokerName = " + classInstanceOrJokerName);
+                    //System.out.println("INNER callback: reflectAttributeValues(): (objectInstanceId) theObject = " + theObject);
                     } catch (ArrayIndexOutOfBounds e) {
                         // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                        System.out.println("INNER callback: reflectAttributeValues: EXCEPTION ArrayIndexOutOfBounds in DEBUG");
+                        System.out.println("INNER callback: reflectAttributeValues(): EXCEPTION ArrayIndexOutOfBounds in DEBUG");
                         e.printStackTrace();
                     }/* catch (IllegalActionException e) {
                         // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                        System.out.println("INNER callback: reflectAttributeValues: EXCEPTION IllegalActionException in DEBUG");
+                        System.out.println("INNER callback: reflectAttributeValues(): EXCEPTION IllegalActionException in DEBUG");
                         e.printStackTrace();
                     }*/
 
@@ -2600,7 +2610,7 @@ implements TimeRegulator {
                                         + ") has been received and stored for "
                                         + hs.getFullName());
                             }
-                            System.out.println("INNER callback: reflectAttributeValues: HLA attribute = " + hs.getAttributeName()
+                            System.out.println("INNER callback: reflectAttributeValues(): HLA attribute = " + hs.getAttributeName()
                             + " timestamp=" + _printTimes(te.timeStamp) + " value=" + value.toString() + " received and stored for = " + hs.getFullName());
 
                             // XXX: FIXME: GiL: add this boolean to be conform to the algo, but
@@ -2612,7 +2622,7 @@ implements TimeRegulator {
                         e.printStackTrace();
                     } catch (IllegalActionException e) {
                         // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                        System.out.println("INNER callback: reflectAttributeValues: EXCEPTION IllegalActionException");
+                        System.out.println("INNER callback: reflectAttributeValues(): EXCEPTION IllegalActionException");
                         e.printStackTrace();
                     }
                 }
@@ -2705,7 +2715,7 @@ implements TimeRegulator {
                 String someName) throws CouldNotDiscover,
         ObjectClassNotKnown, FederateInternalError {
 
-            System.out.println("INNER callback: discoverObjectInstance:" + " objectInstanceId=" + objectInstanceId + " classHandle=" + classHandle + " someName=" + someName);
+            System.out.println("INNER callback: discoverObjectInstance():" + " objectInstanceId=" + objectInstanceId + " classHandle=" + classHandle + " someName=" + someName);
 
             // XXX: FIXME: joker support
             String matchingName = null;
@@ -2777,8 +2787,8 @@ implements TimeRegulator {
                         if (sub.getClassInstanceName().compareTo(matchingName) == 0) {
                             sub.setObjectInstanceId(objectInstanceId);
 
-                            System.out.println("INNER callback: discoverObjectInstance: matchingName=" + matchingName);
-                            System.out.println("INNER callback: discoverObjectInstance: hlaSub=" + sub.getFullName());
+                            System.out.println("INNER callback: discoverObjectInstance(): matchingName=" + matchingName);
+                            System.out.println("INNER callback: discoverObjectInstance(): hlaSub=" + sub.getFullName());
 
                         }
                     } catch (IllegalActionException e) {
@@ -2786,12 +2796,12 @@ implements TimeRegulator {
                         e.printStackTrace();
                     }
                 }
-                System.out.println("INNER callback: discoverObjectInstance: _usedJokerFilterMap = " + _usedJokerFilterMap.toString());
+                System.out.println("INNER callback: discoverObjectInstance(): _usedJokerFilterMap = " + _usedJokerFilterMap.toString());
             }
 
             if (_debugging) {
-                _debug("INNER callback"
-                        + " discoverObjectInstance() - the object" 
+                _debug("INNER callback:"
+                        + " discoverObjectInstance(): the object" 
                         + " objectInstanceId=" + objectInstanceId
                         + " classHandle=" + classHandle
                         + " classIntanceOrJokerName=" + someName);
@@ -2809,7 +2819,7 @@ implements TimeRegulator {
                 FederateInternalError {
             timeRegulator = true;
             if (_debugging) {
-                _debug("INNER callback" + " timeRegulationEnabled() - timeRegulator = "
+                _debug("INNER callback:" + " timeRegulationEnabled(): timeRegulator = "
                         + timeRegulator);
             }
         }
@@ -2823,8 +2833,8 @@ implements TimeRegulator {
                 EnableTimeConstrainedWasNotPending, FederateInternalError {
             timeConstrained = true;
             if (_debugging) {
-                _debug("INNER callback"
-                        + " timeConstrainedEnabled() - timeConstrained = "
+                _debug("INNER callback:"
+                        + " timeConstrainedEnabled(): timeConstrained = "
                         + timeConstrained);
             }
         }
@@ -2853,7 +2863,7 @@ implements TimeRegulator {
             _numberOfTicks.add(0);
 
             if (_debugging) {
-                _debug("INNER callback timeAdvanceGrant() - "
+                _debug("INNER callback: timeAdvanceGrant(): "
                         + "TAG(" + grantedHlaLogicalTime.toString()
                         + " * (HLA time unit=" + _hlaTimeUnitValue + ")) received");
                 //_debug("timeAdvanceGrant() - _TAGDelay => " + _TAGDelay);
@@ -2871,8 +2881,8 @@ implements TimeRegulator {
                 String synchronizationPointLabel) throws FederateInternalError {
             synchronizationFailed = true;
             if (_debugging) {
-                _debug("INNER" + " synchronizationPointRegistrationFailed()"
-                        + " - synchronizationFailed = "
+                _debug("INNER callback: synchronizationPointRegistrationFailed(): "
+                        + "synchronizationFailed = "
                         + synchronizationFailed);
             }
         }
@@ -2885,8 +2895,8 @@ implements TimeRegulator {
                 String synchronizationPointLabel) throws FederateInternalError {
             synchronizationSuccess = true;
             if (_debugging) {
-                _debug("INNER" + " synchronizationPointRegistrationSucceeded()"
-                        + " - synchronizationSuccess = "
+                _debug("INNER callback: synchronizationPointRegistrationSucceeded(): "
+                        + "synchronizationSuccess = "
                         + synchronizationSuccess);
             }
         }
@@ -2900,7 +2910,7 @@ implements TimeRegulator {
                         throws FederateInternalError {
             inPause = true;
             if (_debugging) {
-                _debug("INNER" + " announceSynchronizationPoint() - inPause = "
+                _debug("INNER callback: announceSynchronizationPoint(): inPause = "
                         + inPause);
             }
         }
@@ -2914,7 +2924,7 @@ implements TimeRegulator {
                 throws FederateInternalError {
             inPause = false;
             if (_debugging) {
-                _debug("INNER" + " federationSynchronized() - inPause = "
+                _debug("INNER callback: federationSynchronized(): inPause = "
                         + inPause);
             }
         }
