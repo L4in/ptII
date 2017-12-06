@@ -764,16 +764,16 @@ implements TimeRegulator {
         Time currentTime = _getModelTime();
 
         //This variable is used to avoid rounding the Time more than once
-        String proposedTimeInString = _printTimes(proposedTime);
+        String strProposedTime = _printTimes(proposedTime);
         if (_debugging) {
             if (_eventBased) {
                 _debug("starting proposeTime(t(lastFoundEvent)="
-                        + proposedTimeInString + ") - current status - "
+                        + strProposedTime + ") - current status - "
                         + "t_ptII = " + _printTimes(currentTime)
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             } else {
-                _debug("starting proposeTime(" + proposedTimeInString
-                        + ")) - current status - " + "t_ptII = "
+                _debug("starting proposeTime(" + strProposedTime
+                        + ") - current status - " + "t_ptII = "
                         + _printTimes(currentTime) + "; t_hla = "
                         + _federateAmbassador.hlaLogicalTime);
             }
@@ -787,7 +787,7 @@ implements TimeRegulator {
         if (proposedTime.compareTo(_stopTime) > 0) {
             // XXX: FIXME: clarify SKIP RTI
             if (_debugging) {
-                _debug("    proposeTime(" + proposedTimeInString + ") -"
+                _debug("    proposeTime(" + strProposedTime + ") -"
                         + " called but the proposedTime is bigger than the stopTime"
                         + " -> SKIP RTI -> returning stopTime");
             }
@@ -800,8 +800,9 @@ implements TimeRegulator {
         // shutdown before the last call of this method.
         if (_rtia == null) {
             if (_debugging) {
-                _debug("    proposeTime(" + proposedTimeInString
-                        + ") - called but the _rtia is null -> SKIP RTI ->  returning proposedTime");
+                _debug("    proposeTime(" + strProposedTime
+                        + ") - called but the _rtia is null "
+                        + " -> SKIP RTI ->  returning proposedTime");
             }
             return proposedTime;
         }
@@ -816,9 +817,9 @@ implements TimeRegulator {
             // from the Federation in the Federate's priority timestamp queue,
             // so we tick() to get these events (if they exist).
             if (_debugging) {
-                _debug("    proposeTime(" + proposedTimeInString
+                _debug("    proposeTime(" + strProposedTime
                         + ") - called but the currentTime is equal to"
-                        + " the proposedTime -> SKIP RTI -> returning currentTime");
+                        + " the proposedTime -> tick() one time -> returning currentTime");
             }
             try {
                 // XXX: FIXME: GiL, why tick2() hangs the simulation ?
@@ -850,16 +851,16 @@ implements TimeRegulator {
                     if (_eventBased) {
                         if (_debugging) {
                             _debug("    proposeTime(t(lastFoudEvent)=("
-                                    + proposedTimeInString
+                                    + strProposedTime
                                     + ") - calling _eventsBasedTimeAdvance("
-                                    + proposedTimeInString + ")");
+                                    + strProposedTime + ")");
                         }
                         return _eventsBasedTimeAdvance(proposedTime);
                     } else {
                         if (_debugging) {
-                            _debug("    proposeTime(" + proposedTimeInString
+                            _debug("    proposeTime(" + strProposedTime
                                     + ") - calling _timeSteppedBasedTimeAdvance("
-                                    + proposedTimeInString + ")");
+                                    + strProposedTime + ")");
                         }
                         return _timeSteppedBasedTimeAdvance(proposedTime);
                     }
@@ -895,7 +896,7 @@ implements TimeRegulator {
                             "ConcurrentAccessAttempted: " + e.getMessage());
                 } catch (NoSuchElementException e) {
                     if (_debugging) {
-                        _debug("    proposeTime(" + proposedTimeInString + ") -"
+                        _debug("    proposeTime(" + strProposedTime + ") -"
                                 + " NoSuchElementException " + " for _rtia");
                     }
                     // FIXME: XXX: GiL: explain properly that we want to do here...
@@ -940,8 +941,8 @@ implements TimeRegulator {
             _debug("starting updateHlaAttribute() - current status t_ptII = "
                     + _printTimes(currentTime) + "; t_hla = "
                     + _federateAmbassador.hlaLogicalTime
-                    + " - A HLA value from ptolemy has been"
-                    + " encoded as CERTI MessageBuffer");
+                    + " - A HLA value from Ptolemy has been"
+                    + " encoded for HLA/CERTI message usage");
         }
         SuppliedAttributes suppAttributes = null;
         try {
@@ -970,17 +971,17 @@ implements TimeRegulator {
             // So, we chose tau <- currentTime + lookahead and we respect the condition
             // above.
             uavTimeStamp = currentTime.add(_hlaLookAHead);
-        } else {
+        } else { // _timeStepped case
             // In the TAR case, currentTime >= hlaCurrentTime.
             // So, we have two possible cases:
-            // case 1:  currentTime >= hlaCurrentTime + lookAhead
-            //          We will not break the lookahead rule, therefore tau <- currentTime.
-            // case 2: hlaCurrentTime <= currentTime < hlaCurrentTime + lookAhead
-            //         In order not to break the lookahead rule, we must delay the uav.
+            // case 1: if currentTime >= hlaCurrentTime + lookAhead
+            //         we will not break the lookahead rule, therefore tau <- currentTime.
+            // case 2: if  hlaCurrentTime <= currentTime < hlaCurrentTime + lookAhead
+            //         in order not to break the lookahead rule, we must delay the UAV.
             //         tau <- hlaCurrentTime + lookahead
             CertiLogicalTime certiCurrentTime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
             Time hlaCurrentTime = _convertToPtolemyTime(certiCurrentTime);
-            /*            if (currentTime.compareTo(hlaCurrentTime.add(_hlaTimeStep))==0) {
+            /*  if (currentTime.compareTo(hlaCurrentTime.add(_hlaTimeStep))==0) {
                 hlaCurrentTime= hlaCurrentTime.add(_hlaTimeStep);
             }*/
             if (hlaCurrentTime.add(_hlaLookAHead).compareTo(currentTime) > 0) {
@@ -991,6 +992,8 @@ implements TimeRegulator {
         }
         CertiLogicalTime ct = _convertToCertiLogicalTime(uavTimeStamp);
 
+        // XXX: FIXME: this part of the code is legacy, but may be removed as we have
+        // removed the 'dynamic' multi instance feature.
         int objectInstanceId = _registerObjectInstanceMap.get(senderName);
 
         /*
@@ -1041,6 +1044,15 @@ implements TimeRegulator {
                 + " id = " + objectInstanceId + " suppAttributes = " + suppAttributes + " tag = " + tag + " ct = " + ct);
         try {
             _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, ct);
+            
+            if (_debugging) {
+                _debug("    updateHlaAttribute() - sending UAV("
+                        + "HLA publisher=" + hp.getFullName()
+                        + ",HLA attribute=" + hp.getAttributeName()
+                        + ",timestamp=" + ct.getTime() 
+                        + ",value=" + in.toString()
+                        + ")");
+            }
         } catch (ObjectNotKnown e) {
             throw new IllegalActionException(this, e,
                     "ObjectNotKnown: " + e.getMessage());
@@ -1073,12 +1085,6 @@ implements TimeRegulator {
         // XXX: FIXME: GiL: begin HLA Reporter code ?
         //_numberOfUAVs++;
         // XXX: FIXME: GiL: end HLA Reporter code ?
-        if (_debugging) {
-            _debug("    updateHlaAttribute() - sending UAV( hla attribute = "
-                    + _getPortFromTab(tObj).getContainer().getFullName()
-                    + ",timestamp=" + ct.getTime() + ", value=" + in.toString()
-                    + ")");
-        }
     }
 
     /** Manage the correct termination of the {@link HlaManager}. Call the
@@ -1356,7 +1362,7 @@ implements TimeRegulator {
             // algo3: 8: t'' <- f(h'')
             Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime);
 
-            // algo3: 9: if t 00 > t then  => True in the general case
+            // algo3: 9: if t'' > t then  => True in the general case
             if (newPtolemyTime.compareTo(ptolemyTime) > 0) {
                 // algo3: 10: t' <- t''
                 proposedTime = newPtolemyTime;
@@ -1395,40 +1401,47 @@ implements TimeRegulator {
         // Custom string representation of proposedTime.
         String strProposedTime = _printTimes(proposedTime);
 
+        // Header for debug purpose and listener
+        String headMsg = "_timeSteppedBasedTimeAdvance(" + proposedTime.toString() + "): ";
+
         if (_debugging) {
-            _debug("_timeSteppedBasedTimeAdvance(): strProposedTime"
-                    + " proposedTime=" + proposedTime.toString()
-                    + " - calling CERTI TAR()");
+            _debug("starting " + headMsg
+                    + "strProposedTime=" + strProposedTime
+                    + " proposedTime=" + proposedTime.toString());
         }
 
         // Algorithm 4 - TAR
         // f() => _convertToPtolemyTime()
         // g() => _convertToCertiLogicalTime()
 
-        // t => Ptolemy time => getModelTime()
+        // t   => Ptolemy time => getModelTime()
         //Time ptolemyTime = _director.getModelTime();
 
-        // t' => proposedTime
-
-        // h => HLA logical time => _federateAmbassador.logicalTimeHLA
-        CertiLogicalTime hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
-
-        // TS => _hlaTimeStep
-
+        // t'    => proposedTime
         // g(t') => certiProposedTime
         CertiLogicalTime certiProposedTime = 
                 _convertToCertiLogicalTime(proposedTime);
 
-        // h + TS => tarTime
+        // h      => HLA logical time => _federateAmbassador.logicalTimeHLA
+        CertiLogicalTime hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
+
+        // TS     => _hlaTimeStep
+        // h + TS => tarContractTime
         CertiLogicalTime tarContractTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
 
-        // algo4: 1: if g(t') > h + TS then
-        
+        // algo4: 1: while g(t') > h + TS then
+
         // NOTE: Microstep reset problem
         //  To retrieve the old behavior with the microstep reset problem, you may change the line below:
         //  reset    => while (certiProposedTime.isGreaterThan(tarContractTime)) {
         //  no reset => while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {
+        //while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {
+
+        //System.out.println("_timeSteppedBasedTimeAdvance(" + proposedTime.toString() + "): certiProposedTime=" + certiProposedTime.toString() + " tarContractTime=" + tarContractTime.toString());
+        System.out.println("  " + headMsg + "certiProposedTime=" + _printTimes(_convertToPtolemyTime(certiProposedTime)) + " tarContractTime=" + tarContractTime.toString());
         while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {
+            System.out.println("  " + headMsg + "while certiProposedTime=" + _printTimes(_convertToPtolemyTime(certiProposedTime)) + " < tarContractTime=" + tarContractTime.toString());
+
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
 
@@ -1444,12 +1457,8 @@ implements TimeRegulator {
             // algo4: 3: while not granted do
             while (!(_federateAmbassador.timeAdvanceGrant)) {
                 if (_debugging) {
-                    _debug("        proposeTime(t(lastFoundEvent)="
-                            + strProposedTime
-                            + ") - _timeSteppedBasedTimeAdvance("
-                            + strProposedTime + ") - "
-                            + " waiting for CERTI TAG("
-                            + tarContractTime.getTime()
+                    _debug("  " + headMsg
+                            + " waiting for CERTI TAG(" + tarContractTime.getTime()
                             + ") by calling tick2()");
                 }
 
@@ -1496,8 +1505,7 @@ implements TimeRegulator {
         } // algo4: 15: end while
 
         if (_debugging) {
-            _debug("        proposeTime(" + strProposedTime + ") "
-                    + "- _timeSteppedBasedTimeAdvance(" + strProposedTime + ")");
+            _debug("stopping " + headMsg + " returns proposedTime=" + proposedTime.toString());
         }
 
         // algo4: 16: return t' => Update PtII time
@@ -1525,7 +1533,7 @@ implements TimeRegulator {
                         "A HLA attribute with the same name is already "
                                 + "registered for publication.");
             }
-            
+
             // Note: asked by JC on 20171128, the current implementation is not
             // optimized and may slow the model initialization step if there is
             // a lot of actors.
@@ -1539,16 +1547,16 @@ implements TimeRegulator {
                         && (hp.getAttributeName().compareTo(hpIndex.getAttributeName()) == 0)
                         && (hp.getClassObjectName().compareTo(hpIndex.getClassObjectName()) == 0)
                         && (hp.getClassInstanceName().compareTo(hpIndex.getClassInstanceName()) == 0)) {
-                    
+
                     // FIXME: XXX: Highlight the faulty HlaPublisher actor here.
-                    
+
                     throw new IllegalActionException(this,
                             "A HlaPublisher with the same HLA information specified by the "
-                             + "HlaPublisher '" + hp.getFullName() 
-                             + "' \nis already registered for publication."); 
+                                    + "HlaPublisher '" + hp.getFullName() 
+                                    + "' \nis already registered for publication."); 
                 }
             }
-            
+
             // Only one input port is allowed per HlaPublisher actor.
             TypedIOPort tIOPort = hp.inputPortList().get(0);
 
@@ -1590,7 +1598,7 @@ implements TimeRegulator {
                         "A HLA attribute with the same name is already "
                                 + "registered for subscription.");
             }
-            
+
             // Note: asked by JC on 20171128, the current implementation is not
             // optimized and may slow the model initialization step if there is
             // a lot of actors.
@@ -1604,16 +1612,16 @@ implements TimeRegulator {
                         && (hs.getAttributeName().compareTo(hsIndex.getAttributeName()) == 0)
                         && (hs.getClassObjectName().compareTo(hsIndex.getClassObjectName()) == 0)
                         && (hs.getClassInstanceName().compareTo(hsIndex.getClassInstanceName()) == 0)) {
-                    
+
                     // FIXME: XXX: Highlight the faulty HlaSubscriber actor here.
-                    
+
                     throw new IllegalActionException(this,
                             "A HlaSubscriber with the same HLA information specified by the "
-                             + "HlaSubscriber '" + hs.getFullName() 
-                             + "' \nis already registered for subscription."); 
+                                    + "HlaSubscriber '" + hs.getFullName() 
+                                    + "' \nis already registered for subscription."); 
                 }
             }
-            
+
             // Only one output port is allowed per HlaSubscriber actor.
             TypedIOPort tiop = hs.outputPortList().get(0);
 
@@ -1648,7 +1656,7 @@ implements TimeRegulator {
 
             // XXX: FIXME: joker support
             String classInstanceOrJokerName = hs.getClassInstanceName();
-            
+
             if (classInstanceOrJokerName.contains(_jokerFilter)) {
                 _usedJoker = true;
             }
@@ -1663,7 +1671,7 @@ implements TimeRegulator {
                 } else {
                     // Add a new discovered joker to the joker table.
                     _usedJokerFilterMap.put(classInstanceOrJokerName, false);
-                 }
+                }
             }
 
         }
@@ -1719,9 +1727,10 @@ implements TimeRegulator {
         // reflectAttributeValues() in PtolemyFederateAmbassadorInner class).
 
         if (_debugging) {
-            _debug("starting _putReflectedAttributesOnHlaSubscribers() - current status - "
-                    + "t_ptII = " + _printTimes(_director.getModelTime())
-                    + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
+            _debug("starting _putReflectedAttributesOnHlaSubscribers(" + proposedTime.toString()
+            + ") - current status - "
+            + "t_ptII = " + _printTimes(_director.getModelTime())
+            + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
         }
 
         Iterator<Entry<String, LinkedList<TimedEvent>>> it = _fromFederationEvents
@@ -1768,14 +1777,16 @@ implements TimeRegulator {
                 HlaSubscriber hs = (HlaSubscriber) tiop.getContainer();
                 hs.putReflectedHlaAttribute(ravEvent);
 
-                System.out.println("_putReflectedAttributesOnHlaSubscribers: HlaSubscriber = " + hs.getFullName()
+                System.out.println("_putReflectedAttributesOnHlaSubscribers(" + proposedTime.toString()
+                + "): HlaSubscriber = " + hs.getFullName()
                 + " put event: HlaAttribute = " + hs.getAttributeName() + ", timestamp = " +_printTimes(ravEvent.timeStamp));
 
                 if (_debugging) {
-                    _debug("    _putReflectedAttributesOnHlaSubscribers() - put Event: folRAV( Hla attribute = "
-                            + hs.getDisplayName() + ", timestamp = "
-                            + _printTimes(ravEvent.timeStamp) + ") "
-                            + " in the Hla Subscriber");
+                    _debug("    _putReflectedAttributesOnHlaSubscribers(" + proposedTime.toString()
+                    + ") - put event: RAV("
+                    + "HLA attribute= " + hs.getAttributeName()
+                    + ", timestamp=" + _printTimes(ravEvent.timeStamp)
+                    + ") in the HlaSubscriber=" + hs.getFullName());
                 }
 
                 /*
@@ -2407,7 +2418,7 @@ implements TimeRegulator {
              */
             int numberOfDecimalDigits;
             if (_timeStepped) {
-                //System.out.println("INNER initialize(): hlaTimeStep=" + _hlaTimeStep);
+                //System.out.println("INNER initialize: hlaTimeStep=" + _hlaTimeStep);
                 String s = _hlaTimeStep.toString();
                 s = s.substring(s.indexOf(".") + 1);
                 int n1 = s.length();
@@ -2444,7 +2455,7 @@ implements TimeRegulator {
                 _setupHlaPublishers(rtia);
             } else {
                 if (_debugging) {
-                    _debug("INNER initialize(): _hlaAttributesToPublish is empty");
+                    _debug("INNER initialize: _hlaAttributesToPublish is empty");
                 }
             }
             // Configure HlaSubscriber actors from model */
@@ -2452,7 +2463,7 @@ implements TimeRegulator {
                 _setupHlaSubscribers(rtia);
             } else {
                 if (_debugging) {
-                    _debug("INNER initialize(): _hlaAttributesToSubscribeTo is empty");
+                    _debug("INNER initialize: _hlaAttributesToSubscribeTo is empty");
                 }
             }
 
@@ -2504,88 +2515,110 @@ implements TimeRegulator {
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             }
 
-            try {
-                // Get the object class handle corresponding to
-                // the received "theObject" id.
-                int classHandle = _objectIdToClassHandle.get(theObject);
-                System.out.println("INNER callback: reflectAttributeValues: classHandle = " + classHandle);
+            // Get the object class handle corresponding to
+            // the received "theObject" id.
+            int classHandle = _objectIdToClassHandle.get(theObject);
+            String classInstanceOrJokerName = _discoverObjectInstanceMap.get(theObject);
 
-                String classInstanceOrJokerName = _discoverObjectInstanceMap.get(theObject);
+            System.out.println("INNER callback: reflectAttributeValues:"
+                    + " theObject=" + theObject 
+                    + " theAttributes" + theAttributes 
+                    + " userSuppliedTag=" + userSuppliedTag 
+                    + " theTime=" + theTime);
 
-                System.out.println("INNER callback: reflectAttributeValues:"
-                        + " theObject=" + theObject + " theAttributes" + theAttributes + " userSuppliedTag=" + userSuppliedTag + " theTime=" + theTime);
-                System.out.println("INNER callback: reflectAttributeValues: _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
-                System.out.println("INNER callback: reflectAttributeValues: _discoverObjectInstanceMap.get(theObject) classInstanceOrJokerName = " + classInstanceOrJokerName);
+            System.out.println("INNER callback: reflectAttributeValues: (objectInstanceId) theObject = " + theObject);
+            System.out.println("INNER callback: reflectAttributeValues: _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
+            System.out.println("INNER callback: reflectAttributeValues: _discoverObjectInstanceMap.get(theObject) classInstanceOrJokerName = " + classInstanceOrJokerName);
 
-                for (int i = 0; i < theAttributes.size(); i++) {
+            for (int i = 0; i < theAttributes.size(); i++) {
 
-                    Iterator<Entry<String, Object[]>> ot = _hlaAttributesToSubscribeTo
-                            .entrySet().iterator();
+                Iterator<Entry<String, Object[]>> ot = _hlaAttributesToSubscribeTo
+                        .entrySet().iterator();
 
-                    while (ot.hasNext()) {
-                        Map.Entry<String, Object[]> elt = ot.next();
-                        Object[] tObj = elt.getValue();
+                while (ot.hasNext()) {
+                    Map.Entry<String, Object[]> elt = ot.next();
+                    Object[] tObj = elt.getValue();
 
-                        Time ts = null;
-                        TimedEvent te = null;
-                        Object value = null;
-                        HlaSubscriber hs = (HlaSubscriber) _getPortFromTab(tObj).getContainer();
+                    Time ts = null;
+                    TimedEvent te = null;
+                    Object value = null;
+                    HlaSubscriber hs = (HlaSubscriber) _getPortFromTab(tObj).getContainer();
 
-                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber=" + hs.getFullName());
-                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
-                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classInstanceOrJokerName " + hs.getClassInstanceName());
-                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classHandle " + hs.getClassHandle());
-                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber attributeName in FOM " + hs.getAttributeName());
-                        System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
+                    try {
+/*
+                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber=" + hs.getFullName());
+                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
+                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classInstanceOrJokerName " + hs.getClassInstanceName());
+                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber classHandle " + hs.getClassHandle());
+                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber attributeName in FOM " + hs.getAttributeName());
+                    System.out.println("INNER callback: reflectAttributeValues: hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
+*/
+                    System.out.println("INNER callback: reflectAttributeValues: theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
+                    //System.out.println("INNER callback: reflectAttributeValues: classHandle = " + classHandle);
+                    //System.out.println("INNER callback: reflectAttributeValues: classInstanceOrJokerName = " + classInstanceOrJokerName);
+                    //System.out.println("INNER callback: reflectAttributeValues: (objectInstanceId) theObject = " + theObject);
+                    } catch (ArrayIndexOutOfBounds e) {
+                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
+                        System.out.println("INNER callback: reflectAttributeValues: EXCEPTION ArrayIndexOutOfBounds in DEBUG");
+                        e.printStackTrace();
+                    }/* catch (IllegalActionException e) {
+                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
+                        System.out.println("INNER callback: reflectAttributeValues: EXCEPTION IllegalActionException in DEBUG");
+                        e.printStackTrace();
+                    }*/
 
-                        System.out.println("INNER callback: reflectAttributeValues: theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
-                        System.out.println("INNER callback: reflectAttributeValues: classHandle = " + classHandle);
-                        System.out.println("INNER callback: reflectAttributeValues: classInstanceOrJokerName = " + classInstanceOrJokerName);
-                        System.out.println("INNER callback: reflectAttributeValues: (objectInstanceId) theObject = " + theObject);
-
-                        // The tuple (attributeHandle, classHandle,
-                        // classInstanceName) allows to identify the
-                        // object attribute (i.e. one of the HlaSubscribers)
-                        // where the updated value has to be put.
-                        // XXX: FIXME: class instance name is used to map with corresponding HlaSubscrbier ?
+                    // The tuple (attributeHandle, classHandle,
+                    // classInstanceName) allows to identify the
+                    // object attribute (i.e. one of the HlaSubscribers)
+                    // where the updated value has to be put.
+                    // XXX: FIXME: class instance name is used to map with corresponding HlaSubscrbier ?
+                    try {
                         if (theAttributes.getAttributeHandle(i) == hs.getAttributeHandle()
                                 && classHandle == hs.getClassHandle()
-                                && (classInstanceOrJokerName != null && hs.getClassInstanceName().compareTo(classInstanceOrJokerName) == 0)) {
-                            try {
+                                && (classInstanceOrJokerName != null 
+                                && hs.getClassInstanceName().compareTo(classInstanceOrJokerName) == 0)) {
 
-                                double timeValue = ((CertiLogicalTime) theTime)
-                                        .getTime() / _hlaTimeUnitValue;
+                            double timeValue = ((CertiLogicalTime) theTime)
+                                    .getTime() / _hlaTimeUnitValue;
 
-                                ts = new Time(_director, timeValue);
+                            ts = new Time(_director, timeValue);
 
-                                value = MessageProcessing.decodeHlaValue(hs,
-                                        (BaseType) _getTypeFromTab(tObj),
-                                        theAttributes.getValue(i));
+                            value = MessageProcessing.decodeHlaValue(hs,
+                                    (BaseType) _getTypeFromTab(tObj),
+                                    theAttributes.getValue(i));
 
-                                te = new HlaTimedEvent(ts, new Object[] {
-                                        (BaseType) _getTypeFromTab(tObj),
-                                        value }, theObject);
+                            te = new HlaTimedEvent(ts, new Object[] {
+                                    (BaseType) _getTypeFromTab(tObj),
+                                    value }, theObject);
 
-                                _fromFederationEvents.get(hs.getFullName()).add(te);
-                                if (_debugging) {
-                                    _debug("    reflectAttributeValues() - pRAV("
-                                            + "HLA attribute= "
-                                            + hs.getAttributeName()
-                                            + ", timestamp="
-                                            + _printTimes(te.timeStamp)
-                                            + " ,val=" + value.toString()
-                                            + ") has been received and stored for "
-                                            + hs.getDisplayName() + " " + hs.getFullName());
-                                }
-                                System.out.println("INNER callback: reflectAttributeValues: HLA attribute = " + hs.getAttributeName()
-                                + " timestamp=" + _printTimes(te.timeStamp) + " val=" + value.toString() + " received and stored for = " + hs.getFullName());
+                            _fromFederationEvents.get(hs.getFullName()).add(te);
+                            if (_debugging) {
+                                _debug("    reflectAttributeValues() - receive RAV("
+                                        + "HLA attribute= " + hs.getAttributeName()
+                                        + ", timestamp=" + te.timeStamp.toString() //_printTimes(te.timeStamp)
+                                        + " ,value=" + value.toString()
+                                        + ") has been received and stored for "
+                                        + hs.getFullName());
+                            }
+                            System.out.println("INNER callback: reflectAttributeValues: HLA attribute = " + hs.getAttributeName()
+                            + " timestamp=" + _printTimes(te.timeStamp) + " value=" + value.toString() + " received and stored for = " + hs.getFullName());
 
-                                // XXX: FIXME: GiL: add this boolean to be conform to the algo, but
-                                // need more discussion with ISAE
-                                hasReceivedRAV = true;
+                            // XXX: FIXME: GiL: add this boolean to be conform to the algo, but
+                            // need more discussion with ISAE
+                            hasReceivedRAV = true;
+                        }
+                    } catch (ArrayIndexOutOfBounds e) {
+                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
+                        e.printStackTrace();
+                    } catch (IllegalActionException e) {
+                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
+                        System.out.println("INNER callback: reflectAttributeValues: EXCEPTION IllegalActionException");
+                        e.printStackTrace();
+                    }
+                }
+            }
 
-                                /*
-                                // XXX: FIXME: GiL: begin HLA Reporter code ?
+        /* // XXX: FIXME: GiL: begin HLA Reporter code ?
                                 String attributeName = hs.getParameterName();
 
                                 String pRAVTimeStamp = _printTimes(te.timeStamp)
@@ -2661,23 +2694,8 @@ implements TimeRegulator {
                                 _numberOfRAVs++;
                                 //_RAVsValues=_RAVsValues + value.toString()+";";
                                 // XXX: FIXME: GiL: end HLA Reporter code ?
-                                 */
-                            } catch (IllegalActionException e) {
-                                throw new IllegalActionException(null, e, "IllegalActionException: " + e.getMessage());
-                            }
-                        }
-                    }
-                }
-            } catch (ArrayIndexOutOfBounds e) {
-                // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                e.printStackTrace();
-            }
-            catch (IllegalActionException e1) {
-                // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                System.out.println("INNER callback: reflectAttributeValues: EXCEPTION IllegalActionException");
-                e1.printStackTrace();
-            }
-        }
+         */
+       }
 
         /** Callback delivered by the RTI (CERTI) to discover attribute instance
          *  of HLA attribute that the Federate is subscribed to.
@@ -2687,11 +2705,11 @@ implements TimeRegulator {
                 String someName) throws CouldNotDiscover,
         ObjectClassNotKnown, FederateInternalError {
 
-            System.out.println("callback: discoverObjectInstance:" + " objectInstanceId=" + objectInstanceId + " classHandle=" + classHandle + " someName=" + someName);
-
-            String matchingName = null;
+            System.out.println("INNER callback: discoverObjectInstance:" + " objectInstanceId=" + objectInstanceId + " classHandle=" + classHandle + " someName=" + someName);
 
             // XXX: FIXME: joker support
+            String matchingName = null;
+
             if (_usedJoker) {
                 String jokerFilter = null;
 
@@ -2720,7 +2738,7 @@ implements TimeRegulator {
                     System.out.println("callback: discoverObjectInstance: objectInstanceId=" + objectInstanceId);
                     System.out.println("callback: discoverObjectInstance: jokerFilter=" + jokerFilter);
                     System.out.println("callback: discoverObjectInstance: matchingName=" + matchingName);
-                    
+
                     matchingName = jokerFilter;
                 }
             } else { 
@@ -2731,12 +2749,12 @@ implements TimeRegulator {
                     // XXX: FIXME: GiL: do something??? can this happen?
                 } else {
                     _discoverObjectInstanceMap.put(objectInstanceId, someName);
-                    
+
                     matchingName = someName;
                 }
 
             }
-              
+
             // Bind object instance id to class handle.
             _objectIdToClassHandle.put(objectInstanceId, classHandle);  
 
@@ -2759,8 +2777,8 @@ implements TimeRegulator {
                         if (sub.getClassInstanceName().compareTo(matchingName) == 0) {
                             sub.setObjectInstanceId(objectInstanceId);
 
-                            System.out.println("callback: discoverObjectInstance: matchingName=" + matchingName);
-                            System.out.println("callback: discoverObjectInstance: hlaSub=" + sub.getFullName());
+                            System.out.println("INNER callback: discoverObjectInstance: matchingName=" + matchingName);
+                            System.out.println("INNER callback: discoverObjectInstance: hlaSub=" + sub.getFullName());
 
                         }
                     } catch (IllegalActionException e) {
@@ -2768,11 +2786,11 @@ implements TimeRegulator {
                         e.printStackTrace();
                     }
                 }
-                System.out.println("callback: discoverObjectInstance: _usedJokerFilterMap = " + _usedJokerFilterMap.toString());
+                System.out.println("INNER callback: discoverObjectInstance: _usedJokerFilterMap = " + _usedJokerFilterMap.toString());
             }
 
             if (_debugging) {
-                _debug("INNER"
+                _debug("INNER callback"
                         + " discoverObjectInstance() - the object" 
                         + " objectInstanceId=" + objectInstanceId
                         + " classHandle=" + classHandle
@@ -2791,7 +2809,7 @@ implements TimeRegulator {
                 FederateInternalError {
             timeRegulator = true;
             if (_debugging) {
-                _debug("INNER" + " timeRegulationEnabled() - timeRegulator = "
+                _debug("INNER callback" + " timeRegulationEnabled() - timeRegulator = "
                         + timeRegulator);
             }
         }
@@ -2805,7 +2823,7 @@ implements TimeRegulator {
                 EnableTimeConstrainedWasNotPending, FederateInternalError {
             timeConstrained = true;
             if (_debugging) {
-                _debug("INNER"
+                _debug("INNER callback"
                         + " timeConstrainedEnabled() - timeConstrained = "
                         + timeConstrained);
             }
@@ -2835,9 +2853,10 @@ implements TimeRegulator {
             _numberOfTicks.add(0);
 
             if (_debugging) {
-                _debug("timeAdvanceGrant() - _TAGDelay => " + _TAGDelay);
-                _debug("timeAdvanceGrant() - TAG(" + grantedHlaLogicalTime.toString()
-                + "(HLA Time Unit)) received");
+                _debug("INNER callback timeAdvanceGrant() - "
+                        + "TAG(" + grantedHlaLogicalTime.toString()
+                        + " * (HLA time unit=" + _hlaTimeUnitValue + ")) received");
+                //_debug("timeAdvanceGrant() - _TAGDelay => " + _TAGDelay);
             }
         }
 
