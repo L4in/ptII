@@ -1,0 +1,12 @@
+$id$
+
+Below a list of all tests about ime management:
+
+- 1 fédéré TR (time regulator) TC (time constrained) TAR, 1 Publisher
+- 1 fédéré TR (time regulator) TC (time constrained) TAR, 1 Subcriber (pas forcément utile)
+- 2 fédérés TR (time regulator) TC (time constrained) TAR TAR, UAV + RAV
+- 1 fédéré TR (time regulator) TC (time constrained) NER, 1 Publisher
+- 1 fédéré TR (time regulator) TC (time constrained) NER, 1 Subscriber (pas forcément utile)
+- 2 fédérés TR (time regulator) TC (time constrained) NER NER, UAV + RAV, 1 Publisher, 1 Subscriber
+- 2 fédérés TR (time regulator) TC (time constrained) NER TAR, UAV + RAV, 1 Publisher, 1 Subscriber
+- 2 fédérés TR (time regulator) TC (time constrained) TAR NER, UAV + RAV, 1 Publisher, 1 Subscriber
