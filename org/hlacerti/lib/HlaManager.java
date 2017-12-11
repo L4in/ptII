@@ -257,20 +257,6 @@ implements TimeRegulator {
             throws IllegalActionException, NameDuplicationException {
         super(container, name);
 
-        /*
-        // XXX: FIXME: GiL: begin HLA Reporter code ?
-        try {
-            _testsFolder = _createFolder("testsResults");
-        } catch (IOException ex) {
-            throw new IllegalActionException(this, ex,
-                    "Failed to create folder \"testResults/\".");
-        }
-
-        _file    = _createTextFile("data.txt");
-        _csvFile = _createTextFile("data.csv");
-        // XXX: FIXME: GiL: end HLA Reporter code ?
-         */
-
         _registerObjectInstanceMap = new HashMap<String, Integer>();
         _discoverObjectInstanceMap = new HashMap<Integer, String>();
 
@@ -538,13 +524,6 @@ implements TimeRegulator {
     public Object clone(Workspace workspace) throws CloneNotSupportedException {
         HlaManager newObject = (HlaManager) super.clone(workspace);
 
-        /*
-        // XXX: FIXME: GiL: begin HLA Reporter code ?
-        newObject._csvFile = _createTextFile("data.csv");
-        newObject._file = _createTextFile("data.txt");
-        // XXX: FIXME: GiL: end HLA Reporter code ?
-         */
-
         newObject._hlaAttributesToPublish     = new HashMap<String, Object[]>();
         newObject._hlaAttributesToSubscribeTo = new HashMap<String, Object[]>();
 
@@ -575,6 +554,9 @@ implements TimeRegulator {
         // XXX: FIXME: joker support
         newObject._usedJokerFilterMap = new HashMap<String, Boolean>();
         newObject._usedJoker = false;
+        
+        // XXX: FIXME: HLA reporter support
+        newObject._hlaReporter = null;
 
         try {
             newObject._hlaTimeStep = ((DoubleToken) hlaTimeStep.getToken())
@@ -616,6 +598,23 @@ implements TimeRegulator {
         // Get the corresponding director associated to the HlaManager attribute.
         _director = (DEDirector) ((CompositeActor) this.getContainer())
                 .getDirector();
+        
+
+        // XXX: FIXME: HLA reporter support
+        try {
+            _hlaReporter = new HlaReporter("testsResults",
+                    _federateName + "-hla-report.txt",
+                    _federateName + "-hla-report.csv");
+        } catch (IOException e) {
+            throw new IllegalActionException(this, e, "Failed to create folder or files: " + e.getMessage());
+        }
+        
+        _hlaReporter.initializeReportVariables(_hlaLookAHead, _hlaTimeStep, _hlaTimeUnitValue,
+                _startTime, _director.getModelStopTime(),
+                _federateName, fedFile.asFile().getPath(), _isCreator, _timeStepped, _eventBased);
+        
+        _hlaReporter.initializeAttributesToPublishVariables(_hlaAttributesToPublish);
+        
 
         // Initialize HLA attribute tables for publication/subscription.
         _populateHlaAttributeTables();
@@ -822,16 +821,15 @@ implements TimeRegulator {
                         + " the proposedTime -> tick() one time -> returning currentTime");
             }
             try {
-                // XXX: FIXME: GiL, why tick2() hangs the simulation ?
+                // XXX: FIXME: GiL, why tick2() hangs the simulation?
                 _rtia.tick();
 
-                if (_timeOfTheLastAdvanceRequest > 0) {
-                    _numberOfTicks.set(_numberOfTAGs,
-                            _numberOfTicks.get(_numberOfTAGs) + 1);
+                // XXX: FIXME: HLA reporter support
+                if (_hlaReporter._timeOfTheLastAdvanceRequest > 0) {
+                    //_hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                 } else {
-                    _numberOfOtherTicks++;
+                    _hlaReporter._numberOfOtherTicks++;
                 }
-
             } catch (ConcurrentAccessAttempted e) {
                 throw new IllegalActionException(this, e,
                         "ConcurrentAccessAttempted: " + e.getMessage());
@@ -954,11 +952,13 @@ implements TimeRegulator {
         suppAttributes.add(_getAttributeHandleFromTab(tObj), bAttributeValue);
 
         // XXX: FIXME: GiL: seems not used in our case ?
-        HlaPublisher pub = (HlaPublisher)_getPortFromTab(tObj).getContainer();
+        //HlaPublisher pub = (HlaPublisher)_getPortFromTab(tObj).getContainer();
+        //byte[] tag = EncodingHelpers
+                //.encodeString(pub.getClassInstanceName());
+                //.encodeString(pub.getFullName());
         byte[] tag = EncodingHelpers
                 //.encodeString(pub.getClassInstanceName());
-                .encodeString(pub.getFullName());
-
+                .encodeString(hp.getFullName());
         // Create a representation of uav-event timestamp for CERTI.
         // HLA implies to send event in the future when using NER or TAR services with lookahead > 0.
         // Let us recall the lookahead rule: a federate promises that no events will be sent
@@ -1102,18 +1102,16 @@ implements TimeRegulator {
 
         super.wrapup();
 
-        // XXX: FIXME: GiL: check usage
-        //_structuralInformation.clear();
-        _registerObjectInstanceMap.clear();
-        _discoverObjectInstanceMap.clear();
+        // XXX: FIXME: HLA reporter support
 
         // XXX: FIXME: GiL: set a function HlaReporter.writeReports()
         if (_debugging) {
-            _debug("Data" + "\n number of TARs: " + _numberOfTARs
-                    + "\n number of NERs: " + _numberOfNERs + "\n number of TAGs: "
-                    + _numberOfTAGs);
+            //_hlaReporter.writeDelays();
+
+            _debug(_hlaReporter.displayAnalysisValues());
         }
 
+       
         /*
         // XXX: FIXME: GiL: begin HLA Reporter code ?
         HlaReporter.calculateRuntime();
@@ -1125,7 +1123,7 @@ implements TimeRegulator {
         // XXX: FIXME: GiL: end HLA Reporter code ?
          */
 
-        // Unsubscribe to HLA attributes
+        // Unsubscribe to HLA attributes.
         for (Object[] obj : _hlaAttributesToSubscribeTo.values()) {
             try {
                 _rtia.unsubscribeObjectClass(_getClassHandleFromTab(obj));
@@ -1177,7 +1175,7 @@ implements TimeRegulator {
                     _debug("wrapup() - WARNING: FederatesCurrentlyJoined");
                 }
             } catch (FederationExecutionDoesNotExist e) {
-                // GL: FIXME: This should be an IllegalActionExeception
+                // XXX: FIXME: This should be an IllegalActionExeception
                 if (_debugging) {
                     _debug("wrapup() - WARNING: FederationExecutionDoesNotExist");
                 }
@@ -1211,8 +1209,15 @@ implements TimeRegulator {
         _fromFederationEvents.clear();
         _objectIdToClassHandle.clear();
 
+        // Clean HLA object instance id maps.
+        _registerObjectInstanceMap.clear();
+        _discoverObjectInstanceMap.clear();
+        
         // XXX: FIXME: joker support
         _usedJokerFilterMap.clear();
+        
+        // XXX: FIXME: HLA reporter support
+        _hlaReporter = null;
 
         if (_debugging) {
             _debug("-----------------------");
@@ -1329,8 +1334,17 @@ implements TimeRegulator {
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
 
+            // XXX: FIXME: HLA reporter support
+            // Set time of last time advance request.
+            _hlaReporter._timeOfTheLastAdvanceRequest = System.nanoTime();
+
             // algo3: 2: NER(g(t'))
+            // Call CERTI NER HLA service.
             _rtia.nextEventRequest(certiProposedTime);
+            
+            // XXX: FIXME: HLA reporter support
+            // Increment counter of NER calls.
+            _hlaReporter._numberOfNERs++;
 
             // algo3: 3: while not granted do
             while (!(_federateAmbassador.timeAdvanceGrant)) {
@@ -1345,11 +1359,9 @@ implements TimeRegulator {
                 }
                 _rtia.tick2(); // algo3: 4: tick()  > Wait TAG(h'')
 
-                // XXX: FIXME: GiL: begin HLA Reporter code ?
-                _numberOfTicks2++;
-                _numberOfTicks.set(_numberOfTAGs,
-                        _numberOfTicks.get(_numberOfTAGs) + 1);
-                // XXX: FIXME: GiL: end HLA Reporter code ?
+                // XXX: FIXME: HLA reporter support
+                _hlaReporter._numberOfTicks2++;
+                _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
 
             } // algo3: 5: end while
 
@@ -1438,16 +1450,25 @@ implements TimeRegulator {
         //while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {
 
         //System.out.println("_timeSteppedBasedTimeAdvance(" + proposedTime.toString() + "): certiProposedTime=" + certiProposedTime.toString() + " tarContractTime=" + tarContractTime.toString());
-        System.out.println("  " + headMsg + "certiProposedTime=" + _printTimes(_convertToPtolemyTime(certiProposedTime)) + " tarContractTime=" + tarContractTime.toString());
-        while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {
-            System.out.println("  " + headMsg + "while certiProposedTime=" + _printTimes(_convertToPtolemyTime(certiProposedTime)) + " < tarContractTime=" + tarContractTime.toString());
+        System.out.println("  " + headMsg + "certiProposedTime=" + _printTimes(_convertToPtolemyTime(certiProposedTime)) + " >= tarContractTime=" + tarContractTime.toString());
+        while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {            
+            System.out.println("  " + headMsg + "while certiProposedTime=" + _printTimes(_convertToPtolemyTime(certiProposedTime)) + " >= tarContractTime=" + tarContractTime.toString());
 
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
 
             // algo4: 2: TAR(h + TS))
             try {
+                // XXX: FIXME: HLA reporter support
+                // Set time of last time advance request.
+                _hlaReporter._timeOfTheLastAdvanceRequest = System.nanoTime();
+
+                // Call CERTI TAR HLA service.
                 _rtia.timeAdvanceRequest(tarContractTime);
+                
+                // Increment counter of TAR calls.
+                _hlaReporter._numberOfTARs++;
+
                 if (_debugging) {
                     _debug("  " + headMsg
                             + " call CERTI TAR(" + tarContractTime.getTime() + ")");
@@ -1468,16 +1489,15 @@ implements TimeRegulator {
 
                 try {
                     _rtia.tick2();
+
+                    // XXX: FIXME: HLA reporter support
+                    _hlaReporter._numberOfTicks2++;
+                    _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
+        
                 } catch (SpecifiedSaveLabelDoesNotExist | ConcurrentAccessAttempted | RTIinternalError e) {
                     System.out.println("DEBUG DEBUG DEBUG DEBUG");
                     throw new IllegalActionException(this, e, e.getMessage());
                 } // algo4: 4: tick()  > Wait TAG()
-
-                // XXX: FIXME: GiL: begin HLA Reporter code ?
-                _numberOfTicks2++;
-                _numberOfTicks.set(_numberOfTAGs,
-                        _numberOfTicks.get(_numberOfTAGs) + 1);
-                // XXX: FIXME: GiL: end HLA Reporter code ?
 
             } // algo4: 5: end while
 
@@ -1485,7 +1505,7 @@ implements TimeRegulator {
             _federateAmbassador.hlaLogicalTime = tarContractTime;
 
             // algo4: 7: if receivedRAV then  <= FIXME: XXX: to discuss ?
-            //if (_federateAmbassador.hasReceivedRAV) {
+            if (_federateAmbassador.hasReceivedRAV) {
 
             // algo4: 8: t'' <- f(h)
             Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.hlaLogicalTime);
@@ -1500,13 +1520,16 @@ implements TimeRegulator {
             // Store reflected attributes RAV as events on HLASubscriber actors.
             _putReflectedAttributesOnHlaSubscribers(proposedTime);
 
-            //_federateAmbassador.hasReceivedRAV = false;
+            _federateAmbassador.hasReceivedRAV = false;
 
             // algo4: 13: return t'
             return proposedTime;
 
-            //} // algo4: 14: if receivedRAV then  <= FIXME: XXX: to discuss ?
-
+            } // algo4: 14: end if receivedRAV then  <= FIXME: XXX: to discuss ?
+            
+            hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
+            tarContractTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
+            
         } // algo4: 15: end while
 
         if (_debugging) {
@@ -1685,7 +1708,7 @@ implements TimeRegulator {
         //System.out.println("_populateHlaAttributeTables: _hlaAttributesToSubscribeTo = " + _hlaAttributesToSubscribeTo.toString());
 
         // XXX: FIXME: joker support
-        System.out.println("_populateHlaAttributeTables: _usedJokerFilterMap = " + _usedJokerFilterMap.toString());
+        //System.out.println("_populateHlaAttributeTables: _usedJokerFilterMap = " + _usedJokerFilterMap.toString());
     }
 
     /**
@@ -1818,16 +1841,6 @@ implements TimeRegulator {
     }
 
     /**
-     * Get hlaNextPointInTime in HLA to advance to when TAR is used.
-     * hlaNextPointInTime = hlaCurrentTime + Ts.
-     * @return next point in time to advance to.
-     * @exception IllegalActionException if hlaTimeStep is NULL.
-     */
-    private Time _getHlaNextPointInTime() throws IllegalActionException {
-        return _getHlaCurrentTime().add(_hlaTimeStep);
-    }
-
-    /**
      * Get the current time in HLA which is advanced after a TAG callback.
      * @return hla current time
      */
@@ -1841,13 +1854,13 @@ implements TimeRegulator {
      * in the files {@link #_file} and {@link #_csvFile}
      */
     private void _initializeReportVariables() {
-        _numberOfTARs = 0;
-        _numberOfTicks2 = 0;
-        _numberOfNERs = 0;
-        _numberOfTAGs = 0;
+        //_numberOfTARs = 0;
+        //_numberOfTicks2 = 0;
+        //_numberOfNERs = 0;
+        //_numberOfTAGs = 0;
         //_runtime = 0;
-        _timeOfTheLastAdvanceRequest = 0;
-        _numberOfOtherTicks = 0;
+        //_timeOfTheLastAdvanceRequest = 0;
+        //_numberOfOtherTicks = 0;
 
         //_numberOfAttributesToPublish = _hlaAttributesToPublish.size();
         //_nameOfTheAttributesToPublish = new String[_numberOfAttributesToPublish];
@@ -1865,15 +1878,15 @@ implements TimeRegulator {
         //_tPTII = new StringBuffer("");
         //_tHLA = new StringBuffer("");
 
-        _reasonsToPrintTheTime = new StringBuffer("");
+        //_reasonsToPrintTheTime = new StringBuffer("");
         //_pUAVsTimes = new StringBuffer("");
         //_preUAVsTimes = new StringBuffer("");
         //_pRAVsTimes = new StringBuffer("");
         //_folRAVsTimes = new StringBuffer("");
-        _TAGDelay = new ArrayList<Double>();
-        _numberOfTicks = new ArrayList<Integer>();
-        _numberOfRAVs = 0;
-        _numberOfUAVs = 0;
+        //_TAGDelay = new ArrayList<Double>();
+        //_numberOfTicks = new ArrayList<Integer>();
+        //_numberOfRAVs = 0;
+        //_numberOfUAVs = 0;
     }
     /*
     /**This function was created with the sole purpose of solving the
@@ -1937,12 +1950,12 @@ implements TimeRegulator {
 
     /**-Name of the HLA/CERTI federation to create or to join. */
     private String _federationName;
+    
+    /** Federate Ambassador for the Ptolemy Federate. */
+    private PtolemyFederateAmbassadorInner _federateAmbassador;
 
     /** RTI Ambassador for the Ptolemy Federate. */
     private CertiRtiAmbassador _rtia;
-
-    /** Federate Ambassador for the Ptolemy Federate. */
-    private PtolemyFederateAmbassadorInner _federateAmbassador;
 
     /** Indicates the use of the nextEventRequest() service. */
     private Boolean _eventBased;
@@ -1950,18 +1963,18 @@ implements TimeRegulator {
     /** Indicates the use of the timeAdvanceRequest() service. */
     private Boolean _timeStepped;
 
+    /** The lookahead value of the Ptolemy Federate. */
+    private Double _hlaLookAHead;
+    
+    /** Time step of the Ptolemy Federate. */
+    private Double _hlaTimeStep;
+
     /** Indicates the use of the enableTimeConstrained() service. */
     private Boolean _isTimeConstrained;
 
     /** Indicates the use of the enableTimeRegulation() service. */
     private Boolean _isTimeRegulator;
-
-    /** Time step of the Ptolemy Federate. */
-    private Double _hlaTimeStep;
-
-    /** The lookahead value of the Ptolemy Federate. */
-    private Double _hlaLookAHead;
-
+    
     /** Indicates if the Ptolemy Federate will use a synchronization point. */
     private Boolean _requireSynchronization;
 
@@ -1975,32 +1988,6 @@ implements TimeRegulator {
 
     /** The simulation stop time. */
     private Time _stopTime;
-
-    /** Represents the number of next event request this federate has made.
-     *
-     * Event driven federates advance to the time-stamp of the next event. In order to complete the
-     * advancement, they have to ask the federation's permission to do so using a NER call.
-     */
-    private int _numberOfNERs;
-
-    /** Represents the number of time advance grants this federate has received.
-     *
-     * Federates have to ask permission to the federation in order to advance in time.
-     * If there is no events happening in an inferior time to the proposed one, the
-     * federation sends a TAG to the federate and this last one advances in time.
-     */
-    private int _numberOfTAGs;
-
-    /** Represents the number of time advance requests(TAR) this federate has made.
-     *
-     * Time-stepped federates advance with a fixed step in time. In order to complete the
-     * advancement, they have to ask the federation's permission to do so using a TAR call.
-     */
-    private int _numberOfTARs;
-
-    private double _runtime;
-
-    private int _numberOfTicks2;
 
     private String _testsFolder;
 
@@ -2036,34 +2023,8 @@ implements TimeRegulator {
      */
     private HashMap<String, Integer> _registerObjectInstanceMap;
 
-    /**
-     * The actual value for hlaTimeUnit parameter.
-     */
+    /** The actual value for hlaTimeUnit parameter. */
     private double _hlaTimeUnitValue;
-
-    /**
-     * The time of the last TAR or last NER.
-     */
-    private double _timeOfTheLastAdvanceRequest;
-
-    /**
-     * Array that contains the delays between a NER or TAR and its respective TAG..
-     */
-    private ArrayList<Double> _TAGDelay;
-
-    /**
-     * Array that contains the number of ticks between a NER or TAR and its respective TAG.
-     */
-    private ArrayList<Integer> _numberOfTicks;
-
-    /**
-     * Represents the number of the ticks that were not considered in the variable {@link #_numberOfTicks}
-     */
-    private int _numberOfOtherTicks;
-
-    private int _numberOfRAVs;
-
-    private int _numberOfUAVs;
 
     // XXX: FIXME: joker support
     /** The reserved keyword to filter HLA subscribers using joker wildcard. */
@@ -2071,6 +2032,9 @@ implements TimeRegulator {
 
     /** Indicates if the 'joker' filter is used for HLA class instance name by HLA subscribers actors. */
     private boolean _usedJoker;
+    
+    // XXX: FIXME: HLA reporter support
+    private HlaReporter _hlaReporter;
 
     ///////////////////////////////////////////////////////////////////
     ////                    private  methods                 ////
@@ -2101,15 +2065,13 @@ implements TimeRegulator {
                 try {
                     _rtia.tick2();
 
-                    // XXX: FIXME: GiL: begin HLA Reporter code ?
-                    _numberOfTicks2++;
-                    if (_timeOfTheLastAdvanceRequest > 0) {
-                        _numberOfTicks.set(_numberOfTAGs,
-                                _numberOfTicks.get(_numberOfTAGs) + 1);
+                    // XXX: FIXME: HLA reporter support
+                    _hlaReporter._numberOfTicks2++;
+                    if (_hlaReporter._timeOfTheLastAdvanceRequest > 0) {
+                        _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                     } else {
-                        _numberOfOtherTicks++;
+                        _hlaReporter._numberOfOtherTicks++;
                     }
-                    // XXX: FIXME: GiL: end HLA Reporter code ?
                 } catch (RTIexception e) {
                     throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
                 }
@@ -2125,16 +2087,14 @@ implements TimeRegulator {
         while (!(_federateAmbassador.inPause)) {
             try {
                 _rtia.tick2();
-
-                // XXX: FIXME: GiL: begin HLA Reporter code ?
-                _numberOfTicks2++;
-                if (_timeOfTheLastAdvanceRequest > 0) {
-                    _numberOfTicks.set(_numberOfTAGs,
-                            _numberOfTicks.get(_numberOfTAGs) + 1);
+                
+                // XXX: FIXME: HLA reporter support
+                _hlaReporter._numberOfTicks2++;
+                if (_hlaReporter._timeOfTheLastAdvanceRequest > 0) {
+                    _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                 } else {
-                    _numberOfOtherTicks++;
+                    _hlaReporter._numberOfOtherTicks++;
                 }
-                // XXX: FIXME: GiL: end HLA Reporter code ?
 
             } catch (RTIexception e) {
                 throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
@@ -2161,15 +2121,13 @@ implements TimeRegulator {
             try {
                 _rtia.tick2();
 
-                // XXX: FIXME: GiL: begin HLA Reporter code ?
-                _numberOfTicks2++;
-                if (_timeOfTheLastAdvanceRequest > 0) {
-                    _numberOfTicks.set(_numberOfTAGs,
-                            _numberOfTicks.get(_numberOfTAGs) + 1);
+                // XXX: FIXME: HLA reporter support
+                _hlaReporter._numberOfTicks2++;
+                if (_hlaReporter._timeOfTheLastAdvanceRequest > 0) {
+                    _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                 } else {
-                    _numberOfOtherTicks++;
+                    _hlaReporter._numberOfOtherTicks++;
                 }
-                // XXX: FIXME: GiL: end HLA Reporter code ?
 
             } catch (RTIexception e) {
                 throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
@@ -2216,15 +2174,9 @@ implements TimeRegulator {
                 try {
                     _rtia.tick2();
 
-                    // XXX: FIXME: GiL: begin HLA Reporter code ?
-                    _numberOfTicks2++;
-                    if (_timeOfTheLastAdvanceRequest > 0) {
-                        _numberOfTicks.set(_numberOfTAGs,
-                                _numberOfTicks.get(_numberOfTAGs) + 1);
-                    } else {
-                        _numberOfOtherTicks++;
-                    }
-                    // XXX: FIXME: GiL: end HLA Reporter code ?
+                    // XXX: FIXME: HLA reporter support
+                    _hlaReporter._numberOfTicks2++;
+                    _hlaReporter._numberOfOtherTicks++;
 
                 } catch (RTIexception e) {
                     throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
@@ -2235,15 +2187,9 @@ implements TimeRegulator {
                 try {
                     _rtia.tick2();
 
-                    // XXX: FIXME: GiL: begin HLA Reporter code ?
-                    _numberOfTicks2++;
-                    if (_timeOfTheLastAdvanceRequest > 0) {
-                        _numberOfTicks.set(_numberOfTAGs,
-                                _numberOfTicks.get(_numberOfTAGs) + 1);
-                    } else {
-                        _numberOfOtherTicks++;
-                    }
-                    // XXX: FIXME: GiL: end HLA Reporter code ?
+                    // XXX: FIXME: HLA reporter support
+                    _hlaReporter._numberOfTicks2++;
+                    _hlaReporter._numberOfOtherTicks++;
 
                 } catch (RTIexception e) {
                     throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
@@ -2416,8 +2362,10 @@ implements TimeRegulator {
             // Retrieve model stop time
             _stopTime = _director.getModelStopTime();
 
+            // XXX: FIXME: HLA reporter support
+            _hlaReporter._numberOfTicks.add(0);
             // XXX: FIXME: GiL: begin HLA Reporter code ?
-            _initializeReportVariables();
+            //_initializeReportVariables();
             /*_date = new Date();
             if (_isCreator) {
                 writeInTextFile(_csvFile,
@@ -2448,8 +2396,6 @@ implements TimeRegulator {
                 format.append("#");
             }
             _decimalFormat = format.toString();
-
-            _numberOfTicks.add(0);
             // XXX: FIXME: GiL: end HLA Reporter code ?
 
             this.inPause = false;
@@ -2610,7 +2556,7 @@ implements TimeRegulator {
                                         + ") has been received and stored for "
                                         + hs.getFullName());
                             }
-                            System.out.println("INNER callback: reflectAttributeValues(): HLA attribute = " + hs.getAttributeName()
+                            System.out.println("INNER callback: reflectAttributeValues(): HLA attribute=" + hs.getAttributeName()
                             + " timestamp=" + _printTimes(te.timeStamp) + " value=" + value.toString() + " received and stored for = " + hs.getFullName());
 
                             // XXX: FIXME: GiL: add this boolean to be conform to the algo, but
@@ -2620,6 +2566,7 @@ implements TimeRegulator {
                     } catch (ArrayIndexOutOfBounds e) {
                         // FIXME: XXX: Gil: encapsulate in RTI exception ?
                         e.printStackTrace();
+                        
                     } catch (IllegalActionException e) {
                         // FIXME: XXX: Gil: encapsulate in RTI exception ?
                         System.out.println("INNER callback: reflectAttributeValues(): EXCEPTION IllegalActionException");
@@ -2633,59 +2580,34 @@ implements TimeRegulator {
 
                                 String pRAVTimeStamp = _printTimes(te.timeStamp)
                                         + ";";
-                                if (_numberOfRAVs > 0 && (_pRAVsTimes.length()
-                                        - _pRAVsTimes.lastIndexOf(
-                                                pRAVTimeStamp)) == pRAVTimeStamp
-                                                        .length()) {
+                                if (_numberOfRAVs > 0 && (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
                                     int indexOfAttribute = 0;
                                     for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                                        if (_nameOfTheAttributesSubscribedTo[j]
-                                                .substring(
-                                                        _nameOfTheAttributesSubscribedTo[j]
-                                                                .lastIndexOf(
-                                                                        "-" + attributeName)
-                                                                + 1)
-                                                .equals(attributeName)) {
+                                        if (_nameOfTheAttributesSubscribedTo[j].substring(_nameOfTheAttributesSubscribedTo[j].lastIndexOf("-" + attributeName) + 1).equals(attributeName)) {
                                             indexOfAttribute = j;
                                             break;
                                         }
                                     }
-                                    _RAVsValues[indexOfAttribute].replace(
-                                            _RAVsValues[indexOfAttribute]
-                                                    .length() - 2,
-                                            _RAVsValues[indexOfAttribute]
-                                                    .length(),
-                                            value.toString() + ";");
+                                    _RAVsValues[indexOfAttribute].replace(_RAVsValues[indexOfAttribute].length() - 2, _RAVsValues[indexOfAttribute].length(), value.toString() + ";");
                                     //_UAVsValues[indexOfAttribute].replace(_UAVsValues[indexOfAttribute].length()-2,_UAVsValues[indexOfAttribute].length(),in.toString()+";");
                                 } else {
                                     if (_numberOfRAVs < 1) {
-                                        _numberOfAttributesSubscribedTo = _hlaAttributesSubscribedTo
-                                                .size();
+                                        _numberOfAttributesSubscribedTo = _hlaAttributesSubscribedTo.size();
                                         _nameOfTheAttributesSubscribedTo = new String[_numberOfAttributesSubscribedTo];
-                                        Object attributesSubscribedTo[] = _hlaAttributesSubscribedTo
-                                                .keySet().toArray();
-                                        System.out.println(
-                                                "Attributes subscribed to: ");
+                                        Object attributesSubscribedTo[] = _hlaAttributesSubscribedTo.keySet().toArray();
+                                        System.out.println("Attributes subscribed to: ");
                                         _RAVsValues = new StringBuffer[_numberOfAttributesSubscribedTo];
                                         for (int y = 0; y < _numberOfAttributesSubscribedTo; y++) {
-                                            _nameOfTheAttributesSubscribedTo[y] = attributesSubscribedTo[y]
-                                                    .toString();
-                                            _RAVsValues[y] = new StringBuffer(
-                                                    "");
-                                            System.out.println(
-                                                    _nameOfTheAttributesSubscribedTo[y]);
+                                            _nameOfTheAttributesSubscribedTo[y] = attributesSubscribedTo[y].toString();
+                                            _RAVsValues[y] = new StringBuffer("");
+                                            System.out.println(_nameOfTheAttributesSubscribedTo[y]);
                                         }
                                     }
 
                                     int indexOfAttribute = 0;
                                     for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
                                         if (_nameOfTheAttributesSubscribedTo[j]
-                                                .substring(
-                                                        _nameOfTheAttributesSubscribedTo[j]
-                                                                .lastIndexOf(
-                                                                        "-" + attributeName)
-                                                                + 1)
-                                                .equals(attributeName)) {
+                                                .substring(_nameOfTheAttributesSubscribedTo[j].lastIndexOf("-" + attributeName) + 1).equals(attributeName)) {
                                             indexOfAttribute = j;
                                             break;
                                         }
@@ -2853,20 +2775,27 @@ implements TimeRegulator {
             grantedHlaLogicalTime = (CertiLogicalTime) theTime;
             timeAdvanceGrant = true;
 
-            // Time spent between the last TAR or NER and the TAG.
-            _TAGDelay.add((System.nanoTime() - _timeOfTheLastAdvanceRequest)
-                    / Math.pow(10, 9));
+            // XXX: FIXME: HLA reporter support
+            double delay = (System.nanoTime() - _hlaReporter._timeOfTheLastAdvanceRequest) / Math.pow(10, 9);
 
-            _timeOfTheLastAdvanceRequest = 0;
+            // Reset time fo last advance request (NER or TAG).
+            _hlaReporter._timeOfTheLastAdvanceRequest = Integer.MIN_VALUE;
 
-            _numberOfTAGs++;
-            _numberOfTicks.add(0);
+            // Increment TAG counter.
+            _hlaReporter._numberOfTAGs++;
+            
+            // Compute elapsed time spent between latest TAR or NER and this received TAG.
+            _hlaReporter._TAGDelay.add(delay);
+            
+            // As a new TAG has been received add and set is tick() counter to 0.
+            _hlaReporter._numberOfTicks.add(0);
 
             if (_debugging) {
                 _debug("INNER callback: timeAdvanceGrant(): "
                         + "TAG(" + grantedHlaLogicalTime.toString()
                         + " * (HLA time unit=" + _hlaTimeUnitValue + ")) received");
-                //_debug("timeAdvanceGrant() - _TAGDelay => " + _TAGDelay);
+                /*_debug("INNER callback: timeAdvanceGrant(): TAG(" + _hlaReporter._numberOfTAGs 
+                        + ") delay between TAR/NER and this TAG _TAGDelay=" + _hlaReporter._TAGDelay.get(_hlaReporter._numberOfTAGs));*/
             }
         }
 
