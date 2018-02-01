@@ -35,7 +35,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.RoundingMode;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,25 +64,45 @@ public class HlaReporter {
     /** Constructs a HLA analysis reporter.
      *  @throws IOException 
      */
-    public HlaReporter(String directory, String dataFile, String csvFile) throws IOException
+    public HlaReporter(String directory, String filename, String modelName) throws IOException
     {
+        // FIXME: XXX: GiL: is filename needed ?
+        // Set model filename.
+        _modelName = modelName;
+        
+        // Get current system date.
+        _date = new Date();
+
+        // Format current system date.
+        DateFormat yearDateFormat = new SimpleDateFormat("yyyyMMdd");
+        
         // Files and folder creation.
-        _reportsFolder = createFolder(directory);
+        _reportsFolder = createFolder(directory + "/" + yearDateFormat.format(_date).toString() + "/" + modelName);
 
         // Create textual data file.
-        _file    = createTextFile(dataFile);
-
+        _file    = createTextFile(modelName + "-hla-report.txt");
+        
         // Create CSV data file.
-        _csvFile = createTextFile(csvFile);
+        _csvFile = createTextFile(modelName + "-hla-report.csv");
+        
+        // Write date to file.
+        writeToTextFile(_date.toString());
+        writeToCsvFile( _date.toString());
     }
 
     /** Initialize the variables that are going to be used to create the reports
      *  in the files {@link #_file} and {@link #_csvFile}
      */
-    public void initializeReportVariables(double hlaLookAHead, double hlaTimeStep, 
-            double hlaTimeUnitValue, double startTime,
-            Time stopTime, String federateName, String fedFilePath,
-            Boolean isCreator, Boolean timeStepped, Boolean eventBased) {
+    public void initializeReportVariables(double hlaLookAHead, 
+            double hlaTimeStep, 
+            double hlaTimeUnitValue, 
+            double startTime,
+            Time stopTime, 
+            String federateName, 
+            String fedFilePath,
+            Boolean isCreator, 
+            Boolean timeStepped, 
+            Boolean eventBased) {
         _hlaLookAHead = hlaLookAHead;
         _hlaTimeStep = hlaTimeStep;
         _stopTime = stopTime;
@@ -102,7 +124,6 @@ public class HlaReporter {
         _runtime        = 0;
 
         _timeOfTheLastAdvanceRequest = 0;
-
 
         _tPTII = new StringBuffer("");
         _tHLA = new StringBuffer("");
@@ -171,11 +192,9 @@ public class HlaReporter {
      * @param hlaCurrentTime
      * @param directorTime
      */
-    private void _storeTimes(String reason, Time hlaCurrentTime, Time directorTime) {
+    public void storeTimes(String reason, Time hlaCurrentTime, Time directorTime) {
         String tHLA = _printTimes(hlaCurrentTime);
         String tPTII = _printTimes(directorTime);
-
-        //String tPTII = _printTimes(_director.getModelTime());
 
         _tPTII.append(tPTII + ";");
         _tHLA.append(tHLA + ";");
@@ -196,9 +215,10 @@ public class HlaReporter {
         File folder = new File(folderName);
         if (!folder.exists()) {
             try {
-                if (!folder.mkdir()) {
+            	// Create multiple directories if needed.
+                if (!folder.mkdirs()) {
                     throw new IOException(
-                            "Failed to create " + folder + " directory.");
+                            "Failed to create" + folder + " directory.");
                 } else {
                     System.out.println("Folder " + folderName + " created.");
                 }
@@ -216,7 +236,7 @@ public class HlaReporter {
      *  already exist.
      *  @param name the name to of the file
      */
-    public File createTextFile(String name) {
+    private File createTextFile(String name) {
         if (_reportsFolder != null) {
             name = _reportsFolder + "/" + name;
             if (name == null || name.length() < 3) {
@@ -256,7 +276,7 @@ public class HlaReporter {
      *  @param header
      *  @return
      */
-    public File createTextFile(String name, String header) {
+    private File createTextFile(String name, String header) {
         if (_reportsFolder != null) {
             name = _reportsFolder + "/" + name;
             if (name == null || name.length() < 3) {
@@ -357,7 +377,7 @@ public class HlaReporter {
     }
 
     /** Write the UAV information. */
-    public void writeUAVsInformations() {
+    public void writeUAVsInformation() {
         if (_numberOfUAVs > 0) {
             StringBuffer header = new StringBuffer("LookAhead;TimeStep;StopTime;Information;");
             int count = String.valueOf(_UAVsValues[0]).split(";").length;
@@ -372,13 +392,13 @@ public class HlaReporter {
             for (int i = 0; i < _numberOfAttributesToPublish; i++) {
                 info.append(";;;" + _nameOfTheAttributesToPublish[i] + ";" + _UAVsValues[i] + "\n");
             }
-            _UAVsValuesFile = createTextFile("uav" + _federateName + ".csv");
+            _UAVsValuesFile = createTextFile(_federateName + "UAV" + ".csv");
             writeInTextFile(_UAVsValuesFile, String.valueOf(info));
         }
     }
 
     /** Write the RAV information. */
-    public void writeRAVsInformations() {
+    public void writeRAVsInformation() {
         if (_numberOfRAVs > 0) {
             StringBuffer header = new StringBuffer(
                     "LookAhead;TimeStep;StopTime;Information;");
@@ -396,7 +416,7 @@ public class HlaReporter {
                 info.append(";;;" + _nameOfTheAttributesSubscribedTo[i] + ";"
                         + _RAVsValues[i] + "\n");
             }
-            _RAVsValuesFile = createTextFile("rav" + _federateName + ".csv");
+            _RAVsValuesFile = createTextFile(_federateName + "RAV" + ".csv");
             writeInTextFile(_RAVsValuesFile, String.valueOf(info));
         }
     }
@@ -407,47 +427,53 @@ public class HlaReporter {
      *  variable file.
      */
     public void writeNumberOfHLACalls() {
-
-        String fullName = _federateName.toString();
-        //String nameOfTheFederate = fullName.substring(fullName.indexOf('"'));
-        String nameOfTheFile = fullName.substring(fullName.indexOf('{') + 1,
-                fullName.lastIndexOf('.'));
+        // Get RKSolver value.
         String RKSolver = "<property name=\"ODESolver\" class=\"ptolemy.data.expr.StringParameter\" value=\"ExplicitRK";
-        nameOfTheFile = nameOfTheFile.substring(1,
-                nameOfTheFile.lastIndexOf('.')) + ".xml";
-        //String path = fedFile.asFile().getPath();
-        String path = _fedFilePath;
-        path = path.substring(0, path.lastIndexOf("/") + 1);
-        File file = new File(path + nameOfTheFile);
+        
+        // FIXME: XXX: GiL: TO REWORK
+        // Get FOM file.
+        String folderPath = _fedFilePath.substring(0, _fedFilePath.lastIndexOf("/") + 1);
+        
+        File file = new File(folderPath + _modelName);
+                
+        // Create first line as StringBuffer
+        // ex: Federate AutoPilot in the model f14AutoPilot.xml
+        StringBuffer info = new StringBuffer("Federate " + _federateName + " in the model " + _modelName);
 
-        //StringBuffer info = new StringBuffer("Federate " + getDisplayName()
-        StringBuffer info = new StringBuffer("Federate " + _federateName
-                + " in the model " + nameOfTheFile);
+        // Add line
+        // ex: RKSolver: UNDEFINED
+        // ex: RKSolver: ExplicitRK23Solver
         try {
             RKSolver = AutomaticSimulation.findParameterValue(file, RKSolver);
             info.append("\nRKSolver: " + RKSolver);
         } catch (IllegalActionException e) {
-            // TODO Auto-generated catch block
+            // FIXME: XXX: GiL: HANDLE EXCEPTION
             e.printStackTrace();
         }
 
-        info.append("\n" + "stopTime: " + _stopTime + "    hlaTimeUnit: "
-                + _hlaTimeUnitValue + "    lookAhead: " + _hlaLookAHead);
+        // Add line
+        // ex: stopTime: 12.0    hlaTimeUnit: 1.0    lookAhead: 0.005
+        info.append("\n" + "stopTime: " + _stopTime + "    hlaTimeUnit: " + _hlaTimeUnitValue + "    lookAhead: " + _hlaLookAHead);
+        
+        // Add information it is the synchronization point register
         if (_isCreator) {
             info = new StringBuffer("SP register -> " + info);
         }
+        
+        // Handle time stepped or event based time management information
         if (_timeStepped) {
-            info.append("    Time Step: " + _hlaTimeStep + "\n"
-                    + "Number of TARs: " + _numberOfTARs);
+            info.append("    Time Step: " + _hlaTimeStep + "\n" + "Number of TARs: " + _numberOfTARs);
         } else if (_eventBased) {
-
             info.append("\nNumber of NERs: " + _numberOfNERs);
         }
+        
+        // Add information UAV, TAGS, RAVS
         info.append("    Number of UAVs:" + _numberOfUAVs
                 + "\nNumber of TAGs: " + _numberOfTAGs
                 + "    Number of RAVs:" + _numberOfRAVs + "\n" + "Runtime: "
                 + _runtime + "\n");
 
+        // Write to file.
         writeInTextFile(_file, info.toString());
     }
 
@@ -455,62 +481,58 @@ public class HlaReporter {
      *  the number of ticks, the delay between a NER or a TAR and its respective TAG, the number of UAVs and RAVs.
      */
     public void writeDelays() {
-        String fullName = _federateName.toString();
-        String nameOfTheFile = fullName.substring(fullName.indexOf('{') + 1,
-                fullName.lastIndexOf('.'));
-        nameOfTheFile = nameOfTheFile.substring(1,
-                nameOfTheFile.lastIndexOf('.')) + ".xml";
-        String nameOfTheFederate = fullName
-                .substring(fullName.indexOf('"'));
-        String info = "\nFederate: " + nameOfTheFederate + ";in the model:;"
-                + nameOfTheFile + "\nhlaTimeUnit: ;" + _hlaTimeUnitValue
-                + ";lookAhead: ;" + _hlaLookAHead + ";runtime: ;" + _runtime
-                + "\nApproach:;";
+        StringBuffer info = new StringBuffer("\nFederate: " + _federateName + ";in the model:;" + _modelName);
+        
+        info.append("\nhlaTimeUnit: ;" + _hlaTimeUnitValue + ";lookAhead: ;" + _hlaLookAHead + ";runtime: ;" + _runtime);
+        
+        info.append("\nApproach:;");
+        
         if (_timeStepped) {
-            info = info + "TAR;Time step:;" + _hlaTimeStep
-                    + ";Number of TARs:;" + _numberOfTARs + "\n";
+            info.append("TAR;Time step:;" + _hlaTimeStep + ";Number of TARs:;" + _numberOfTARs + "\n");
         } else if (_eventBased) {
-            info = info + "NER;Number of NERs:;" + _numberOfNERs + "\n";
+            info.append("NER;Number of NERs:;" + _numberOfNERs + "\n");
         }
-        info = info + "Number of UAVs:;" + _numberOfUAVs
-                + ";Number of RAVs:;" + _numberOfRAVs + ";Number of TAGs:;"
-                + _numberOfTAGs;
-        String numberOfTicks = "\nNumber of ticks:;";
-        String delay = "\nDelay :;";
+
+        info.append("Number of UAVs:;" + _numberOfUAVs + ";Number of RAVs:;" + _numberOfRAVs + ";Number of TAGs:;" + _numberOfTAGs);
+        
+        String strNumberOfTicks = "\nNumber of ticks:;";
+        String strDelay = "\nDelay :;";
+        
         double averageNumberOfTicks = 0;
         double averageDelay = 0;
+        
+        String strDelayPerTick = "\nDelay per tick;";
+        
         StringBuffer header = new StringBuffer("\nInformation :;");
-        String delayPerTick = "\nDelay per tick;";
+
         for (int i = 0; i < _numberOfTAGs; i++) {
             if (i < 10) {
                 header.append((i + 1) + ";");
-                numberOfTicks = numberOfTicks + _numberOfTicks.get(i) + ";";
-                delay = delay + _TAGDelay.get(i) + ";";
+                strNumberOfTicks = strNumberOfTicks + _numberOfTicks.get(i) + ";";
+                strDelay = strDelay + _TAGDelay.get(i) + ";";
                 if (_numberOfTicks.get(i) > 0) {
-                    delayPerTick = delayPerTick
+                    strDelayPerTick = strDelayPerTick
                             + (_TAGDelay.get(i) / _numberOfTicks.get(i))
                             + ";";
                 } else {
-                    delayPerTick = delayPerTick + "0;";
+                    strDelayPerTick = strDelayPerTick + "0;";
                 }
             }
-            averageNumberOfTicks = averageNumberOfTicks
-                    + _numberOfTicks.get(i);
+            averageNumberOfTicks = averageNumberOfTicks + _numberOfTicks.get(i);
             averageDelay = averageDelay + _TAGDelay.get(i);
         }
         header.append("Sum;");
         int totalNumberOfHLACalls = _numberOfOtherTicks
                 + (int) averageNumberOfTicks + _numberOfTARs + _numberOfNERs
                 + _numberOfRAVs + _numberOfUAVs + _numberOfTAGs;
-        numberOfTicks = numberOfTicks + averageNumberOfTicks + ";";
-        delay = delay + averageDelay + ";";
-        delayPerTick = delayPerTick + ";";
+        strNumberOfTicks = strNumberOfTicks + averageNumberOfTicks + ";";
+        strDelay = strDelay + averageDelay + ";";
+        strDelayPerTick = strDelayPerTick + ";";
         header.append("Average;");
         if (_timeStepped) {
+        	// FIXME: XXX: GiL: check if _reportFile is used in an other part ?
             _reportFile = createTextFile(
-                    nameOfTheFederate.substring(1,
-                            nameOfTheFederate.length() - 1) + "TAR"
-                            + ".csv",
+                    _federateName + "TAR" + ".csv",
                     "date;timeStep;lookahead;runtime;total number of calls;TARs;TAGs;RAVs;UAVs;Ticks2;inactive Time");
             writeInTextFile(_reportFile,
                     _date + ";" + _hlaTimeStep + ";" + _hlaLookAHead + ";"
@@ -520,9 +542,7 @@ public class HlaReporter {
                             + _numberOfTicks2 + ";" + averageDelay);
         } else {
             _reportFile = createTextFile(
-                    nameOfTheFederate.substring(1,
-                            nameOfTheFederate.length() - 1) + "NER"
-                            + ".csv",
+                    _federateName + "NER" + ".csv",
                     "date;lookahead;runtime;total number of calls;NERs;TAGs;RAVs;UAVs;Ticks2;inactive Time");
             writeInTextFile(_reportFile,
                     _date + ";" + _hlaLookAHead + ";" + _runtime + ";"
@@ -534,16 +554,15 @@ public class HlaReporter {
 
         averageNumberOfTicks = averageNumberOfTicks / _numberOfTAGs;
         averageDelay = averageDelay / _numberOfTAGs;
-        delayPerTick = delayPerTick + (averageDelay / averageNumberOfTicks)
+        strDelayPerTick = strDelayPerTick + (averageDelay / averageNumberOfTicks)
                 + ";";
-        numberOfTicks = numberOfTicks + averageNumberOfTicks + ";";
-        delay = delay + averageDelay + ";";
+        strNumberOfTicks = strNumberOfTicks + averageNumberOfTicks + ";";
+        strDelay = strDelay + averageDelay + ";";
 
-        writeInTextFile(_csvFile, info + header + delay + numberOfTicks
-                + delayPerTick + "\nOther ticks:;" + _numberOfOtherTicks
+        info.append(header + strDelay + strNumberOfTicks
+                + strDelayPerTick + "\nOther ticks:;" + _numberOfOtherTicks
                 + "\nTotal number of HLA Calls:;" + totalNumberOfHLACalls);
-
-
+        writeInTextFile(_csvFile, info.toString());
     }
 
     /** Write information in a txt file.
@@ -579,9 +598,11 @@ public class HlaReporter {
 
     /** Write the time file to 'times.csv'. */
     public void writeTimes() {
-        File timesFile = createTextFile("times.csv");
-        writeInTextFile(timesFile, _date + ";Reason:;" + _reasonsToPrintTheTime
-                + "\nt_ptII:;" + _tPTII + "\nt_hla:;" + _tHLA);
+        File timesFile = createTextFile(_modelName + "-times.csv");
+        writeInTextFile(timesFile,
+        		_date + ";Reason:;" + _reasonsToPrintTheTime
+                + "\nt_ptII:;" + _tPTII 
+                + "\nt_hla:;" + _tHLA);
     }
 
     /** TBC
@@ -765,7 +786,9 @@ public class HlaReporter {
     /** The simulation stop time. */
     private Time _stopTime;
 
-
+    /** Name of the current model. */
+    private String _modelName;
+    
     /** Name of the current Ptolemy federate. */
     private String _federateName;
 
