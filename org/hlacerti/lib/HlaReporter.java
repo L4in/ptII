@@ -68,7 +68,7 @@ public class HlaReporter {
     {
         // FIXME: XXX: GiL: is filename needed ?
         // Set model filename.
-        _modelName = modelName;
+        _modelFileName = modelName + ".xml";
         
         // Get current system date.
         _date = new Date();
@@ -88,7 +88,7 @@ public class HlaReporter {
         // Write date to file.
         writeToTextFile(_date.toString());
         writeToCsvFile( _date.toString());
-    }
+   }
 
     /** Initialize the variables that are going to be used to create the reports
      *  in the files {@link #_file} and {@link #_csvFile}
@@ -142,6 +142,30 @@ public class HlaReporter {
         _hlaAttributesUAV = new HashMap<String, Object[]>();
         _hlaAttributesRAV = new HashMap<String, Object[]>();
         //_nbrTicksByTags = new HashMap<String, Object[]>();
+        
+        // Define number format
+        int numberOfDecimalDigits;
+        if (_timeStepped) {
+            System.out.println(_hlaTimeStep);
+            String s = _hlaTimeStep.toString();
+            s = s.substring(s.indexOf(".") + 1);
+            int n1 = s.length();
+            s = _hlaLookAHead.toString();
+            s = s.substring(s.indexOf(".") + 1);
+            int n2 = s.length();
+            if (n1 > n2) {
+                numberOfDecimalDigits = n1;
+            } else {
+                numberOfDecimalDigits = n2;
+            }
+        } else {
+            numberOfDecimalDigits = 10;
+        }
+        StringBuffer format = new StringBuffer("#.#");
+        for (int i = 1; i < numberOfDecimalDigits; i++) {
+            format.append("#");
+        }
+        _decimalFormat = format.toString();
     }
 
 
@@ -150,20 +174,28 @@ public class HlaReporter {
      * @param hlaAttributesToPublish
      */
     public void initializeAttributesToPublishVariables(HashMap<String, Object[]> hlaAttributesToPublish) {
+        // XXX: FIXME: GiL: to improve, instead of using String[] and StringBuffer[] just set a
+        // HashMap<String, Object[]> where the key is the HLAPublisher fullName ?
+        
+        // XXX: FIXME: GiL: todo, _nameOfTheAttributesToPublish => _hlaPublisherFullname,
+        //                        _numberOfAttributesToPublish => _numberOfHlaPublisher
         _numberOfAttributesToPublish = hlaAttributesToPublish.size();
         _nameOfTheAttributesToPublish = new String[_numberOfAttributesToPublish];
-
-        Object attributesToPublish[] = hlaAttributesToPublish.keySet().toArray();
-        System.out.println("initializeAttributesToPublishVariables: attributes to publish: ");
-
+        
         _UAVsValues = new StringBuffer[_numberOfAttributesToPublish];
         _RAVsValues = null;
 
+        Object attributesToPublish[] = hlaAttributesToPublish.keySet().toArray();
         for (int i = 0; i < _numberOfAttributesToPublish; i++) {
+            // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, so
+            // toString() will print the HlaPublisher fullName.
             _nameOfTheAttributesToPublish[i] = attributesToPublish[i].toString();
             _UAVsValues[i] = new StringBuffer("");
-            System.out.println(_nameOfTheAttributesToPublish[i]);
+            
+            // XXX: FIXME: GiL: debug only
+            System.out.println("[DEBUG-REPORTER] _nameOfTheAttributesToPublish[i] " + _nameOfTheAttributesToPublish[i]);
         }
+
     }
 
     /** TBC
@@ -182,7 +214,7 @@ public class HlaReporter {
      * @param time
      * @return
      */
-    private String _printTimes(Time time) {
+    public String printTimes(Time time) {
         return _printFormatedNumbers(time.getDoubleValue());
     }
 
@@ -193,8 +225,8 @@ public class HlaReporter {
      * @param directorTime
      */
     public void storeTimes(String reason, Time hlaCurrentTime, Time directorTime) {
-        String tHLA = _printTimes(hlaCurrentTime);
-        String tPTII = _printTimes(directorTime);
+        String tHLA = printTimes(hlaCurrentTime);
+        String tPTII = printTimes(directorTime);
 
         _tPTII.append(tPTII + ";");
         _tHLA.append(tHLA + ";");
@@ -434,11 +466,11 @@ public class HlaReporter {
         // Get FOM file.
         String folderPath = _fedFilePath.substring(0, _fedFilePath.lastIndexOf("/") + 1);
         
-        File file = new File(folderPath + _modelName);
+        File file = new File(folderPath + _modelFileName);
                 
         // Create first line as StringBuffer
         // ex: Federate AutoPilot in the model f14AutoPilot.xml
-        StringBuffer info = new StringBuffer("Federate " + _federateName + " in the model " + _modelName);
+        StringBuffer info = new StringBuffer("Federate " + _federateName + " in the model " + _modelFileName);
 
         // Add line
         // ex: RKSolver: UNDEFINED
@@ -481,7 +513,7 @@ public class HlaReporter {
      *  the number of ticks, the delay between a NER or a TAR and its respective TAG, the number of UAVs and RAVs.
      */
     public void writeDelays() {
-        StringBuffer info = new StringBuffer("\nFederate: " + _federateName + ";in the model:;" + _modelName);
+        StringBuffer info = new StringBuffer("\nFederate: " + _federateName + ";in the model:;" + _modelFileName);
         
         info.append("\nhlaTimeUnit: ;" + _hlaTimeUnitValue + ";lookAhead: ;" + _hlaLookAHead + ";runtime: ;" + _runtime);
         
@@ -598,7 +630,7 @@ public class HlaReporter {
 
     /** Write the time file to 'times.csv'. */
     public void writeTimes() {
-        File timesFile = createTextFile(_modelName + "-times.csv");
+        File timesFile = createTextFile(_modelFileName + "-times.csv");
         writeInTextFile(timesFile,
         		_date + ";Reason:;" + _reasonsToPrintTheTime
                 + "\nt_ptII:;" + _tPTII 
@@ -647,6 +679,8 @@ public class HlaReporter {
         + "\n number of (other) Ticks: " +_numberOfOtherTicks
         + "\n number of Ticks during TAR/TAG or NER/TAG:" + _numberOfTicks.toString()
         + "\n number of delays between TAR/TAG or NER/TAG:" + _TAGDelay.toString()
+        + "\n number of UAVs:" + _numberOfUAVs
+        + "\n number of RAVs:" + _numberOfRAVs
         + "\n runtime:        " + _runtime;
     }
 
@@ -723,8 +757,33 @@ public class HlaReporter {
     /** .. */
     private StringBuffer[] _UAVsValues;
 
+    /**
+     * @return the _UAVsValues
+     */
+    public StringBuffer[] getUAVsValues() {
+        return _UAVsValues;
+    }
+    
+    
+
+    /**
+     * @param _UAVsValues the _UAVsValues to set
+     */
+    public void setUAVsValues(StringBuffer[] _UAVsValues) {
+        this._UAVsValues = _UAVsValues;
+    }
+
     /** .. */
     private int _numberOfAttributesToPublish;
+    
+    
+
+    /**
+     * @return the _numberOfAttributesToPublish
+     */
+    public int getNumberOfAttributesToPublish() {
+        return _numberOfAttributesToPublish;
+    }
 
     /** .. */
     private int _numberOfAttributesSubscribedTo;
@@ -732,11 +791,46 @@ public class HlaReporter {
     /** .. */
     private String[] _nameOfTheAttributesToPublish;
 
+    /**
+     * @return the _nameOfTheAttributesToPublish
+     */
+    public String[] getNameOfTheAttributesToPublish() {
+        return _nameOfTheAttributesToPublish;
+    }
+
     /** .. */
     private String[] _nameOfTheAttributesSubscribedTo;
 
     /** .. */
     private StringBuffer _pUAVsTimes;
+
+    /**
+     * @return the _pUAVsTimes
+     */
+    public StringBuffer getPUAVsTimes() {
+        return _pUAVsTimes;
+    }
+
+    /**
+     * @param _pUAVsTimes the _pUAVsTimes to set
+     */
+    public void appendToPUAVsTimes(String strValue) {
+        this._pUAVsTimes.append(strValue);
+    }
+
+    /**
+     * @return the _preUAVsTimes
+     */
+    public StringBuffer getPreUAVsTimes() {
+        return _preUAVsTimes;
+    }
+
+    /**
+     * @param _preUAVsTimes the _preUAVsTimes to set
+     */
+    public void appendToPreUAVsTimes(String strValue) {
+        this._preUAVsTimes.append(strValue);
+    }
 
     /** .. */
     private StringBuffer _preUAVsTimes;
@@ -773,6 +867,21 @@ public class HlaReporter {
     /** Represents the number of received UAV. */
     private int _numberOfUAVs;
 
+    /**
+     * @param _numberOfUAVs the _numberOfUAVs to set
+     */
+    public void incrNumberOfUAVs() {
+        _numberOfUAVs++;
+    }
+    
+    public void resetNumberOfUAVs() {
+        _numberOfUAVs = 0;
+    }
+    
+    public int getNumberOfUAVs() {
+        return _numberOfUAVs;
+    }
+
     /** Array that contains the delays between a NER or TAR and its respective TAG. */
     public ArrayList<Double> _TAGDelay;
 
@@ -787,7 +896,7 @@ public class HlaReporter {
     private Time _stopTime;
 
     /** Name of the current model. */
-    private String _modelName;
+    private String _modelFileName;
     
     /** Name of the current Ptolemy federate. */
     private String _federateName;
