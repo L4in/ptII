@@ -652,7 +652,7 @@ implements TimeRegulator {
         
         // XXX: FIXME: HLA Reporter support
         _hlaReporter.initializeAttributesToPublishVariables(_hlaAttributesToPublish);
-
+        //_hlaReporter.initializeAttributesSubscribedToVariables(_hlaAttributesToSubscribeTo);
 
         // Get a link to the RTI.
         RtiFactory factory = null;
@@ -1099,6 +1099,9 @@ implements TimeRegulator {
         try {
             _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, ct);
 
+            // XXX: FIXME: HLA Reporter support
+            _hlaReporter.incrNumberOfUAVs();
+            
             if (_debugging) {
                 _debug("    updateHlaAttribute() - sending UAV("
                         + "HLA publisher=" + hp.getFullName()
@@ -1107,10 +1110,6 @@ implements TimeRegulator {
                         + ",value=" + in.toString()
                         + ")");
             }
-            
-            // XXX: FIXME: HLA Reporter support
-            _hlaReporter.incrNumberOfUAVs();
-
         } catch (ObjectNotKnown e) {
             throw new IllegalActionException(this, e,
                     "ObjectNotKnown: " + e.getMessage());
@@ -1139,10 +1138,6 @@ implements TimeRegulator {
             throw new IllegalActionException(this, e,
                     "ConcurrentAccessAttempted: " + e.getMessage());
         }
-
-        // XXX: FIXME: GiL: begin HLA Reporter code ?
-        //_numberOfUAVs++;
-        // XXX: FIXME: GiL: end HLA Reporter code ?
     }
 
     /** Manage the correct termination of the {@link HlaManager}. Call the
@@ -1175,18 +1170,6 @@ implements TimeRegulator {
             _hlaReporter.writeTimes();
 
         }
-
-
-        /*
-        // XXX: FIXME: GiL: begin HLA Reporter code ?
-        HlaReporter.calculateRuntime();
-        HlaReporter.writeNumberOfHLACalls();
-        HlaReporter.writeDelays();
-        HlaReporter.writeUAVsInformations();
-        HlaReporter.writeRAVsInformations();
-        HlaReporter.writeTimes();
-        // XXX: FIXME: GiL: end HLA Reporter code ?
-         */
 
         // Unsubscribe to HLA attributes.
         for (Object[] obj : _hlaAttributesToSubscribeTo.values()) {
@@ -2625,6 +2608,73 @@ implements TimeRegulator {
                             // XXX: FIXME: GiL: add this boolean to be conform to the algo, but
                             // need more discussion with ISAE
                             hasReceivedRAV = true;
+                            
+                            // XXX: FIXME: GiL: begin HLA Reporter code ?
+                            //String attributeName = hs.getParameterName();
+                            String hlaSubcriberName = hs.getFullName();
+
+                            //String pRAVTimeStamp = _printTimes(te.timeStamp) + ";";
+                            String pRAVTimeStamp = _hlaReporter.printTimes(te.timeStamp) + ";";
+
+                            if (_hlaReporter.getNumberOfRAVs() > 0 
+                                    && (_hlaReporter.getPRAVsTimes().length() - _hlaReporter.getPRAVsTimes().lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
+
+                                int indexOfAttribute = 0;
+
+                                String[] arrayStr = _hlaReporter.getNameOfTheAttributesSubscribedTo();
+                                System.out.println("DEBUG HLA-MANAGER: RAV: arrayStr " + arrayStr.toString() );
+                                for (int j = 0; j < arrayStr.length; j++) {
+                                    System.out.println("DEBUG HLA-MANAGER: RAV: arrayStr value " + i + " " + arrayStr[i]);
+
+                                }
+
+                                for (int j = 0; j < _hlaAttributesToSubscribeTo.size(); j++) {
+                                    //if (_nameOfTheAttributesSubscribedTo[j].substring(_nameOfTheAttributesSubscribedTo[j].lastIndexOf("-" + attributeName) + 1).equals(attributeName)) {
+                                    if (hlaSubcriberName.equals(arrayStr[j])) {
+                                        indexOfAttribute = j;
+                                        break;
+                                    }  
+                                }
+                                StringBuffer[] stb = _hlaReporter.getRAVsValues();
+
+                                stb[indexOfAttribute].replace(stb[indexOfAttribute].length() - 2, stb[indexOfAttribute].length(), value.toString() + ";");
+
+                            } else { // setup XXX: FIXME: GiL: to reverse
+                                if (_hlaReporter.getNumberOfRAVs() < 1) {
+                                    // initialize
+                                    _hlaReporter.initializeAttributesSubscribedToVariables(_hlaAttributesToSubscribeTo);
+
+                                    int indexOfAttribute = 0;
+
+                                    String[] arrayStr = _hlaReporter.getNameOfTheAttributesSubscribedTo();
+                                    for (int j = 0; j < _hlaAttributesToSubscribeTo.size(); j++) {
+                                        //if (_nameOfTheAttributesSubscribedTo[j].substring(_nameOfTheAttributesSubscribedTo[j].lastIndexOf("-" + attributeName) + 1).equals(attributeName)) {
+                                        if (hlaSubcriberName.equals(arrayStr[j])) {
+                                            indexOfAttribute = j;
+                                            break;
+                                        }
+                                    }
+
+                                    //_folRAVsTimes.append("*");
+                                    _hlaReporter.appendToFolRAVsTimes("*"); 
+
+                                    //_pRAVsTimes.append(pRAVTimeStamp);
+                                    _hlaReporter.appendToPRAVsTimes(pRAVTimeStamp);
+
+                                    for (int j = 0; j < _hlaAttributesToSubscribeTo.size(); j++) {
+                                        StringBuffer[] stb = _hlaReporter.getRAVsValues();
+
+                                        if (j == indexOfAttribute) {
+                                            stb[j].append(value.toString() + ";");
+                                        } else {
+                                            stb[j].append("-;");
+                                        }
+                                    }
+                                }
+                            }
+
+                            _hlaReporter.incrNumberOfRAVs();
+                            // XXX: FIXME: GiL: end HLA Reporter code ? 
                         }
                     } catch (ArrayIndexOutOfBounds e) {
                         // FIXME: XXX: Gil: encapsulate in RTI exception ?
@@ -2637,59 +2687,6 @@ implements TimeRegulator {
                     }
                 }
             }
-
-            /* // XXX: FIXME: GiL: begin HLA Reporter code ?
-                                String attributeName = hs.getParameterName();
-
-                                String pRAVTimeStamp = _printTimes(te.timeStamp)
-                                        + ";";
-                                if (_numberOfRAVs > 0 && (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
-                                    int indexOfAttribute = 0;
-                                    for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                                        if (_nameOfTheAttributesSubscribedTo[j].substring(_nameOfTheAttributesSubscribedTo[j].lastIndexOf("-" + attributeName) + 1).equals(attributeName)) {
-                                            indexOfAttribute = j;
-                                            break;
-                                        }
-                                    }
-                                    _RAVsValues[indexOfAttribute].replace(_RAVsValues[indexOfAttribute].length() - 2, _RAVsValues[indexOfAttribute].length(), value.toString() + ";");
-                                    //_UAVsValues[indexOfAttribute].replace(_UAVsValues[indexOfAttribute].length()-2,_UAVsValues[indexOfAttribute].length(),in.toString()+";");
-                                } else {
-                                    if (_numberOfRAVs < 1) {
-                                        _numberOfAttributesSubscribedTo = _hlaAttributesSubscribedTo.size();
-                                        _nameOfTheAttributesSubscribedTo = new String[_numberOfAttributesSubscribedTo];
-                                        Object attributesSubscribedTo[] = _hlaAttributesSubscribedTo.keySet().toArray();
-                                        System.out.println("Attributes subscribed to: ");
-                                        _RAVsValues = new StringBuffer[_numberOfAttributesSubscribedTo];
-                                        for (int y = 0; y < _numberOfAttributesSubscribedTo; y++) {
-                                            _nameOfTheAttributesSubscribedTo[y] = attributesSubscribedTo[y].toString();
-                                            _RAVsValues[y] = new StringBuffer("");
-                                            System.out.println(_nameOfTheAttributesSubscribedTo[y]);
-                                        }
-                                    }
-
-                                    int indexOfAttribute = 0;
-                                    for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                                        if (_nameOfTheAttributesSubscribedTo[j]
-                                                .substring(_nameOfTheAttributesSubscribedTo[j].lastIndexOf("-" + attributeName) + 1).equals(attributeName)) {
-                                            indexOfAttribute = j;
-                                            break;
-                                        }
-                                    }
-                                    _folRAVsTimes.append("*");
-                                    _pRAVsTimes.append(pRAVTimeStamp);
-                                    for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                                        if (j == indexOfAttribute) {
-                                            _RAVsValues[j].append(
-                                                    value.toString() + ";");
-                                        } else {
-                                            _RAVsValues[j].append("-;");
-                                        }
-                                    }
-                                }
-                                _numberOfRAVs++;
-                                //_RAVsValues=_RAVsValues + value.toString()+";";
-                                // XXX: FIXME: GiL: end HLA Reporter code ?
-             */
         }
 
         /** Callback delivered by the RTI (CERTI) to discover attribute instance

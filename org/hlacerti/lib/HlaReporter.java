@@ -132,9 +132,12 @@ public class HlaReporter {
 
         _pUAVsTimes = new StringBuffer("");
         _preUAVsTimes = new StringBuffer("");
+        
         _pRAVsTimes = new StringBuffer("");
         _folRAVsTimes = new StringBuffer("");
+        
         _TAGDelay = new ArrayList<Double>();
+        
         _numberOfTicks = new ArrayList<Integer>();
         _numberOfRAVs = 0;
         _numberOfUAVs = 0;
@@ -183,8 +186,7 @@ public class HlaReporter {
         _nameOfTheAttributesToPublish = new String[_numberOfAttributesToPublish];
         
         _UAVsValues = new StringBuffer[_numberOfAttributesToPublish];
-        _RAVsValues = null;
-
+        
         Object attributesToPublish[] = hlaAttributesToPublish.keySet().toArray();
         for (int i = 0; i < _numberOfAttributesToPublish; i++) {
             // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, so
@@ -196,6 +198,34 @@ public class HlaReporter {
             System.out.println("[DEBUG-REPORTER] _nameOfTheAttributesToPublish[i] " + _nameOfTheAttributesToPublish[i]);
         }
 
+    }
+    
+    /**
+     * 
+     * @param hlaAttributesToPublish
+     */
+    public void initializeAttributesSubscribedToVariables(HashMap<String, Object[]> hlaAttributesSubscribedTo) {
+        // XXX: FIXME: GiL: to improve, instead of using String[] and StringBuffer[] just set a
+        // HashMap<String, Object[]> where the key is the HLAPublisher fullName ?
+        
+        // XXX: FIXME: GiL: todo, _nameOfTheAttributesSubscribedTo => _hlaSubscriberFullname,
+        //                        _numberOfAttributesSubscribedTo => _numberOfHlaSubscriber
+        _numberOfAttributesSubscribedTo = hlaAttributesSubscribedTo.size();
+        _nameOfTheAttributesSubscribedTo = new String[_numberOfAttributesSubscribedTo];
+        
+        
+        _RAVsValues = new StringBuffer[_numberOfAttributesSubscribedTo];
+
+        Object attributesSubscribedTo[] = hlaAttributesSubscribedTo.keySet().toArray();
+        for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
+            // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, so
+            // toString() will print the HlaPublisher fullName.
+            _nameOfTheAttributesSubscribedTo[i] = attributesSubscribedTo[i].toString();
+            _RAVsValues[i] = new StringBuffer("");
+            
+            // XXX: FIXME: GiL: debug only
+            System.out.println("[DEBUG-REPORTER] RAV: _nameOfTheAttributesSubscribedTo[i] " + _nameOfTheAttributesSubscribedTo[i]);
+        }
     }
 
     /** TBC
@@ -425,31 +455,28 @@ public class HlaReporter {
                 info.append(";;;" + _nameOfTheAttributesToPublish[i] + ";" + _UAVsValues[i] + "\n");
             }
             _UAVsValuesFile = createTextFile(_federateName + "UAV" + ".csv");
-            writeInTextFile(_UAVsValuesFile, String.valueOf(info));
+            writeInTextFile(_UAVsValuesFile, info.toString());
         }
     }
 
     /** Write the RAV information. */
     public void writeRAVsInformation() {
         if (_numberOfRAVs > 0) {
-            StringBuffer header = new StringBuffer(
-                    "LookAhead;TimeStep;StopTime;Information;");
-            int count = _RAVsValues[0].toString().split(";").length;
+            StringBuffer header = new StringBuffer("LookAhead;TimeStep;StopTime;Information;");
+            int count = String.valueOf(_RAVsValues[0]).split(";").length;
             for (int i = 0; i < count; i++) {
                 header.append("RAV" + i + ";");
             }
 
             StringBuffer info = new StringBuffer(_date.toString() + "\n"
             + header + "\n" 
-                    + _hlaLookAHead + ";" + _hlaTimeStep + ";"
-                    + _stopTime + ";" + "pRAV TimeStamp:;" + _pRAVsTimes + "\n"
-                    + ";;;" + "folRAV TimeStamp:;" + _folRAVsTimes + "\n");
+            + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "pRAV TimeStamp:;" + _pRAVsTimes + "\n"
+            + ";;;" + "folRAV TimeStamp:;" + _folRAVsTimes + "\n");
             for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
-                info.append(";;;" + _nameOfTheAttributesSubscribedTo[i] + ";"
-                        + _RAVsValues[i] + "\n");
+                info.append(";;;" + _nameOfTheAttributesSubscribedTo[i] + ";" + _RAVsValues[i] + "\n");
             }
             _RAVsValuesFile = createTextFile(_federateName + "RAV" + ".csv");
-            writeInTextFile(_RAVsValuesFile, String.valueOf(info));
+            writeInTextFile(_RAVsValuesFile, info.toString());
         }
     }
 
@@ -775,8 +802,6 @@ public class HlaReporter {
 
     /** .. */
     private int _numberOfAttributesToPublish;
-    
-    
 
     /**
      * @return the _numberOfAttributesToPublish
@@ -784,9 +809,6 @@ public class HlaReporter {
     public int getNumberOfAttributesToPublish() {
         return _numberOfAttributesToPublish;
     }
-
-    /** .. */
-    private int _numberOfAttributesSubscribedTo;
 
     /** .. */
     private String[] _nameOfTheAttributesToPublish;
@@ -798,8 +820,21 @@ public class HlaReporter {
         return _nameOfTheAttributesToPublish;
     }
 
+
+    /** .. */
+    private int _numberOfAttributesSubscribedTo;
+    
+    public int getNumberOfAttributesSubscribedTo() {
+        return _numberOfAttributesSubscribedTo;
+    }
+    
     /** .. */
     private String[] _nameOfTheAttributesSubscribedTo;
+    
+    /** .. */
+    public String[] getNameOfTheAttributesSubscribedTo() {
+        return _nameOfTheAttributesSubscribedTo;
+    }
 
     /** .. */
     private StringBuffer _pUAVsTimes;
@@ -838,15 +873,40 @@ public class HlaReporter {
     /** .. */
     private File _RAVsValuesFile;
 
-    /** .. */
+    /** OK */
     private StringBuffer[] _RAVsValues;
+    
+    /** OK */
+    public StringBuffer[] getRAVsValues() {
+        return _RAVsValues;
+    }
 
-    /** .. */
+    /** OK */
     private StringBuffer _pRAVsTimes;
-
-    /** .. */
+    
+    /** OK */
+    public StringBuffer getPRAVsTimes() {
+        return _pRAVsTimes;
+    }
+    
+    /** OK */
+    public void appendToPRAVsTimes(String strValue) {
+        _pRAVsTimes.append(strValue);
+    }
+        
+    /** OK */
     private StringBuffer _folRAVsTimes;
-
+    
+    /** OK */
+    public StringBuffer getFolRAVsTimes() {
+        return _folRAVsTimes;
+    }
+    
+    /** OK */
+    public void appendToFolRAVsTimes(String strValue) {
+        _folRAVsTimes.append(strValue);
+    }
+    
     /** Represents the instant when the simulation is fully started
      * (when the last federate starts running).
      */
@@ -863,6 +923,27 @@ public class HlaReporter {
 
     /** Represents the number of received RAV. */
     private int _numberOfRAVs;
+
+    /**
+     * @return the _numberOfRAVs
+     */
+    public int getNumberOfRAVs() {
+        return _numberOfRAVs;
+    }
+
+    /**
+     * @param _numberOfUAVs the _numberOfUAVs to set
+     */
+    public void incrNumberOfRAVs() {
+        _numberOfRAVs++;
+    }
+    
+    /**
+     * @param _numberOfRAVs the _numberOfRAVs to set
+     */
+    public void resetNumberOfRAVs() {
+        _numberOfRAVs = 0;
+    }
 
     /** Represents the number of received UAV. */
     private int _numberOfUAVs;
