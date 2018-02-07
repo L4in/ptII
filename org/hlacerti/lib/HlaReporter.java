@@ -64,11 +64,12 @@ public class HlaReporter {
     /** Constructs a HLA analysis reporter.
      *  @throws IOException 
      */
-    public HlaReporter(String directory, String filename, String modelName) throws IOException
+    public HlaReporter(String directory, String federateName, String modelName) throws IOException
     {
         // FIXME: XXX: GiL: is filename needed ?
         // Set model filename.
-        _modelFileName = modelName + ".xml";
+        _modelName = modelName;
+        _modelFileName = modelName + _FILE_EXT_XML;
         
         // Get current system date.
         _date = new Date();
@@ -80,10 +81,10 @@ public class HlaReporter {
         _reportsFolder = createFolder(directory + "/" + yearDateFormat.format(_date).toString() + "/" + modelName);
 
         // Create textual data file.
-        _file    = createTextFile(modelName + "-hla-report.txt");
+        _txtFile = createTextFile(federateName + "-HLA-report" + _FILE_EXT_TXT);
         
         // Create CSV data file.
-        _csvFile = createTextFile(modelName + "-hla-report.csv");
+        _csvFile = createTextFile(federateName + "-HLA-report" + _FILE_EXT_CSV);
         
         // Write date to file.
         writeToTextFile(_date.toString());
@@ -91,7 +92,7 @@ public class HlaReporter {
    }
 
     /** Initialize the variables that are going to be used to create the reports
-     *  in the files {@link #_file} and {@link #_csvFile}
+     *  in the files {@link #_txtFile} and {@link #_csvFile}
      */
     public void initializeReportVariables(double hlaLookAHead, 
             double hlaTimeStep, 
@@ -305,8 +306,8 @@ public class HlaReporter {
                 System.out.println("Choose a valid name for the txt file.");
                 return null;
             } else {
-                if (!(name.endsWith(".txt") || name.endsWith(".csv"))) {
-                    name = name.concat(".txt");
+                if (!(name.endsWith(_FILE_EXT_TXT) || name.endsWith(_FILE_EXT_CSV))) {
+                    name = name.concat(_FILE_EXT_TXT);
                 }
                 try {
                     File file = new File(name);
@@ -345,8 +346,8 @@ public class HlaReporter {
                 System.out.println("Choose a valid name for the txt file.");
                 return null;
             } else {
-                if (!(name.endsWith(".txt") || name.endsWith(".csv"))) {
-                    name = name.concat(".txt");
+                if (!(name.endsWith(_FILE_EXT_TXT) || name.endsWith(_FILE_EXT_CSV))) {
+                    name = name.concat(_FILE_EXT_TXT);
                 }
                 try {
                     File file = new File(name);
@@ -454,7 +455,7 @@ public class HlaReporter {
             for (int i = 0; i < _numberOfAttributesToPublish; i++) {
                 info.append(";;;" + _nameOfTheAttributesToPublish[i] + ";" + _UAVsValues[i] + "\n");
             }
-            _UAVsValuesFile = createTextFile(_federateName + "UAV" + ".csv");
+            _UAVsValuesFile = createTextFile(_federateName + "-UAV" + _FILE_EXT_CSV);
             writeInTextFile(_UAVsValuesFile, info.toString());
         }
     }
@@ -475,7 +476,7 @@ public class HlaReporter {
             for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
                 info.append(";;;" + _nameOfTheAttributesSubscribedTo[i] + ";" + _RAVsValues[i] + "\n");
             }
-            _RAVsValuesFile = createTextFile(_federateName + "RAV" + ".csv");
+            _RAVsValuesFile = createTextFile(_federateName + "-RAV" + _FILE_EXT_CSV);
             writeInTextFile(_RAVsValuesFile, info.toString());
         }
     }
@@ -533,7 +534,7 @@ public class HlaReporter {
                 + _runtime + "\n");
 
         // Write to file.
-        writeInTextFile(_file, info.toString());
+        writeInTextFile(_txtFile, info.toString());
     }
 
     /** Write a report containing(in a .csv file {@link #_csvFile}), among other informations,
@@ -591,7 +592,7 @@ public class HlaReporter {
         if (_timeStepped) {
         	// FIXME: XXX: GiL: check if _reportFile is used in an other part ?
             _reportFile = createTextFile(
-                    _federateName + "TAR" + ".csv",
+                    _federateName + "-TAR" + _FILE_EXT_CSV,
                     "date;timeStep;lookahead;runtime;total number of calls;TARs;TAGs;RAVs;UAVs;Ticks2;inactive Time");
             writeInTextFile(_reportFile,
                     _date + ";" + _hlaTimeStep + ";" + _hlaLookAHead + ";"
@@ -601,7 +602,7 @@ public class HlaReporter {
                             + _numberOfTicks2 + ";" + averageDelay);
         } else {
             _reportFile = createTextFile(
-                    _federateName + "NER" + ".csv",
+                    _federateName + "-NER" + _FILE_EXT_CSV,
                     "date;lookahead;runtime;total number of calls;NERs;TAGs;RAVs;UAVs;Ticks2;inactive Time");
             writeInTextFile(_reportFile,
                     _date + ";" + _hlaLookAHead + ";" + _runtime + ";"
@@ -657,7 +658,7 @@ public class HlaReporter {
 
     /** Write the time file to 'times.csv'. */
     public void writeTimes() {
-        File timesFile = createTextFile(_modelFileName + "-times.csv");
+        File timesFile = createTextFile(_federateName + "-times"+ _FILE_EXT_CSV);
         writeInTextFile(timesFile,
         		_date + ";Reason:;" + _reasonsToPrintTheTime
                 + "\nt_ptII:;" + _tPTII 
@@ -677,7 +678,7 @@ public class HlaReporter {
      *  @return
      */
     public boolean writeToTextFile(String data) {
-        return writeInTextFile(_file, data);
+        return writeInTextFile(_txtFile, data);
     }
 
     /** TBC
@@ -761,7 +762,7 @@ public class HlaReporter {
 
     /** Represents a text file that is going to keep track of the number of
      *  HLA calls of the federate. */
-    private File _file;
+    private File _txtFile;
 
     /** Represents a ".csv" file that is going to keep track of the number of
      *  HLA calls of the federate. */
@@ -977,6 +978,9 @@ public class HlaReporter {
     private Time _stopTime;
 
     /** Name of the current model. */
+    private String _modelName;
+    
+    /** FileName of the current model. */
     private String _modelFileName;
     
     /** Name of the current Ptolemy federate. */
@@ -1005,4 +1009,13 @@ public class HlaReporter {
     protected HashMap<String, Object[]> _hlaAttributesUAV = new HashMap<String, Object[]>();
     protected HashMap<String, Object[]> _hlaAttributesRAV = new HashMap<String, Object[]>();
     //protected HashMap<String, Object[]> _nbrTicksByTags = new HashMap<String, Object[]>();
+    
+    /** CSV file extension suffix. */
+    private static final String _FILE_EXT_CSV = ".csv";
+    
+    /** TXT file extension suffix. */
+    private static final String _FILE_EXT_TXT = ".txt";
+    
+    /** XML file extension suffix. */
+    private static final String _FILE_EXT_XML = ".xml";
 }
