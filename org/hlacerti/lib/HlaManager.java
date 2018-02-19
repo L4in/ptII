@@ -1512,9 +1512,12 @@ implements TimeRegulator {
                 // Call CERTI TAR HLA service.
                 _rtia.timeAdvanceRequest(tarContractTime);
 
-                // Increment counter of TAR calls.
-                _hlaReporter._numberOfTARs++;
-
+                // XXX: FIXME: HLA Reporter support
+                if (_enableHlaReporter) {
+                	// Increment counter of TAR calls.
+                	_hlaReporter._numberOfTARs++;
+                }
+                
                 if (_debugging) {
                     _debug("  " + headMsg
                             + " call CERTI TAR(" + tarContractTime.getTime() + ")");
