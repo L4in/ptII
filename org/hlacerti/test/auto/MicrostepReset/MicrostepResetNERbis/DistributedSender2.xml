@@ -74,13 +74,13 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[200.0, 15.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={77, 459, 708, 621}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={41, 408, 587, 533}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[483, 512]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[371, 415]">
     </property>
-    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.2018626012629967">
+    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.6737136775190634">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{123.77790102751362, 188.15110181725547}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{217.41796875, 280.0493529259003}">
     </property>
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
         <property name="textSize" class="ptolemy.data.expr.Parameter" value="8">
@@ -188,13 +188,16 @@
         </property>
     </entity>
     <entity name="val" class="org.hlacerti.lib.HlaPublisher">
-        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;ValueTransfer&quot;">
-            <display name="Object class in FOM"/>
-        </property>
         <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
             <display name="Name of the attribute to receive"/>
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{235.0, 95.0}">
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;ValueTransfer&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance2&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[395.0, 95.0]">
         </property>
     </entity>
     <entity name="TimeDelay" class="ptolemy.actor.lib.TimeDelay">

@@ -4,7 +4,7 @@
 <entity name="MicrostepResetTAR" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={50, 56, 1017, 632}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={50, 56, 999, 640}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[783, 522]">
     </property>
@@ -25,7 +25,7 @@
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
         <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Open the DistributedReceiver.xml model: first federate  to be launched (Receiver).">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{10.0, 100.0}">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[10.0, 95.0]">
         </property>
         <property name="LiveLink" class="ptolemy.actor.gui.LiveLink" value="DistributedReceiver.xml">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
@@ -46,7 +46,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="{395, 280}">
             </property>
         </property>
-        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/demo/MicrostepReset/MicrostepResetTAR/DistributedReceiver/index.html">
+        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/test/auto/MicrostepReset/MicrostepResetTAR/DistributedReceiver/index.html">
             <property name="linkTarget" class="ptolemy.vergil.basic.export.web.LinkTarget" value="_self">
             </property>
             <property name="_location" class="ptolemy.kernel.util.Location" value="{450, 180}">
@@ -77,7 +77,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="{395, 280}">
             </property>
         </property>
-        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/demo/MicrostepReset/MicrostepResetTAR/DistributedSender/index.html">
+        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/test/auto/MicrostepReset/MicrostepResetTAR/DistributedSender/index.html">
             <property name="linkTarget" class="ptolemy.vergil.basic.export.web.LinkTarget" value="_self">
             </property>
             <property name="_location" class="ptolemy.kernel.util.Location" value="{450, 180}">
@@ -124,7 +124,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="{395, 280}">
             </property>
         </property>
-        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/demo/MicrostepReset/MicrostepResetTAR/DistributedReceiver/index.html">
+        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/test/auto/MicrostepReset/MicrostepResetTAR/DistributedReceiver/index.html">
             <property name="linkTarget" class="ptolemy.vergil.basic.export.web.LinkTarget" value="_self">
             </property>
             <property name="_location" class="ptolemy.kernel.util.Location" value="{450, 180}">

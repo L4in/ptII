@@ -93,13 +93,13 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[100.0, 15.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={75, 459, 686, 621}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={71, 459, 677, 632}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 512]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 514]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.0442771656244068">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{172.93884020739492, 219.66623850412913}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{172.93884020739492, 220.62383868243242}">
     </property>
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
         <property name="textSize" class="ptolemy.data.expr.Parameter" value="8">
@@ -174,21 +174,21 @@
         </property>
         <property name="offsets" class="ptolemy.data.expr.Parameter" value="{periodS}">
         </property>
-        <property name="values" class="ptolemy.data.expr.Parameter" value="{4}">
+        <property name="values" class="ptolemy.data.expr.Parameter" value="{v}">
         </property>
         <doc>Create periodic timed events.</doc>
         <property name="_location" class="ptolemy.kernel.util.Location" value="{65.0, 90.0}">
         </property>
     </entity>
     <entity name="val" class="org.hlacerti.lib.HlaPublisher">
-        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;ValueTransfer&quot;">
-            <display name="Object class in FOM"/>
-        </property>
         <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
             <display name="Name of the attribute to receive"/>
         </property>
-        <property name="classObjectHandle" class="ptolemy.data.expr.Parameter" value="">
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;ValueTransfer&quot;">
             <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance2&quot;">
+            <display name="Name of the HLA class instance"/>
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[195.0, 90.0]">
         </property>
@@ -198,8 +198,12 @@
             </property>
         </port>
     </entity>
-    <relation name="relation" class="ptolemy.actor.TypedIORelation">
+    <relation name="relation2" class="ptolemy.actor.TypedIORelation">
+        <property name="width" class="ptolemy.data.expr.Parameter" value="-1">
+        </property>
+        <vertex name="vertex1" value="{130.0, 90.0}">
+        </vertex>
     </relation>
-    <link port="DiscreteClock.output" relation="relation"/>
-    <link port="val.input" relation="relation"/>
+    <link port="DiscreteClock.output" relation="relation2"/>
+    <link port="val.input" relation="relation2"/>
 </entity>

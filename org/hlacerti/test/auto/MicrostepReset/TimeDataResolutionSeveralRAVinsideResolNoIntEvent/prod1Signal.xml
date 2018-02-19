@@ -16,13 +16,13 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[35.0, 30.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={428, 402, 686, 621}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={170, 273, 677, 632}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 512]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 514]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.7387143778515635">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{187.26006635451154, 341.961137986341}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{187.26006635451154, 343.3148411630794}">
     </property>
     <property name="stopTime" class="ptolemy.data.expr.Parameter" value="16">
         <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
@@ -222,11 +222,11 @@
         </property>
     </property>
     <entity name="producer" class="ptolemy.actor.lib.gui.TimedPlotter">
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={901, 402, 144, 194}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={901, 402, 170, 203}, maximized=false}">
         </property>
-        <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[144, 153]">
+        <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[168, 153]">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[70.0, 115.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[200.0, 125.0]">
         </property>
         <configure>
 <?plotml <!DOCTYPE plot PUBLIC "-//UC Berkeley//DTD PlotML 1//EN"
@@ -291,11 +291,14 @@
         </property>
     </entity>
     <entity name="val" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Signal&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
-            <display name="Name of the attribute to receive"/>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance1&quot;">
+            <display name="Name of the HLA class instance"/>
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[140.0, 165.0]">
         </property>

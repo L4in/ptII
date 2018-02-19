@@ -1,0 +1,23 @@
+0 0 0 128 10 0 
+0 0 0 128 10 0 
+0 0 0 128 10 0 
+0 0 0 3 9 0 Federation Name : MicrostepError, Handle : 1(Last modified Thu Dec  7 12:06:07 2017) created. - OK
+0 0 0 5 9 0 Federate "Receiver" joins Federation "MicrostepError"(1)with handle 1. Socket 6 - OK
+0 1 1 36 7 0 Subscribe Object Class = 3, # of att. = 1 - OK
+0 1 1 8 8 0 ON at time 0 - OK
+0 1 1 7 8 0 ON at time 0.5 - OK
+0 0 0 128 10 0 
+0 0 0 3 9 0 Federation Name : MicrostepError, Handle : 2 - OK
+0 0 0 5 9 0 Federate "Sender2" joins Federation "MicrostepError"(1)with handle 2. Socket 7 - OK
+0 1 2 32 7 0 Publish Object Class = 3, # of att. = 1 - OK
+0 1 2 42 6 0 Register Object Class = 3 - OK
+0 1 2 8 8 0 ON at time 0 - OK
+0 1 2 7 8 0 ON at time 0.01 - OK
+0 0 0 128 10 0 
+0 0 0 3 9 0 Federation Name : MicrostepError, Handle : 3 - OK
+0 0 0 5 9 0 Federate "Sender" joins Federation "MicrostepError"(1)with handle 3. Socket 8 - OK
+0 1 3 32 7 0 Publish Object Class = 3, # of att. = 1 - OK
+0 1 3 42 6 64 Register Object Class = 3Object name already defined.
+0 1 3 33 7 0 Publish Object Class = 3, # of att. = 0 - OK
+0 1 3 6 9 0 Federate 3 resign federation(1) - OK
+0 0 0 4 9 0  - OK

@@ -74,13 +74,13 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[200.0, 25.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={69, 392, 686, 631}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={69, 392, 677, 640}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 522]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.0095044515242522">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{180.37692484616318, 232.8983620897684}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{180.37692484616318, 232.89836208976845}">
     </property>
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
         <property name="textSize" class="ptolemy.data.expr.Parameter" value="8">
@@ -162,11 +162,14 @@
         </property>
     </entity>
     <entity name="val" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;ValueTransfer&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
-            <display name="Name of the attribute to receive"/>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance2&quot;">
+            <display name="Name of the HLA class instance"/>
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[170.0, 95.0]">
         </property>

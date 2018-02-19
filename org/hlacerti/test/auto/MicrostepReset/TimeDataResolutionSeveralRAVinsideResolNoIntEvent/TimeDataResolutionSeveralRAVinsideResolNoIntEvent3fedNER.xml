@@ -4,13 +4,13 @@
 <entity name="TimeDataResolutionSeveralRAVinsideResolNoIntEvent3fedNER" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={478, 95, 744, 516}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={478, 95, 726, 632}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[510, 406]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[510, 514]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.317150222011844">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{203.80371093750003, 219.3245390625}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{203.8037109375, 260.322140625}">
     </property>
     <property name="Annotation999" class="ptolemy.vergil.kernel.attributes.TextAttribute">
         <property name="textSize" class="ptolemy.data.expr.Parameter" value="9">
@@ -21,7 +21,7 @@
         </property>
     </property>
     <property name="Annotation5" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="WIP: cons model: first federate to be launched.">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="WIP: cons1 model: first federate to be launched.">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[10.0, 90.0]">
         </property>
@@ -44,7 +44,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="{395, 280}">
             </property>
         </property>
-        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/demo/WipMicrostepReset/DistributedReceiver/index.html">
+        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/test/auto/WipMicrostepReset/DistributedReceiver/index.html">
             <property name="linkTarget" class="ptolemy.vergil.basic.export.web.LinkTarget" value="_self">
             </property>
             <property name="_location" class="ptolemy.kernel.util.Location" value="{450, 180}">
@@ -77,7 +77,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="{395, 280}">
             </property>
         </property>
-        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/demo/WipMicrostepReset/DistributedSender/index.html">
+        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/test/auto/WipMicrostepReset/DistributedSender/index.html">
             <property name="linkTarget" class="ptolemy.vergil.basic.export.web.LinkTarget" value="_self">
             </property>
             <property name="_location" class="ptolemy.kernel.util.Location" value="{450, 180}">
@@ -85,7 +85,7 @@
         </property>
     </property>
     <property name="Annotation6" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="WIP: cons model: second federate to be launched.">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="WIP: prod2 model: second federate to be launched.">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[10.0, 110.0]">
         </property>
@@ -108,7 +108,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="{395, 280}">
             </property>
         </property>
-        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/demo/WipMicrostepReset/DistributedReceiver/index.html">
+        <property name="IconLink" class="ptolemy.vergil.basic.export.web.IconLink" value="http://ptolemy.eecs.berkeley.edu/ptolemyII/ptII11.0/ptII/org/hlacerti/test/auto/WipMicrostepReset/DistributedReceiver/index.html">
             <property name="linkTarget" class="ptolemy.vergil.basic.export.web.LinkTarget" value="_self">
             </property>
             <property name="_location" class="ptolemy.kernel.util.Location" value="{450, 180}">

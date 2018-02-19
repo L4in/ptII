@@ -10,13 +10,13 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[60.0, 45.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={196, 109, 686, 621}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={1245, 75, 677, 632}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 512]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 514]">
     </property>
-    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.710347882337663">
+    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.7794849372839435">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{306.4500911552079, 367.6917450330696}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{250.8470296859743, 337.7669661325257}">
     </property>
     <property name="HlaManager" class="org.hlacerti.lib.HlaManager">
         <property name="federateName" class="ptolemy.data.expr.Parameter" value="&quot;Receiver&quot;">
@@ -270,14 +270,14 @@
         </port>
         <entity name="HlaSubscriber" class="org.hlacerti.lib.HlaSubscriber">
             <display name="objectName val"/>
-            <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
-                <display name="type of the parameter"/>
+            <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
+                <display name="Name of the attribute to receive"/>
             </property>
             <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;ValueTransfer&quot;">
                 <display name="Object class in FOM"/>
             </property>
-            <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
-                <display name="Name of the attribute to receive"/>
+            <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+                <display name="type of the parameter"/>
             </property>
             <property name="_location" class="ptolemy.kernel.util.Location" value="[85.0, 135.0]">
             </property>
@@ -287,11 +287,6 @@
         <link port="out" relation="relation"/>
         <link port="HlaSubscriber.output" relation="relation"/>
     </class>
-    <entity name="InstanceOfHlaSubscriber" class="ValueTransfer">
-        <display name="Sender2 DiscreteClock"/>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[50.0, 355.0]">
-        </property>
-    </entity>
     <entity name="InstanceOfRecordAssembler4" class="RecordAssembler">
         <property name="_location" class="ptolemy.kernel.util.Location" value="[225.0, 355.0]">
         </property>
@@ -348,11 +343,6 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="{220, 155}">
         </property>
     </entity>
-    <entity name="InstanceOfValueTransfer" class="ValueTransfer">
-        <display name="Sender DiscreteClock"/>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[50.0, 415.0]">
-        </property>
-    </entity>
     <entity name="InstanceOfRecordAssembler3" class="RecordAssembler">
         <property name="_location" class="ptolemy.kernel.util.Location" value="[225.0, 415.0]">
         </property>
@@ -363,6 +353,38 @@
     </entity>
     <entity name="MicrostepDelay2" class="ptolemy.actor.lib.MicrostepDelay">
         <property name="_location" class="ptolemy.kernel.util.Location" value="[90.0, 190.0]">
+        </property>
+    </entity>
+    <entity name="HlaSubSender2TimeDelay" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;ValueTransfer&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance2&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[35.0, 355.0]">
+        </property>
+    </entity>
+    <entity name="HlaSubSenderTimeDelay" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;ValueTransfer&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[35.0, 415.0]">
         </property>
     </entity>
     <relation name="relation11" class="ptolemy.actor.TypedIORelation">
@@ -405,7 +427,6 @@
     </relation>
     <relation name="relation12" class="ptolemy.actor.TypedIORelation">
     </relation>
-    <link port="InstanceOfHlaSubscriber.out" relation="relation11"/>
     <link port="InstanceOfRecordAssembler4.in" relation="relation11"/>
     <link port="InstanceOfRecordAssembler4.out" relation="relation5"/>
     <link port="InstanceOfRecordAssembler5.in" relation="relation2"/>
@@ -426,11 +447,12 @@
     <link port="AddSubtract.plus" relation="relation11"/>
     <link port="AddSubtract.plus" relation="relation10"/>
     <link port="AddSubtract.output" relation="relation2"/>
-    <link port="InstanceOfValueTransfer.out" relation="relation10"/>
     <link port="InstanceOfRecordAssembler3.in" relation="relation10"/>
     <link port="InstanceOfRecordAssembler3.out" relation="relation7"/>
     <link port="MicrostepDelay.input" relation="relation9"/>
     <link port="MicrostepDelay.output" relation="relation8"/>
     <link port="MicrostepDelay2.input" relation="relation12"/>
     <link port="MicrostepDelay2.output" relation="relation6"/>
+    <link port="HlaSubSender2TimeDelay.output" relation="relation11"/>
+    <link port="HlaSubSenderTimeDelay.output" relation="relation10"/>
 </entity>
