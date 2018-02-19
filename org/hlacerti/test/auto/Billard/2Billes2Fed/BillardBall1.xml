@@ -4,13 +4,13 @@
 <entity name="BillardBall1" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={2353, 188, 1840, 694}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={80, 188, 1831, 703}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[1615, 585]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="2.1186569462983877">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{340.7776975418734, 268.92550231268626}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{340.77769754187335, 268.92550231268626}">
     </property>
     <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
         <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
@@ -250,7 +250,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[195.0, 10.0]">
             </property>
         </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={32, 22, 1201, 460}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={32, 24, 1183, 632}, maximized=false}">
         </property>
         <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[967, 350]">
         </property>
@@ -544,11 +544,14 @@
         <link port="SingleEvent.output" relation="relation4"/>
     </entity>
     <entity name="PositionX" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
-            <display name="Name of the attribute to receive"/>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;HLAclassInstanceName1&quot;">
+            <display name="Name of the HLA class instance"/>
         </property>
         <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
             <display name="use CERTI message buffer"/>
@@ -557,11 +560,14 @@
         </property>
     </entity>
     <entity name="PositionY" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
-            <display name="Name of the attribute to receive"/>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;HLAclassInstanceName1&quot;">
+            <display name="Name of the HLA class instance"/>
         </property>
         <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
             <display name="use CERTI message buffer"/>

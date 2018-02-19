@@ -4,13 +4,13 @@
 <entity name="TwoBilliardBalls" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={2242, 158, 1248, 865}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={672, 158, 1239, 874}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[1023, 756]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.564443539095174">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{285.75728963216153, 230.60507405598963}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{285.7572896321614, 230.60507405598963}">
     </property>
     <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
         <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
@@ -27,6 +27,9 @@
         </property>
         <property name="fedFile" class="ptolemy.data.expr.FileParameter" value="Test.fed">
             <display name="Federate Object Model (.fed) file path"/>
+        </property>
+        <property name="requireSynchronization" class="ptolemy.data.expr.Parameter" value="false">
+            <display name="Require synchronization ?"/>
         </property>
         <property name="synchronizationPointName" class="ptolemy.data.expr.Parameter" value="&quot;Init&quot;">
             <display name="Synchronization point name"/>
@@ -90,7 +93,7 @@
         </property>
     </property>
     <entity name="Bille1" class="ptolemy.actor.TypedCompositeActor">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{-5.0, 210.0}">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[0.0, 225.0]">
         </property>
         <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
             <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
@@ -140,7 +143,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[175.0, 0.0]">
             </property>
         </property>
-        <property name="Vy" class="ptolemy.data.expr.Parameter" value="1.0">
+        <property name="Vy" class="ptolemy.data.expr.Parameter" value="-1.0">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
             </property>
             <property name="_icon" class="ptolemy.vergil.icon.ValueIcon">
@@ -272,7 +275,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[195.0, 10.0]">
             </property>
         </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={32, 22, 1188, 630}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={32, 24, 1183, 642}, maximized=false}">
         </property>
         <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[967, 524]">
         </property>
@@ -564,7 +567,7 @@
         <link port="SingleEvent.output" relation="relation4"/>
     </entity>
     <entity name="Bille2" class="ptolemy.actor.TypedCompositeActor">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{-5.0, 285.0}">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[-5.0, 325.0]">
         </property>
         <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
             <property name="startTime" class="ptolemy.data.expr.Parameter" value="">
@@ -1040,23 +1043,55 @@
         <link port="SingleEvent.output" relation="relation4"/>
     </entity>
     <entity name="PositionX" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
-            <display name="Name of the attribute to receive"/>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;BilleInstance1&quot;">
+            <display name="Name of the HLA class instance"/>
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[245.0, 200.0]">
         </property>
     </entity>
     <entity name="PositionY" class="org.hlacerti.lib.HlaPublisher">
-        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
-            <display name="Object class in FOM"/>
-        </property>
         <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
             <display name="Name of the attribute to receive"/>
         </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;BilleInstance1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[245.0, 250.0]">
+        </property>
+    </entity>
+    <entity name="PositionX2" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;BilleInstance2&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="{244.5285725911458, 297.7215901692709}">
+        </property>
+    </entity>
+    <entity name="PositionY2" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;BilleInstance2&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[245.0, 350.0]">
         </property>
     </entity>
     <relation name="relation4" class="ptolemy.actor.TypedIORelation">
@@ -1067,22 +1102,20 @@
         <property name="_layoutHint" class="ptolemy.vergil.actor.LayoutHint" value="{ { head={id=&quot;PositionX.input&quot;,x=170.0,y=250.0,index=2}, tail={id=&quot;relation4.vertex1&quot;,x=70.0,y=250.0}, points={} },{ head={id=&quot;Bille2.X&quot;,x=-5.0,y=285.0}, tail={id=&quot;relation4.vertex1&quot;,x=70.0,y=250.0}, points={55.0,275.0,55.0,250.0} } }">
         </property>
     </relation>
+    <relation name="relation3" class="ptolemy.actor.TypedIORelation">
+    </relation>
+    <relation name="relation5" class="ptolemy.actor.TypedIORelation">
+    </relation>
     <relation name="relation" class="ptolemy.actor.TypedIORelation">
-        <property name="width" class="ptolemy.data.expr.Parameter" value="-1">
-        </property>
-        <vertex name="vertex1" value="[100.0, 200.0]">
-        </vertex>
     </relation>
     <relation name="relation2" class="ptolemy.actor.TypedIORelation">
-        <property name="width" class="ptolemy.data.expr.Parameter" value="-1">
-        </property>
-        <vertex name="vertex1" value="[75.0, 220.0]">
-        </vertex>
     </relation>
     <link port="Bille1.X" relation="relation"/>
     <link port="Bille1.Y" relation="relation2"/>
-    <link port="Bille2.X" relation="relation"/>
-    <link port="Bille2.Y" relation="relation2"/>
+    <link port="Bille2.X" relation="relation3"/>
+    <link port="Bille2.Y" relation="relation5"/>
     <link port="PositionX.input" relation="relation"/>
     <link port="PositionY.input" relation="relation2"/>
+    <link port="PositionX2.input" relation="relation3"/>
+    <link port="PositionY2.input" relation="relation5"/>
 </entity>
