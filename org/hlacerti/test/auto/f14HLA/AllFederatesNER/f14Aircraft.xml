@@ -4,13 +4,13 @@
 <entity name="f14Aircraft" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={54, 260, 1294, 768}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={0, 340, 519, 436}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[1069, 659]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[303, 318]">
     </property>
-    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.337366449285417">
+    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.5670373586862263">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{314.92738421314743, 159.07366756930614}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{177.36040210723877, 188.39173135334312}">
     </property>
     <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
         <property name="stopTime" class="ptolemy.data.expr.Parameter" value="stopTime">
@@ -174,7 +174,7 @@
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
         </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: Gilles Lasnier - SUPAERO ISAE - gilles.lasnier@gmail.com&#10;               Janette Cardoso - SUPAERO ISAE - janette.cardoso@isae.fr&#10;               Pierre Siron - SUPAERO ISAE / ONERA - pierre.siron@isae.fr&#10;&#10;Update: CIELE Ingenierie - www.ciele.fr&#10;">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: Gilles Lasnier - SUPAERO ISAE - gilles.lasnier@gmail.com&#10;               Janette Cardoso - SUPAERO ISAE - janette.cardoso@isae.fr&#10;               Pierre Siron - SUPAERO ISAE / ONERA - pierre.siron@isae.fr&#10;&#10;Update: CIELE Ingénierie - www.ciele.fr&#10;">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[145.0, 235.0]">
         </property>
@@ -1335,7 +1335,7 @@
         <entity name="alpha AoA" class="ptolemy.actor.lib.gui.TimedPlotter">
             <property name="legend" class="ptolemy.kernel.util.StringAttribute" value="ElevComD,AoAD, ElevComC,AoAC">
             </property>
-            <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={1227, 818, 596, 334}, maximized=false}">
+            <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={682, 436, 598, 340}, maximized=false}">
             </property>
             <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[596, 290]">
             </property>
@@ -1349,7 +1349,7 @@
 <plot>
 <title>TimedPlotter</title>
 <xRange min="0.0" max="12.0"/>
-<yRange min="-1.4384763172161281" max="1.0475134934714894"/>
+<yRange min="-1.4384757896228786" max="1.0475134942966624"/>
 </plot>?>
             </configure>
         </entity>
@@ -1412,7 +1412,7 @@
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;myObjectClass&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;Instance1&quot;">
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance2&quot;">
             <display name="Name of the HLA class instance"/>
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[305.0, 60.0]">
@@ -1430,7 +1430,7 @@
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;myObjectClass&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;Instance1&quot;">
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance2&quot;">
             <display name="Name of the HLA class instance"/>
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[305.0, 105.0]">
@@ -1444,12 +1444,21 @@
     <entity name="TimedPlotter" class="ptolemy.actor.lib.gui.TimedPlotter">
         <property name="legend" class="ptolemy.kernel.util.StringAttribute" value="Nz,q, AoA">
         </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={385, 224, 502, 350}, maximized=false}">
         </property>
-        <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute">
+        <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[500, 300]">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="{295, 150}">
         </property>
+        <configure>
+<?plotml <!DOCTYPE plot PUBLIC "-//UC Berkeley//DTD PlotML 1//EN"
+"http://ptolemy.eecs.berkeley.edu/xml/dtd/PlotML_1.dtd">
+<plot>
+<title>TimedPlotter</title>
+<xRange min="0.0" max="12.0"/>
+<yRange min="-12.479058880335414" max="12.835830588144363"/>
+</plot>?>
+        </configure>
     </entity>
     <entity name="HlaSubAutoPilot" class="org.hlacerti.lib.HlaSubscriber">
         <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;elevCom&quot;">
@@ -1458,7 +1467,7 @@
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;myObjectClass&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;Instance1&quot;">
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;elevComInstance&quot;">
             <display name="Name of the HLA class instance"/>
         </property>
         <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
