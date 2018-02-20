@@ -10,7 +10,7 @@
     (Class myObjectClass
 		(Attribute elevCom RELIABLE TIMESTAMP)
 		(Attribute alpha RELIABLE TIMESTAMP)
-                (Attribute q RELIABLE TIMESTAMP)
+        (Attribute q RELIABLE TIMESTAMP)
 		(Attribute nz RELIABLE TIMESTAMP)
 	)
     (Class TRIM_DATA

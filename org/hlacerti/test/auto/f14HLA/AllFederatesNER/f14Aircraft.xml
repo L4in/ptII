@@ -4,7 +4,7 @@
 <entity name="f14Aircraft" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={101, 187, 1294, 768}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={54, 260, 1294, 768}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[1069, 659]">
     </property>
@@ -217,46 +217,6 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[285.0, -50.0]">
         </property>
     </property>
-    <class name="myObjectClass" extends="ptolemy.actor.TypedCompositeActor">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[355.0, 10.0]">
-        </property>
-        <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
-            <property name="stopTime" class="ptolemy.data.expr.Parameter" value="stopTime">
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[140.0, 85.0]">
-            </property>
-        </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={270, 257, 686, 621}, maximized=false}">
-        </property>
-        <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 512]">
-        </property>
-        <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.1168394993334834">
-        </property>
-        <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{262.40904792906747, 275.9229755704365}">
-        </property>
-        <port name="elevCom" class="ptolemy.actor.TypedIOPort">
-            <property name="output"/>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[255.0, 150.0]">
-            </property>
-            <property name="_showName" class="ptolemy.data.expr.SingletonParameter" value="true">
-            </property>
-        </port>
-        <entity name="HlaSubscriber" class="org.hlacerti.lib.HlaSubscriber">
-            <display name="objectName elevCom"/>
-            <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
-                <display name="type of the parameter"/>
-            </property>
-            <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;elevCom&quot;">
-                <display name="Name of the attribute to receive"/>
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="{105, 150}">
-            </property>
-        </entity>
-        <relation name="relation" class="ptolemy.actor.TypedIORelation">
-        </relation>
-        <link port="elevCom" relation="relation"/>
-        <link port="HlaSubscriber.output" relation="relation"/>
-    </class>
     <entity name="AircraftSAct" class="ptolemy.actor.TypedCompositeActor">
         <property name="_location" class="ptolemy.kernel.util.Location" value="[125.0, 125.0]">
         </property>
@@ -429,7 +389,7 @@
         <entity name="AircraftModel" class="ptolemy.actor.TypedCompositeActor">
             <property name="_location" class="ptolemy.kernel.util.Location" value="{140.0, 100.0}">
             </property>
-            <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={894, 416, 762, 634}, maximized=false}">
+            <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={894, 416, 753, 621}, maximized=false}">
             </property>
             <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[528, 460]">
             </property>
@@ -1206,7 +1166,7 @@
         <entity name="PilotGForce" class="ptolemy.actor.TypedCompositeActor">
             <property name="_location" class="ptolemy.kernel.util.Location" value="[260.0, 205.0]">
             </property>
-            <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={641, 93, 640, 634}, maximized=false}">
+            <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={641, 93, 686, 621}, maximized=false}">
             </property>
             <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[406, 451]">
             </property>
@@ -1449,6 +1409,12 @@
         <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;alpha&quot;">
             <display name="Name of the attribute to receive"/>
         </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;myObjectClass&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;Instance1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[305.0, 60.0]">
         </property>
         <port name="input" class="ptolemy.actor.TypedIOPort">
@@ -1461,6 +1427,12 @@
         <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;q&quot;">
             <display name="Name of the attribute to receive"/>
         </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;myObjectClass&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;Instance1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[305.0, 105.0]">
         </property>
         <port name="input" class="ptolemy.actor.TypedIOPort">
@@ -1468,11 +1440,6 @@
             <property name="_type" class="ptolemy.actor.TypeAttribute" value="double">
             </property>
         </port>
-    </entity>
-    <entity name="InstanceOfmyObjectClass" class="myObjectClass">
-        <display name="AutoPilot AutoPilotDE"/>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[-35.0, 125.0]">
-        </property>
     </entity>
     <entity name="TimedPlotter" class="ptolemy.actor.lib.gui.TimedPlotter">
         <property name="legend" class="ptolemy.kernel.util.StringAttribute" value="Nz,q, AoA">
@@ -1484,17 +1451,33 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="{295, 150}">
         </property>
     </entity>
+    <entity name="HlaSubAutoPilot" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;elevCom&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;myObjectClass&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;Instance1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[-15.0, 125.0]">
+        </property>
+    </entity>
     <relation name="relation2" class="ptolemy.actor.TypedIORelation">
     </relation>
     <relation name="relation6" class="ptolemy.actor.TypedIORelation">
     </relation>
-    <relation name="relation" class="ptolemy.actor.TypedIORelation">
-    </relation>
-    <relation name="relation3" class="ptolemy.actor.TypedIORelation">
-    </relation>
     <relation name="relation4" class="ptolemy.actor.TypedIORelation">
     </relation>
     <relation name="relation5" class="ptolemy.actor.TypedIORelation">
+    </relation>
+    <relation name="relation" class="ptolemy.actor.TypedIORelation">
+    </relation>
+    <relation name="relation3" class="ptolemy.actor.TypedIORelation">
     </relation>
     <link port="AircraftSAct.alphaS" relation="relation2"/>
     <link port="AircraftSAct.qS" relation="relation6"/>
@@ -1504,8 +1487,8 @@
     <link port="AircraftSAct.alpha(AoA)" relation="relation5"/>
     <link port="alpha.input" relation="relation2"/>
     <link port="q.input" relation="relation6"/>
-    <link port="InstanceOfmyObjectClass.elevCom" relation="relation"/>
     <link port="TimedPlotter.input" relation="relation3"/>
     <link port="TimedPlotter.input" relation="relation4"/>
     <link port="TimedPlotter.input" relation="relation5"/>
+    <link port="HlaSubAutoPilot.output" relation="relation"/>
 </entity>
