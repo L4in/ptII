@@ -27,7 +27,7 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[140.0, 50.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={552, 229, 805, 621}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={823, 381, 805, 621}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[580, 512]">
     </property>
@@ -60,44 +60,6 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-10.0, 200.0]">
         </property>
     </property>
-    <class name="myObjectClass" extends="ptolemy.actor.TypedCompositeActor">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[265.0, 60.0]">
-        </property>
-        <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
-            <property name="stopTime" class="ptolemy.data.expr.Parameter" value="stopTime">
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[180.0, 90.0]">
-            </property>
-        </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={336, 144, 925, 621}, maximized=false}">
-        </property>
-        <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[700, 512]">
-        </property>
-        <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.0">
-        </property>
-        <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{340.0, 246.0}">
-        </property>
-        <port name="out" class="ptolemy.actor.TypedIOPort">
-            <property name="output"/>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[330.0, 200.0]">
-            </property>
-        </port>
-        <entity name="HlaSubscriber" class="org.hlacerti.lib.HlaSubscriber">
-            <display name="objectName val"/>
-            <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
-                <display name="type of the parameter"/>
-            </property>
-            <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
-                <display name="Name of the attribute to receive"/>
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[150.0, 200.0]">
-            </property>
-        </entity>
-        <relation name="relation" class="ptolemy.actor.TypedIORelation">
-        </relation>
-        <link port="out" relation="relation"/>
-        <link port="HlaSubscriber.output" relation="relation"/>
-    </class>
     <entity name="ConsumerTimedPlotter" class="ptolemy.actor.lib.gui.TimedPlotter">
         <property name="legend" class="ptolemy.kernel.util.StringAttribute" value="A,B,C">
         </property>
@@ -105,7 +67,7 @@
         </property>
         <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[483, 296]">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[165.0, 145.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[220.0, 145.0]">
         </property>
         <configure>
 <?plotml <!DOCTYPE plot PUBLIC "-//UC Berkeley//DTD PlotML 1//EN"
@@ -120,12 +82,24 @@
 </plot>?>
         </configure>
     </entity>
-    <entity name="InstanceOfmyObjectClass" class="myObjectClass">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[10.0, 145.0]">
+    <entity name="HlaSubVal" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;val&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;myObjectClass&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;Instance1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[60.0, 145.0]">
         </property>
     </entity>
     <relation name="relation" class="ptolemy.actor.TypedIORelation">
     </relation>
     <link port="ConsumerTimedPlotter.input" relation="relation"/>
-    <link port="InstanceOfmyObjectClass.out" relation="relation"/>
+    <link port="HlaSubVal.output" relation="relation"/>
 </entity>
