@@ -10,7 +10,7 @@
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.0697653107044345">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{230.13085937499986, 242.4212496573465}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{230.13085937499983, 242.4212496573465}">
     </property>
     <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
         <property name="stopTime" class="ptolemy.data.expr.Parameter" value="stopTime">
@@ -81,11 +81,14 @@
         </property>
     </entity>
     <entity name="clockValue" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;clockValue&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;clock&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;clockValue&quot;">
-            <display name="Name of the attribute to receive"/>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;Instance1&quot;">
+            <display name="Name of the HLA class instance"/>
         </property>
         <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="false">
             <display name="use CERTI message buffer"/>
