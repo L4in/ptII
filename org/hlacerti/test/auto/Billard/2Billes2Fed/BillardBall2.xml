@@ -4,13 +4,13 @@
 <entity name="BillardBall2" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={0, 261, 1920, 687}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={63, 53, 957, 496}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[1704, 569]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[723, 386]">
     </property>
-    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="2.254435729177214">
+    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.685160137923597">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{334.0785334944998, 260.8293705087505}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{131.242075920105, 220.90202193507645}">
     </property>
     <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
         <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
@@ -250,7 +250,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[195.0, 10.0]">
             </property>
         </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={32, 22, 1201, 634}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={503, 291, 1201, 634}, maximized=true}">
         </property>
         <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[967, 524]">
         </property>
@@ -548,13 +548,13 @@
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;HLAclassInstanceName2&quot;">
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;ball2&quot;">
             <display name="Name of the HLA class instance"/>
         </property>
         <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
             <display name="use CERTI message buffer"/>
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[320.0, 225.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[200.0, 220.0]">
         </property>
     </entity>
     <entity name="PositionY" class="org.hlacerti.lib.HlaPublisher">
@@ -564,13 +564,13 @@
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;HLAclassInstanceName2&quot;">
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;ball2&quot;">
             <display name="Name of the HLA class instance"/>
         </property>
         <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
             <display name="use CERTI message buffer"/>
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[320.0, 265.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[205.0, 265.0]">
         </property>
     </entity>
     <relation name="relation" class="ptolemy.actor.TypedIORelation">
