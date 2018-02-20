@@ -10,13 +10,13 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="{30, 45}">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={556, 195, 686, 623}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={98, 52, 677, 632}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[461, 514]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.9159159159159159">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{223.2016393442621, 291.8375512295083}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{223.20163934426208, 291.8375512295083}">
     </property>
     <property name="stopTime" class="ptolemy.data.expr.Parameter" value="30.0">
         <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
@@ -80,6 +80,9 @@
         <property name="federateName" class="ptolemy.data.expr.Parameter" value="&quot;cons3&quot;">
             <display name="Federate's name"/>
         </property>
+        <property name="federationName" class="ptolemy.data.expr.Parameter" value="&quot;SimpleProducerConsumer&quot;">
+            <display name="Federation's name"/>
+        </property>
         <property name="fedFile" class="ptolemy.data.expr.FileParameter" value="SimpleProducerConsumer.fed">
             <display name="Federate Object Model (.fed) file path"/>
         </property>
@@ -103,63 +106,17 @@
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
         </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Author: Yanxuan LI (ISAE-SUPAERO)&#10;Update: CIELE Ingenierie - www.ciele.fr">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Author: Yanxuan LI (ISAE-SUPAERO)&#10;Update: CIELE Ingénierie - www.ciele.fr">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[30.0, 180.0]">
         </property>
     </property>
-    <class name="consumer" extends="ptolemy.actor.TypedCompositeActor">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[270.0, 55.0]">
-        </property>
-        <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
-            <property name="stopTime" class="ptolemy.data.expr.Parameter" value="stopTime">
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[180.0, 90.0]">
-            </property>
-        </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={393, 282, 925, 623}, maximized=false}">
-        </property>
-        <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[700, 514]">
-        </property>
-        <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.0">
-        </property>
-        <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{340.0, 247.0}">
-        </property>
-        <port name="x" class="ptolemy.actor.TypedIOPort">
-            <property name="output"/>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[300.0, 200.0]">
-            </property>
-            <property name="_showName" class="ptolemy.data.expr.SingletonParameter" value="true">
-            </property>
-        </port>
-        <entity name="HlaSubscriber" class="org.hlacerti.lib.HlaSubscriber">
-            <display name="objectName x"/>
-            <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
-                <display name="type of the parameter"/>
-            </property>
-            <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="false">
-                <display name="use CERTI message buffer"/>
-            </property>
-            <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;consumer&quot;">
-                <display name="Object class in FOM"/>
-            </property>
-            <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;x&quot;">
-                <display name="Name of the attribute to receive"/>
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[150.0, 200.0]">
-            </property>
-        </entity>
-        <relation name="relation" class="ptolemy.actor.TypedIORelation">
-        </relation>
-        <link port="x" relation="relation"/>
-        <link port="HlaSubscriber.output" relation="relation"/>
-    </class>
     <entity name="ConsumerC3" class="ptolemy.actor.lib.gui.TimedPlotter">
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={899, 425, 245, 172}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={899, 425, 243, 163}, maximized=false}">
         </property>
         <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[243, 122]">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[215.0, 140.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[225.0, 135.0]">
         </property>
         <configure>
 <?plotml <!DOCTYPE plot PUBLIC "-//UC Berkeley//DTD PlotML 1//EN"
@@ -168,19 +125,33 @@
 <title>TimedPlotter</title>
 <xLabel></xLabel>
 <yLabel></yLabel>
-<xRange min="30.0" max="30.0"/>
-<yRange min="0.0" max="2.0"/>
+<xRange min="1.7976931348623157E308" max="-1.7976931348623157E308"/>
+<yRange min="1.7976931348623157E308" max="-1.7976931348623157E308"/>
 <default connected="no"/>
 </plot>?>
         </configure>
     </entity>
-    <entity name="InstanceOfconsumer" class="consumer">
-        <display name="cons2 Discrete TimeDelay"/>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[30.0, 140.0]">
+    <entity name="HlaSubCons2DiscreteTimeDelayC3" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;x&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;consumer&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;instance1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="false">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[50.0, 135.0]">
         </property>
     </entity>
     <relation name="relation" class="ptolemy.actor.TypedIORelation">
     </relation>
     <link port="ConsumerC3.input" relation="relation"/>
-    <link port="InstanceOfconsumer.x" relation="relation"/>
+    <link port="HlaSubCons2DiscreteTimeDelayC3.output" relation="relation"/>
 </entity>
