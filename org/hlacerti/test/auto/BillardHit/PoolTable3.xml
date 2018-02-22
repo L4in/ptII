@@ -4,13 +4,13 @@
 <entity name="PoolTable3" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={708, 265, 835, 631}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={1919, 24, 1922, 1033}, maximized=true}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[610, 522]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[1706, 915]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.4153192646052701">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{378.96630859375, 428.0595572916668}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{766.1580989583333, 566.897489420573}">
     </property>
     <property name="display" class="org.hlacerti.lib.HlaManager">
         <display name="displayActor"/>
@@ -62,87 +62,17 @@
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
         </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: J. Cardoso, D. Come &amp; P. Siron&#10;Update: CIELE Ingenierie">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: J. Cardoso, D. Come &amp; P. Siron&#10;Update: CIELE Ingénierie - http://www.ciele.fr">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[350.0, 395.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[425.0, 290.0]">
         </property>
     </property>
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Generic display that can be used with any Billard application.&#10;&#10;The model will create new instances of Bille if needed &#10;and plug them to the ArrayPlotterXY  ">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Generic display that can be used with any Billard application.">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[170.0, 455.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[165.0, 540.0]">
         </property>
     </property>
-    <class name="Bille" extends="ptolemy.actor.TypedCompositeActor">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[465.0, 290.0]">
-        </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={126, 265, 1501, 665}, maximized=false}">
-        </property>
-        <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[1276, 556]">
-        </property>
-        <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.5353535353535352">
-        </property>
-        <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{542.7828947368421, 194.9908511513158}">
-        </property>
-        <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
-            <property name="stopTime" class="ptolemy.data.expr.Parameter" value="endTime">
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[255.0, 45.0]">
-            </property>
-        </property>
-        <port name="X" class="ptolemy.actor.TypedIOPort">
-            <property name="output"/>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[500.0, 105.0]">
-            </property>
-        </port>
-        <port name="Y" class="ptolemy.actor.TypedIOPort">
-            <property name="output"/>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[500.0, 160.0]">
-            </property>
-        </port>
-        <entity name="HlaSubscriber" class="org.hlacerti.lib.HlaSubscriber">
-            <display name="objectName PositionX"/>
-            <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
-                <display name="type of the parameter"/>
-            </property>
-            <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
-                <display name="use CERTI message buffer"/>
-            </property>
-            <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
-                <display name="Object class in FOM"/>
-            </property>
-            <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
-                <display name="Name of the attribute to receive"/>
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[225.0, 105.0]">
-            </property>
-        </entity>
-        <entity name="HlaSubscriber2" class="org.hlacerti.lib.HlaSubscriber">
-            <display name="objectName PositionY"/>
-            <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
-                <display name="type of the parameter"/>
-            </property>
-            <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
-                <display name="use CERTI message buffer"/>
-            </property>
-            <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
-                <display name="Object class in FOM"/>
-            </property>
-            <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
-                <display name="Name of the attribute to receive"/>
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[225.0, 160.0]">
-            </property>
-        </entity>
-        <relation name="relation" class="ptolemy.actor.TypedIORelation">
-        </relation>
-        <relation name="relation2" class="ptolemy.actor.TypedIORelation">
-        </relation>
-        <link port="X" relation="relation"/>
-        <link port="Y" relation="relation2"/>
-        <link port="HlaSubscriber.output" relation="relation"/>
-        <link port="HlaSubscriber2.output" relation="relation2"/>
-    </class>
     <entity name="ArrayPlotterXY" class="ptolemy.actor.lib.gui.ArrayPlotterXY">
         <property name="fillOnWrapup" class="ptolemy.data.expr.Parameter" value="false">
         </property>
@@ -150,7 +80,7 @@
         </property>
         <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[495, 201]">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[355.0, 365.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[510.0, 430.0]">
         </property>
         <port name="x" class="ptolemy.actor.TypedIOPort">
             <property name="input"/>
@@ -179,36 +109,96 @@
 </plot>?>
         </configure>
     </entity>
-    <entity name="InstanceOfBille" class="Bille">
-        <display name="billeHit BilleHit1"/>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[210.0, 360.0]">
+    <entity name="billeHit1PositionX" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
+            <display name="Name of the attribute to receive"/>
         </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={419, 168, 1107, 646}, maximized=false}">
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;billeHit1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[240.0, 365.0]">
         </property>
     </entity>
-    <entity name="billeHit BilleHit1" class=".PoolTable3.Bille">
-        <display name="billeHit2 BilleHit1"/>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[210.0, 420.0]">
+    <entity name="billeHit1PositionY" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;billeHit1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[240.0, 415.0]">
         </property>
     </entity>
+    <entity name="billeHit2PositionX" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;billeHit2&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[240.0, 460.0]">
+        </property>
+    </entity>
+    <entity name="billeHit2PositionY" class="org.hlacerti.lib.HlaSubscriber">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;billeHit2&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="typeSelector" class="ptolemy.data.expr.StringParameter" value="double">
+            <display name="type of the parameter"/>
+        </property>
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[240.0, 505.0]">
+        </property>
+    </entity>
+    <relation name="relation3" class="ptolemy.actor.TypedIORelation">
+    </relation>
     <relation name="relation" class="ptolemy.actor.TypedIORelation">
     </relation>
     <relation name="relation2" class="ptolemy.actor.TypedIORelation">
     </relation>
-    <relation name="billeHit BilleHit1 X" class="ptolemy.actor.TypedIORelation">
-        <property name="width" class="ptolemy.data.expr.Parameter" value="Auto">
-        </property>
+    <relation name="relation4" class="ptolemy.actor.TypedIORelation">
     </relation>
-    <relation name="billeHit BilleHit1 Y" class="ptolemy.actor.TypedIORelation">
-        <property name="width" class="ptolemy.data.expr.Parameter" value="Auto">
-        </property>
-    </relation>
-    <link port="ArrayPlotterXY.x" relation="relation"/>
-    <link port="ArrayPlotterXY.x" relation="billeHit BilleHit1 X"/>
-    <link port="ArrayPlotterXY.y" relation="relation2"/>
-    <link port="ArrayPlotterXY.y" relation="billeHit BilleHit1 Y"/>
-    <link port="InstanceOfBille.X" relation="relation"/>
-    <link port="InstanceOfBille.Y" relation="relation2"/>
-    <link port="billeHit BilleHit1.X" relation="billeHit BilleHit1 X"/>
-    <link port="billeHit BilleHit1.Y" relation="billeHit BilleHit1 Y"/>
+    <link port="ArrayPlotterXY.x" relation="relation3"/>
+    <link port="ArrayPlotterXY.x" relation="relation2"/>
+    <link port="ArrayPlotterXY.y" relation="relation"/>
+    <link port="ArrayPlotterXY.y" relation="relation4"/>
+    <link port="billeHit1PositionX.output" relation="relation3"/>
+    <link port="billeHit1PositionY.output" relation="relation"/>
+    <link port="billeHit2PositionX.output" relation="relation2"/>
+    <link port="billeHit2PositionY.output" relation="relation4"/>
 </entity>
