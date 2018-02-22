@@ -4,13 +4,13 @@
 <entity name="TwoBilliardBalls" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={672, 158, 1239, 874}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={501, 111, 838, 632}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[1023, 756]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[622, 514]">
     </property>
-    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.564443539095174">
+    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.036374384849783">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{285.7572896321614, 230.60507405598963}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{254.04766469606218, 234.85849788826957}">
     </property>
     <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
         <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
@@ -25,10 +25,10 @@
         <property name="federationName" class="ptolemy.data.expr.Parameter" value="&quot;Test&quot;">
             <display name="Federation's name"/>
         </property>
-        <property name="fedFile" class="ptolemy.data.expr.FileParameter" value="Test.fed">
+        <property name="fedFile" class="ptolemy.data.expr.FileParameter" value="./Test.fed">
             <display name="Federate Object Model (.fed) file path"/>
         </property>
-        <property name="requireSynchronization" class="ptolemy.data.expr.Parameter" value="false">
+        <property name="requireSynchronization" class="ptolemy.data.expr.Parameter" value="true">
             <display name="Require synchronization ?"/>
         </property>
         <property name="synchronizationPointName" class="ptolemy.data.expr.Parameter" value="&quot;Init&quot;">
@@ -40,7 +40,7 @@
         <property name="hlaTimeUnit" class="ptolemy.data.expr.Parameter" value="1">
             <display name="HLA time unit"/>
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{195.0, 90.0}">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[250.0, 30.0]">
         </property>
     </property>
     <property name="EndSimu" class="ptolemy.data.expr.Parameter" value="1600.0">
@@ -59,7 +59,7 @@
         </property>
         <property name="_editorFactory" class="ptolemy.vergil.toolbox.VisibleParameterEditorFactory">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{90.0, 0.0}">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[90.0, 5.0]">
         </property>
     </property>
     <property name="Annotation" class="ptolemy.vergil.kernel.attributes.TextAttribute">
@@ -67,9 +67,9 @@
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
         </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: J. Cardoso, D. Come &amp; P. Siron&#10;Update: CIELE Ingenierie">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: J. Cardoso, D. Come &amp; P. Siron&#10;Update: CIELE Ingénierie - http://www.ciele.fr">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{-40.0, 50.0}">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[220.0, 70.0]">
         </property>
     </property>
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
@@ -79,7 +79,7 @@
         </property>
         <property name="text" class="ptolemy.kernel.util.StringAttribute" value="This federate simulates 2 instances of class&#10;&quot;Bille&quot; (see Test.fed file) and can interoperate&#10;with C++ federates of CERTI demo &quot;Billard&quot;.">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{-40.0, 125.0}">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[-30.0, 60.0]">
         </property>
     </property>
     <property name="Annotation3" class="ptolemy.vergil.kernel.attributes.TextAttribute">
@@ -89,21 +89,11 @@
         </property>
         <property name="text" class="ptolemy.kernel.util.StringAttribute" value="If there are problems, &#10;right click on &#10;the HlaManager icon&#10;and select&#10;Listen to Attribute,&#10;then rerun the model.">
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[250.0, 55.0]">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[315.0, -5.0]">
         </property>
     </property>
     <entity name="Bille1" class="ptolemy.actor.TypedCompositeActor">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[0.0, 225.0]">
-        </property>
-        <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
-            <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
-            </property>
-            <property name="stopWhenQueueIsEmpty" class="ptolemy.data.expr.Parameter" value="false">
-            </property>
-            <property name="synchronizeToRealTime" class="ptolemy.data.expr.Parameter" value="false">
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[100.0, 15.0]">
-            </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[20.0, 175.0]">
         </property>
         <property name="delta" class="ptolemy.data.expr.Parameter" value="1">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
@@ -143,7 +133,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[175.0, 0.0]">
             </property>
         </property>
-        <property name="Vy" class="ptolemy.data.expr.Parameter" value="-1.0">
+        <property name="Vy" class="ptolemy.data.expr.Parameter" value="1.0">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
             </property>
             <property name="_icon" class="ptolemy.vergil.icon.ValueIcon">
@@ -248,6 +238,32 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[745.0, 0.0]">
             </property>
         </property>
+        <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
+            <property name="textSize" class="ptolemy.data.expr.Parameter" value="14">
+            </property>
+            <property name="text" class="ptolemy.kernel.util.StringAttribute" value="This is a simplified model of a billiard ball given by X(k)=X(k-1) + Vx (same for the Y). The step time is&#10;given by delta=1. It starts from an initial position (x_,y_), and evolves in a table with 500x100. Each&#10;time the ball reaches the border, the velocity changes its sign.">
+            </property>
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[195.0, 10.0]">
+            </property>
+        </property>
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={2525, 197, 1183, 642}, maximized=false}">
+        </property>
+        <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[967, 524]">
+        </property>
+        <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.5638201225266546">
+        </property>
+        <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{83.22277157967633, 84.40505091152572}">
+        </property>
+        <property name="Annotation3" class="ptolemy.vergil.kernel.attributes.TextAttribute">
+            <property name="textSize" class="ptolemy.data.expr.Parameter" value="12">
+            </property>
+            <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
+            </property>
+            <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: Janette Cardoso, Patricia Derler.">
+            </property>
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[440.0, 235.0]">
+            </property>
+        </property>
         <property name="EndSimu" class="ptolemy.data.expr.Parameter" value="1600">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
             </property>
@@ -264,33 +280,17 @@
             </property>
             <property name="_editorFactory" class="ptolemy.vergil.toolbox.VisibleParameterEditorFactory">
             </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[55.0, 45.0]">
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[25.0, 40.0]">
             </property>
         </property>
-        <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-            <property name="textSize" class="ptolemy.data.expr.Parameter" value="14">
+        <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
+            <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
             </property>
-            <property name="text" class="ptolemy.kernel.util.StringAttribute" value="This is a simplified model of a billiard ball given by X(k)=X(k-1) + Vx (same for the Y). The step time is&#10;given by delta=1. It starts from an initial position (x_,y_), and evolves in a table with 500x100. Each&#10;time the ball reaches the border, the velocity changes its sign.">
+            <property name="stopWhenQueueIsEmpty" class="ptolemy.data.expr.Parameter" value="false">
             </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[195.0, 10.0]">
+            <property name="synchronizeToRealTime" class="ptolemy.data.expr.Parameter" value="false">
             </property>
-        </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={32, 24, 1183, 642}, maximized=false}">
-        </property>
-        <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[967, 524]">
-        </property>
-        <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.0545953880392065">
-        </property>
-        <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{484.884765625, 230.87699802442526}">
-        </property>
-        <property name="Annotation3" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-            <property name="textSize" class="ptolemy.data.expr.Parameter" value="12">
-            </property>
-            <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
-            </property>
-            <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: Janette Cardoso, Patricia Derler.">
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[440.0, 235.0]">
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[70.0, -5.0]">
             </property>
         </property>
         <port name="X" class="ptolemy.actor.TypedIOPort">
@@ -566,20 +566,40 @@
         <link port="Expression4.Y" relation="relation6"/>
         <link port="SingleEvent.output" relation="relation4"/>
     </entity>
-    <entity name="Bille2" class="ptolemy.actor.TypedCompositeActor">
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[-5.0, 325.0]">
+    <entity name="PositionX" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
+            <display name="Name of the attribute to receive"/>
         </property>
-        <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
-            <property name="startTime" class="ptolemy.data.expr.Parameter" value="">
-            </property>
-            <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
-            </property>
-            <property name="stopWhenQueueIsEmpty" class="ptolemy.data.expr.Parameter" value="false">
-            </property>
-            <property name="synchronizeToRealTime" class="ptolemy.data.expr.Parameter" value="false">
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[100.0, 15.0]">
-            </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;ball1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[300.0, 135.0]">
+        </property>
+    </entity>
+    <entity name="PositionY" class="org.hlacerti.lib.HlaPublisher">
+        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
+            <display name="Name of the attribute to receive"/>
+        </property>
+        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
+            <display name="Object class in FOM"/>
+        </property>
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;ball1&quot;">
+            <display name="Name of the HLA class instance"/>
+        </property>
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[300.0, 220.0]">
+        </property>
+    </entity>
+    <entity name="Bille2" class="ptolemy.actor.TypedCompositeActor">
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[20.0, 330.0]">
         </property>
         <property name="delta" class="ptolemy.data.expr.Parameter" value="1">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
@@ -638,7 +658,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[260.0, 0.0]">
             </property>
         </property>
-        <property name="x_" class="ptolemy.data.expr.Parameter" value="200.0">
+        <property name="x_" class="ptolemy.data.expr.Parameter" value="400.0">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
             </property>
             <property name="_icon" class="ptolemy.vergil.icon.ValueIcon">
@@ -667,7 +687,7 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[50.0, 55.0]">
             </property>
         </property>
-        <property name="y_" class="ptolemy.data.expr.Parameter" value="50.0">
+        <property name="y_" class="ptolemy.data.expr.Parameter" value="100.0">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
             </property>
             <property name="_icon" class="ptolemy.vergil.icon.ValueIcon">
@@ -724,6 +744,32 @@
             <property name="_location" class="ptolemy.kernel.util.Location" value="[745.0, 0.0]">
             </property>
         </property>
+        <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
+            <property name="textSize" class="ptolemy.data.expr.Parameter" value="14">
+            </property>
+            <property name="text" class="ptolemy.kernel.util.StringAttribute" value="This is a simplified model of a billiard ball given by X(k)=X(k-1) + Vx (same for the Y). The step time is&#10;given by delta=1. It starts from an initial position (x_,y_), and evolves in a table with 500x100. Each&#10;time the ball reaches the border, the velocity changes its sign.">
+            </property>
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[195.0, 10.0]">
+            </property>
+        </property>
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={2525, 197, 1183, 642}, maximized=false}">
+        </property>
+        <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[967, 524]">
+        </property>
+        <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.5638201225266546">
+        </property>
+        <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{83.22277157967633, 84.40505091152572}">
+        </property>
+        <property name="Annotation3" class="ptolemy.vergil.kernel.attributes.TextAttribute">
+            <property name="textSize" class="ptolemy.data.expr.Parameter" value="12">
+            </property>
+            <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
+            </property>
+            <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: Janette Cardoso, Patricia Derler.">
+            </property>
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[440.0, 235.0]">
+            </property>
+        </property>
         <property name="EndSimu" class="ptolemy.data.expr.Parameter" value="1600">
             <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
             </property>
@@ -740,38 +786,22 @@
             </property>
             <property name="_editorFactory" class="ptolemy.vergil.toolbox.VisibleParameterEditorFactory">
             </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[55.0, 45.0]">
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[25.0, 40.0]">
             </property>
         </property>
-        <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-            <property name="textSize" class="ptolemy.data.expr.Parameter" value="14">
+        <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
+            <property name="stopTime" class="ptolemy.data.expr.Parameter" value="EndSimu">
             </property>
-            <property name="text" class="ptolemy.kernel.util.StringAttribute" value="This is a simplified model of a billiard ball given by X(k)=X(k-1) + Vx (same for the Y). The step time is&#10;given by delta=1. It starts from an initial position (x_,y_), and evolves in a table with 500x100. Each&#10;time the ball reaches the border, the velocity changes its sign.">
+            <property name="stopWhenQueueIsEmpty" class="ptolemy.data.expr.Parameter" value="false">
             </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[195.0, 10.0]">
+            <property name="synchronizeToRealTime" class="ptolemy.data.expr.Parameter" value="false">
             </property>
-        </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={32, 27, 1626, 884}, maximized=false}">
-        </property>
-        <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[967, 496]">
-        </property>
-        <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.0545953880392065">
-        </property>
-        <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{484.884765625, 217.60176454741375}">
-        </property>
-        <property name="Annotation3" class="ptolemy.vergil.kernel.attributes.TextAttribute">
-            <property name="textSize" class="ptolemy.data.expr.Parameter" value="12">
-            </property>
-            <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
-            </property>
-            <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Authors: Janette Cardoso, Patricia Derler.">
-            </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[440.0, 235.0]">
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[70.0, -5.0]">
             </property>
         </property>
         <port name="X" class="ptolemy.actor.TypedIOPort">
             <property name="output"/>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[370.0, 110.0]">
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[365.0, 105.0]">
             </property>
         </port>
         <port name="Y" class="ptolemy.actor.TypedIOPort">
@@ -841,7 +871,7 @@
                 <property name="displayHeight" class="ptolemy.data.expr.Parameter" value="10">
                 </property>
             </property>
-            <property name="_location" class="ptolemy.kernel.util.Location" value="[510.0, 150.0]">
+            <property name="_location" class="ptolemy.kernel.util.Location" value="[505.0, 145.0]">
             </property>
             <port name="X" class="ptolemy.actor.TypedIOPort">
                 <property name="input"/>
@@ -1042,32 +1072,6 @@
         <link port="Expression4.Y" relation="relation6"/>
         <link port="SingleEvent.output" relation="relation4"/>
     </entity>
-    <entity name="PositionX" class="org.hlacerti.lib.HlaPublisher">
-        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
-            <display name="Name of the attribute to receive"/>
-        </property>
-        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
-            <display name="Object class in FOM"/>
-        </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;BilleInstance1&quot;">
-            <display name="Name of the HLA class instance"/>
-        </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[245.0, 200.0]">
-        </property>
-    </entity>
-    <entity name="PositionY" class="org.hlacerti.lib.HlaPublisher">
-        <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionY&quot;">
-            <display name="Name of the attribute to receive"/>
-        </property>
-        <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
-            <display name="Object class in FOM"/>
-        </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;BilleInstance1&quot;">
-            <display name="Name of the HLA class instance"/>
-        </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[245.0, 250.0]">
-        </property>
-    </entity>
     <entity name="PositionX2" class="org.hlacerti.lib.HlaPublisher">
         <property name="attributeName" class="ptolemy.data.expr.Parameter" value="&quot;PositionX&quot;">
             <display name="Name of the attribute to receive"/>
@@ -1075,10 +1079,13 @@
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;BilleInstance2&quot;">
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;ball2&quot;">
             <display name="Name of the HLA class instance"/>
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="{244.5285725911458, 297.7215901692709}">
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[300.0, 295.0]">
         </property>
     </entity>
     <entity name="PositionY2" class="org.hlacerti.lib.HlaPublisher">
@@ -1088,34 +1095,29 @@
         <property name="classObjectName" class="ptolemy.data.expr.Parameter" value="&quot;Bille&quot;">
             <display name="Object class in FOM"/>
         </property>
-        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;BilleInstance2&quot;">
+        <property name="classInstanceName" class="ptolemy.data.expr.Parameter" value="&quot;ball2&quot;">
             <display name="Name of the HLA class instance"/>
         </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[245.0, 350.0]">
+        <property name="useCertiMessageBuffer" class="ptolemy.data.expr.Parameter" value="true">
+            <display name="use CERTI message buffer"/>
+        </property>
+        <property name="_location" class="ptolemy.kernel.util.Location" value="[300.0, 365.0]">
         </property>
     </entity>
-    <relation name="relation4" class="ptolemy.actor.TypedIORelation">
-        <property name="width" class="ptolemy.data.expr.Parameter" value="-1">
-        </property>
-        <vertex name="vertex1" value="[-135.0, 300.0]">
-        </vertex>
-        <property name="_layoutHint" class="ptolemy.vergil.actor.LayoutHint" value="{ { head={id=&quot;PositionX.input&quot;,x=170.0,y=250.0,index=2}, tail={id=&quot;relation4.vertex1&quot;,x=70.0,y=250.0}, points={} },{ head={id=&quot;Bille2.X&quot;,x=-5.0,y=285.0}, tail={id=&quot;relation4.vertex1&quot;,x=70.0,y=250.0}, points={55.0,275.0,55.0,250.0} } }">
-        </property>
-    </relation>
-    <relation name="relation3" class="ptolemy.actor.TypedIORelation">
-    </relation>
-    <relation name="relation5" class="ptolemy.actor.TypedIORelation">
-    </relation>
     <relation name="relation" class="ptolemy.actor.TypedIORelation">
     </relation>
     <relation name="relation2" class="ptolemy.actor.TypedIORelation">
     </relation>
+    <relation name="relation3" class="ptolemy.actor.TypedIORelation">
+    </relation>
+    <relation name="relation4" class="ptolemy.actor.TypedIORelation">
+    </relation>
     <link port="Bille1.X" relation="relation"/>
     <link port="Bille1.Y" relation="relation2"/>
-    <link port="Bille2.X" relation="relation3"/>
-    <link port="Bille2.Y" relation="relation5"/>
     <link port="PositionX.input" relation="relation"/>
     <link port="PositionY.input" relation="relation2"/>
+    <link port="Bille2.X" relation="relation3"/>
+    <link port="Bille2.Y" relation="relation4"/>
     <link port="PositionX2.input" relation="relation3"/>
-    <link port="PositionY2.input" relation="relation5"/>
+    <link port="PositionY2.input" relation="relation4"/>
 </entity>
