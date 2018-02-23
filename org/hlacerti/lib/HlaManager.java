@@ -621,7 +621,8 @@ implements TimeRegulator {
             // Get model filename.
             String modelName =  _director.getFullName().substring(1, _director.getFullName().lastIndexOf('.'));
             try {
-                _hlaReporter = new HlaReporter("testsResults", _federateName, modelName);
+                // XXX: FIXME: where is the default location to store the report ? Models folder ?
+                _hlaReporter = new HlaReporter(hlaReportPath.getValueAsString(), _federateName, modelName);
             } catch (IOException e) {
                 throw new IllegalActionException(this, e, "HLA reporter: Failed to create folder or files: " + e.getMessage());
             }
@@ -849,7 +850,7 @@ implements TimeRegulator {
 
                 // XXX: FIXME: HLA Reporter support
                 if (_enableHlaReporter) {
-                    if (_hlaReporter._timeOfTheLastAdvanceRequest > 0) {
+                    if (_hlaReporter.getTimeOfTheLastAdvanceRequest() > 0) {
                         //_hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                     } else {
                         _hlaReporter._numberOfOtherTicks++;
@@ -1013,13 +1014,29 @@ implements TimeRegulator {
             if (hlaCurrentTime.add(_hlaLookAHead).compareTo(currentTime) > 0) {
                 uavTimeStamp = hlaCurrentTime.add(_hlaLookAHead);
             } else {
+                if (_debugging) {
+                    _debug("XXXXXXXXXXXXXXX = "
+                            + " uavTimeStamp (avant modif) = " + uavTimeStamp);
+                }
+                
                 uavTimeStamp = currentTime;
+                
+                if (_debugging) {
+                    _debug("XXXXXXXXXXXXXXX = "
+                            + "hla_time = _federateAmbassador.hlaLogicalTime = " + (CertiLogicalTime) _federateAmbassador.hlaLogicalTime
+                            + " ptII_time = currentTime = " + currentTime 
+                            + " uavTimeStamp = " + uavTimeStamp);
+                }
             }
         }
+        
+        // Convert UAV timestamp to CERTI logical time.
         CertiLogicalTime ct = _convertToCertiLogicalTime(uavTimeStamp);
 
         // XXX: FIXME: HLA Reporter support
         if (_enableHlaReporter) {
+            _hlaReporter.updateUAVsInformation(hp, in, _getHlaCurrentTime(), currentTime, _director.getMicrostep(), ct);
+            /*
             int attributeIndex = 0;
 
             //String attributeName = _getPortFromTab(tObj).getContainer().getName();
@@ -1080,6 +1097,7 @@ implements TimeRegulator {
                 }
             }
             // XXX: FIXME: GiL: end HLA Reporter code ?
+            */
         }
         
         // XXX: FIXME: this part of the code is legacy, but may be removed as we have
@@ -1089,13 +1107,6 @@ implements TimeRegulator {
         System.out.println("updateHlaAttribute: UAV -"
                 + " id = " + objectInstanceId + " suppAttributes = " + suppAttributes + " tag = " + tag + " ct = " + ct);
         try {
-            _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, ct);
-
-            // XXX: FIXME: HLA Reporter support
-            if (_enableHlaReporter) {
-                _hlaReporter.incrNumberOfUAVs();
-            }
-            
             if (_debugging) {
                 _debug("    updateHlaAttribute() - sending UAV("
                         + "HLA publisher=" + hp.getFullName()
@@ -1104,6 +1115,14 @@ implements TimeRegulator {
                         + ",value=" + in.toString()
                         + ")");
             }
+            
+            _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, ct);
+
+            // XXX: FIXME: HLA Reporter support
+            if (_enableHlaReporter) {
+                _hlaReporter.incrNumberOfUAVs();
+            }
+
         } catch (ObjectNotKnown e) {
             throw new IllegalActionException(this, e,
                     "ObjectNotKnown: " + e.getMessage());
@@ -1115,7 +1134,14 @@ implements TimeRegulator {
                     "AttributeNotOwned: " + e.getMessage());
         } catch (InvalidFederationTime e) {
             throw new IllegalActionException(this, e,
-                    "InvalidFederationTime: " + e.getMessage());
+                    "InvalidFederationTime: " + e.getMessage() + "    updateHlaAttribute() - sending UAV("
+                            + "HLA publisher=" + hp.getFullName()
+                            + ",HLA attribute=" + hp.getAttributeName()
+                            + ",timestamp=" + ct.getTime() 
+                            + ",value=" + in.toString()
+                            + ")"
+                            + " ptII_time=" + currentTime.toString() + " certi_time=" + (CertiLogicalTime) _federateAmbassador.hlaLogicalTime    
+                    );
         } catch (FederateNotExecutionMember e) {
             throw new IllegalActionException(this, e,
                     "FederateNotExecutionMember: " + e.getMessage());
@@ -1379,7 +1405,7 @@ implements TimeRegulator {
             // XXX: FIXME: HLA Reporter support
             if (_enableHlaReporter) {
                 // Set time of last time advance request.
-                _hlaReporter._timeOfTheLastAdvanceRequest = System.nanoTime();
+                _hlaReporter.setTimeOfTheLastAdvanceRequest(System.nanoTime());
             }
             
             // algo3: 2: NER(g(t'))
@@ -1389,7 +1415,7 @@ implements TimeRegulator {
             // XXX: FIXME: HLA Reporter support
             if (_enableHlaReporter) {
                 // Increment counter of NER calls.
-                _hlaReporter._numberOfNERs++;
+                _hlaReporter.incrNumberOfNERs();
             }
             
             // algo3: 3: while not granted do
@@ -1417,7 +1443,7 @@ implements TimeRegulator {
             _federateAmbassador.hlaLogicalTime = (CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime;
 
             // algo3: 7: if receivedRAV then  <= FIXME: XXX: not implemented ?
-            //if (_federateAmbassador.hasReceivedRAV) {
+            // if (_federateAmbassador.hasReceivedRAV) {
 
             // algo3: 8: t'' <- f(h'')
             Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime);
@@ -1438,9 +1464,9 @@ implements TimeRegulator {
             // Store reflected attributes RAV as events on HLASubscriber actors.
             _putReflectedAttributesOnHlaSubscribers(proposedTime);
 
-            //    _federateAmbassador.hasReceivedRAV = false;
+            // _federateAmbassador.hasReceivedRAV = false;
 
-            //} // algo3: 15: end if => if receivedRAV then  <= FIXME: XXX: not implemented ?
+            // } // algo3: 15: end if => if receivedRAV then  <= FIXME: XXX: not implemented ?
 
         } // algo3: 16: end if
 
@@ -1489,6 +1515,15 @@ implements TimeRegulator {
         // h + TS => tarContractTime
         CertiLogicalTime tarContractTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
 
+        if (_debugging) {
+            _debug("YYYYYYYYYY " 
+                    + "t': =" + proposedTime
+                    + " g(t'): certiProposedTime=" + certiProposedTime
+                    + " hlaLogicaltime=" + hlaLogicaltime
+                    + " tarContractTime=" + tarContractTime
+                    + " test = certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)");
+        }
+        
         // algo4: 1: while g(t') > h + TS then
 
         // NOTE: Microstep reset problem
@@ -1506,7 +1541,7 @@ implements TimeRegulator {
                 // XXX: FIXME: HLA Reporter support
                 if (_enableHlaReporter) {
                     // Set time of last time advance request.
-                    _hlaReporter._timeOfTheLastAdvanceRequest = System.nanoTime();
+                    _hlaReporter.setTimeOfTheLastAdvanceRequest(System.nanoTime());
                 }
                 
                 // Call CERTI TAR HLA service.
@@ -1515,7 +1550,7 @@ implements TimeRegulator {
                 // XXX: FIXME: HLA Reporter support
                 if (_enableHlaReporter) {
                 	// Increment counter of TAR calls.
-                	_hlaReporter._numberOfTARs++;
+                	_hlaReporter.incrNumberOfTARs();
                 }
                 
                 if (_debugging) {
@@ -1902,45 +1937,6 @@ implements TimeRegulator {
         return _convertToPtolemyTime(certiCurrentTime);
     }
 
-    /**
-     * Initialize the variables that are going to be used to create the reports
-     * in the files {@link #_file} and {@link #_csvFile}
-     */
-    private void _initializeReportVariables() {
-        //_numberOfTARs = 0;
-        //_numberOfTicks2 = 0;
-        //_numberOfNERs = 0;
-        //_numberOfTAGs = 0;
-        //_runtime = 0;
-        //_timeOfTheLastAdvanceRequest = 0;
-        //_numberOfOtherTicks = 0;
-
-        //_numberOfAttributesToPublish = _hlaAttributesToPublish.size();
-        //_nameOfTheAttributesToPublish = new String[_numberOfAttributesToPublish];
-        //Object attributesToPublish[] = _hlaAttributesToPublish.keySet()
-        //        .toArray();
-        //System.out.println("Attributes to publish: ");
-        //_UAVsValues = new StringBuffer[_numberOfAttributesToPublish];
-        //_RAVsValues = null;
-        //for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-        //    _nameOfTheAttributesToPublish[i] = attributesToPublish[i]
-        //            .toString();
-        //    _UAVsValues[i] = new StringBuffer("");
-        //    System.out.println(_nameOfTheAttributesToPublish[i]);
-        //}
-        //_tPTII = new StringBuffer("");
-        //_tHLA = new StringBuffer("");
-
-        //_reasonsToPrintTheTime = new StringBuffer("");
-        //_pUAVsTimes = new StringBuffer("");
-        //_preUAVsTimes = new StringBuffer("");
-        //_pRAVsTimes = new StringBuffer("");
-        //_folRAVsTimes = new StringBuffer("");
-        //_TAGDelay = new ArrayList<Double>();
-        //_numberOfTicks = new ArrayList<Integer>();
-        //_numberOfRAVs = 0;
-        //_numberOfUAVs = 0;
-    }
     /*
     /**This function was created with the sole purpose of solving the
      * java problem with mathematical operations of real numbers.
@@ -1975,26 +1971,6 @@ implements TimeRegulator {
     private Time _getModelTime() {
         return _director.getModelTime();
     }
-
-    /*
-    private SuperdenseTime _getModelSuperdenseTime() {
-        return new SuperdenseTime(_director.getModelTime(),
-                _director.getMicrostep());
-    }*/
-
-    /*private void _storeTimes(String reason) {
-        try {
-            String tHLA = _printTimes(_getHlaCurrentTime());
-            String tPTII = _printTimes(_director.getModelTime());
-            //_tPTII.append(tPTII + ";");
-            //_tHLA.append(tHLA + ";");
-            _reasonsToPrintTheTime.append(reason + ";");
-
-        } catch (IllegalActionException e) {
-            e.printStackTrace();
-        }
-
-    }*/
 
     ///////////////////////////////////////////////////////////////////
     ////                         private variables                 ////
@@ -2042,14 +2018,10 @@ implements TimeRegulator {
     /** The simulation stop time. */
     private Time _stopTime;
 
-    private String _testsFolder;
-
-    private StringBuffer _tPTII;
-
-    private StringBuffer _tHLA;
-
+    // XXX: FIXME: to remove ?
     private StringBuffer _reasonsToPrintTheTime;
 
+    // XXX: FIXME: to remove ?
     private String _decimalFormat;
 
     /** Represents the instant when the simulation is fully started
@@ -2124,7 +2096,7 @@ implements TimeRegulator {
                     // XXX: FIXME: HLA Reporter support
                     if (_enableHlaReporter) {
                         _hlaReporter._numberOfTicks2++;
-                        if (_hlaReporter._timeOfTheLastAdvanceRequest > 0) {
+                        if (_hlaReporter.getTimeOfTheLastAdvanceRequest() > 0) {
                             _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                         } else {
                             _hlaReporter._numberOfOtherTicks++;
@@ -2149,7 +2121,7 @@ implements TimeRegulator {
                 // XXX: FIXME: HLA Reporter support
                 if (_enableHlaReporter) {
                     _hlaReporter._numberOfTicks2++;
-                    if (_hlaReporter._timeOfTheLastAdvanceRequest > 0) {
+                    if (_hlaReporter.getTimeOfTheLastAdvanceRequest() > 0) {
                         _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                     } else {
                         _hlaReporter._numberOfOtherTicks++;
@@ -2166,7 +2138,7 @@ implements TimeRegulator {
             _rtia.synchronizationPointAchieved(_synchronizationPointName);
             if (_debugging) {
                 _debug("_doInitialSynchronization() - initialize() - Synchronisation point "
-                        + _synchronizationPointName + " satisfied !");
+                        + _synchronizationPointName + " satisfied");
             }
         } catch (RTIexception e) {
             throw new IllegalActionException(this, e, "RTIexception: " + e.getMessage());
@@ -2175,7 +2147,7 @@ implements TimeRegulator {
         // Wait federation synchronization.
         while (_federateAmbassador.inPause) {
             if (_debugging) {
-                _debug("_doInitialSynchronization() - initialize() - Waiting for simulation phase !");
+                _debug("_doInitialSynchronization() - initialize() - Waiting for simulation phase");
             }
 
             try {
@@ -2184,7 +2156,7 @@ implements TimeRegulator {
                 // XXX: FIXME: HLA Reporter support
                 if (_enableHlaReporter) {
                     _hlaReporter._numberOfTicks2++;
-                    if (_hlaReporter._timeOfTheLastAdvanceRequest > 0) {
+                    if (_hlaReporter.getTimeOfTheLastAdvanceRequest() > 0) {
                         _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                     } else {
                         _hlaReporter._numberOfOtherTicks++;
@@ -2630,6 +2602,9 @@ implements TimeRegulator {
                             
                             // XXX: FIXME: GiL: HLA Reporter support
                             if (_enableHlaReporter) {
+                                _hlaReporter.updateRAVsInformation(hs, (HlaTimedEvent) te, _hlaAttributesToSubscribeTo, value);
+                                
+                                /*
                                 //String attributeName = hs.getParameterName();
                                 String hlaSubcriberName = hs.getFullName();
 
@@ -2644,7 +2619,7 @@ implements TimeRegulator {
                                     String[] arrayStr = _hlaReporter.getNameOfTheAttributesSubscribedTo();
                                     System.out.println("DEBUG HLA-MANAGER: RAV: arrayStr " + arrayStr.toString() );
                                     for (int j = 0; j < arrayStr.length; j++) {
-                                        System.out.println("DEBUG HLA-MANAGER: RAV: arrayStr value " + i + " " + arrayStr[i]);
+                                        System.out.println("DEBUG HLA-MANAGER: RAV: arrayStr value " + j + " " + arrayStr[j]);
 
                                     }
 
@@ -2692,7 +2667,8 @@ implements TimeRegulator {
                                         }
                                     }
                                 }
-
+                                */
+                                
                                 _hlaReporter.incrNumberOfRAVs();
                             }
                             // XXX: FIXME: GiL: end HLA Reporter code ? 
@@ -2858,19 +2834,20 @@ implements TimeRegulator {
 
             // XXX: FIXME: HLA Reporter support
             if (_enableHlaReporter) {
-                double delay = (System.nanoTime() - _hlaReporter._timeOfTheLastAdvanceRequest) / Math.pow(10, 9);
-
-                // Reset time fo last advance request (NER or TAG).
-                _hlaReporter._timeOfTheLastAdvanceRequest = Integer.MIN_VALUE;
-
-                // Increment TAG counter.
-                _hlaReporter._numberOfTAGs++;
+                double delay = (System.nanoTime() - _hlaReporter.getTimeOfTheLastAdvanceRequest()) / Math.pow(10, 9);
+                
+                // Reset time for last advance request (NER or TAG).
+                //_hlaReporter._timeOfTheLastAdvanceRequest = Integer.MIN_VALUE;
+                _hlaReporter.setTimeOfTheLastAdvanceRequest(Integer.MIN_VALUE);
 
                 // Compute elapsed time spent between latest TAR or NER and this received TAG.
                 _hlaReporter._TAGDelay.add(delay);
 
                 // As a new TAG has been received add and set is tick() counter to 0.
                 _hlaReporter._numberOfTicks.add(0);
+                
+                // Increment TAG counter.
+                _hlaReporter._numberOfTAGs++;
             }
             
             if (_debugging) {
