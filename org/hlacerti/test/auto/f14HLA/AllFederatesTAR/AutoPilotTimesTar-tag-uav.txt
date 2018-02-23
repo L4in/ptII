@@ -1,0 +1,356 @@
+Federate AutoPilot
+lookahead is 0.005
+Timestep ?? stopTime= 0.3
+
+starting proposeTime(0.0) - current status - t_ptII = 0.0; t_hla = 0.0
+ 
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.01)
+ 
+INNER callback: ravValues(): starting - current status - t_ptII = 0.0; t_hla = 0.0
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.005 ,value=0.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+
+    ravValues() - receive RAV(attr= q, timestamp=0.005 ,value=0.0) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+
+INNER callback: timeAdvanceGrant(): TAG(0.01 * (HLA time unit=1.0)) received
+starting _putRAVon(0.01) - current status - t_ptII = 0.0; t_hla = 0.01
+    _putRAVon(0.01) - put event: RAV(attr= q, timestamp=0.01) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.01) - put event: RAV(attr= ELEVATOR, timestamp=0.01) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.01) - put event: RAV(attr= alpha, timestamp=0.01) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.01; t_hla = 0.01 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.015000000000000001,value=-0.0)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.02)
+
+INNER callback: ravValues(): starting - current status - t_ptII = 0.01; t_hla = 0.01
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.015000000000000001 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+      ravValues() - receive RAV(attr= alpha, timestamp=0.015000000000000001 ,value=0.0) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+      ravValues() - receive RAV(attr= q, timestamp=0.015000000000000001 ,value=0.0) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+ 
+
+INNER callback: timeAdvanceGrant(): TAG(0.02 * (HLA time unit=1.0)) received
+starting _putRAVon(0.02) - current status - t_ptII = 0.01; t_hla = 0.02
+    _putRAVon(0.02) - put event: RAV(attr= q, timestamp=0.02) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.02) - put event: RAV(attr= ELEVATOR, timestamp=0.02) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.02) - put event: RAV(attr= alpha, timestamp=0.02) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+    _putRAVon(0.02) - no more RAVs to deal with
+
+starting uav() - current status t_ptII = 0.02; t_hla = 0.02 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.025,value=9.199999999999999E-4)
+
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.03)
+ 
+INNER callback: ravValues(): starting - current status - t_ptII = 0.02; t_hla = 0.02
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.025 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+      ravValues() - receive RAV(attr= alpha, timestamp=0.025 ,value=0.0) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+      ravValues() - receive RAV(attr= q, timestamp=0.025 ,value=0.0) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+  
+INNER callback: timeAdvanceGrant(): TAG(0.03 * (HLA time unit=1.0)) received
+starting _putRAVon(0.030000000000000002) - current status - t_ptII = 0.02; t_hla = 0.03
+    _putRAVon(0.030000000000000002) - put event: RAV(attr= q, timestamp=0.030000000000000002) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.030000000000000002) - put event: RAV(attr= ELEVATOR, timestamp=0.030000000000000002) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.030000000000000002) - put event: RAV(attr= alpha, timestamp=0.030000000000000002) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+    _putRAVon(0.030000000000000002) - no more RAVs to deal with
+
+
+starting uav() - current status t_ptII = 0.030000000000000002; t_hla = 0.03 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.035,value=0.0876552380952)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.04)
+ 
+INNER callback: ravValues(): starting - current status - t_ptII = 0.030000000000000002; t_hla = 0.03
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.035 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.035 ,value=0.0) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.035 ,value=0.0) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+  
+INNER callback: timeAdvanceGrant(): TAG(0.04 * (HLA time unit=1.0)) received
+starting _putRAVon(0.04) - current status - t_ptII = 0.030000000000000002; t_hla = 0.04
+    _putRAVon(0.04) - put event: RAV(attr= q, timestamp=0.04) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.04) - put event: RAV(attr= ELEVATOR, timestamp=0.04) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.04) - put event: RAV(attr= alpha, timestamp=0.04) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+    _putRAVon(0.04) - no more RAVs to deal with
+
+starting uav() - current status t_ptII = 0.04; t_hla = 0.04 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.045,value=0.2529528344671)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.05)
+      ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.045 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+      ravValues() - receive RAV(attr= alpha, timestamp=0.045 ,value=-1.0064245527116332E-7) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+      ravValues() - receive RAV(attr= q, timestamp=0.045 ,value=-5.896627134590134E-6) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+ 
+INNER callback: timeAdvanceGrant(): TAG(0.05 * (HLA time unit=1.0)) received
+starting _putRAVon(0.05) - current status - t_ptII = 0.04; t_hla = 0.05
+    _putRAVon(0.05) - put event: RAV(attr= q, timestamp=0.05) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.05) - put event: RAV(attr= ELEVATOR, timestamp=0.05) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.05) - put event: RAV(attr= alpha, timestamp=0.05) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.05; t_hla = 0.05 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.055,value=0.4061877091443)
+
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.060000000000000005)
+
+INNER callback: ravValues(): starting - current status - t_ptII = 0.05; t_hla = 0.05
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.055 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.055 ,value=-9.940810976596198E-6) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.055 ,value=-5.780429059438271E-4) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+
+INNER callback: timeAdvanceGrant(): TAG(0.060000000000000005 * (HLA time unit=1.0)) received
+starting _putRAVon(0.060000000000000005) - current status - t_ptII = 0.05; t_hla = 0.060000000000000005
+    _putRAVon(0.060000000000000005) - put event: RAV(attr= q, timestamp=0.060000000000000005) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.060000000000000005) - put event: RAV(attr= ELEVATOR, timestamp=0.060000000000000005) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.060000000000000005) - put event: RAV(attr= alpha, timestamp=0.060000000000000005) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.060000000000000005; t_hla = 0.060000000000000005 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.065,value=0.5484911686176)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.07)
+
+INNER callback: ravValues(): starting - current status - t_ptII = 0.060000000000000005; t_hla = 0.060000000000000005
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.065 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.065 ,value=-6.168192077179545E-5) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.065 ,value=-0.0031967207216443538) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+
+INNER callback: timeAdvanceGrant(): TAG(0.07 * (HLA time unit=1.0)) received
+starting _putRAVon(0.07) - current status - t_ptII = 0.060000000000000005; t_hla = 0.07
+    _putRAVon(0.07) - put event: RAV(attr= q, timestamp=0.07) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.07) - put event: RAV(attr= ELEVATOR, timestamp=0.07) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.07) - put event: RAV(attr= alpha, timestamp=0.07) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.07; t_hla = 0.07 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.075,value=0.6800586818239)
+
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.08)
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.08) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.07; t_hla = 0.07
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.075 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.075 ,value=-2.0553883678009648E-4) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.075 ,value=-0.009450856096387534) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+
+INNER callback: timeAdvanceGrant(): TAG(0.08 * (HLA time unit=1.0)) received
+starting _putRAVon(0.08) - current status - t_ptII = 0.07; t_hla = 0.08
+    _putRAVon(0.08) - put event: RAV(attr= q, timestamp=0.08) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.08) - put event: RAV(attr= ELEVATOR, timestamp=0.08) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.08) - put event: RAV(attr= alpha, timestamp=0.08) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.08; t_hla = 0.08 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.085,value=0.7996294062925)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.09)
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.09) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.08; t_hla = 0.08
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.085 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.085 ,value=-4.990159222243959E-4) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.085 ,value=-0.020484777366413014) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.09) by calling tick2()
+INNER callback: timeAdvanceGrant(): TAG(0.09 * (HLA time unit=1.0)) received
+starting _putRAVon(0.09) - current status - t_ptII = 0.08; t_hla = 0.09
+    _putRAVon(0.09) - put event: RAV(attr= q, timestamp=0.09) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.09) - put event: RAV(attr= ELEVATOR, timestamp=0.09) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.09) - put event: RAV(attr= alpha, timestamp=0.09) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.09; t_hla = 0.09 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.095,value=0.9056773867118)
+
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.09999999999999999)
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.09999999999999999) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.09; t_hla = 0.09
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.095 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.095 ,value=-0.0010041303615856152) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.095 ,value=-0.037085510359834255) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.09999999999999999) by calling tick2()
+INNER callback: timeAdvanceGrant(): TAG(0.09999999999999999 * (HLA time unit=1.0)) received
+starting _putRAVon(0.1) - current status - t_ptII = 0.09; t_hla = 0.09999999999999999
+    _putRAVon(0.1) - put event: RAV(attr= q, timestamp=0.1) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.1) - put event: RAV(attr= ELEVATOR, timestamp=0.1) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.1) - put event: RAV(attr= alpha, timestamp=0.1) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+tarting uav() - current status t_ptII = 0.1; t_hla = 0.09999999999999999 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.10500000000000001,value=0.9972260570506)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.10999999999999999)
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.10999999999999999) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.1; t_hla = 0.09999999999999999
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.10500000000000001 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.10500000000000001 ,value=-0.0017848938882753353) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.10500000000000001 ,value=-0.0597410227159961) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.10999999999999999) by calling tick2()
+
+INNER callback: timeAdvanceGrant(): TAG(0.10999999999999999 * (HLA time unit=1.0)) received
+starting _putRAVon(0.11) - current status - t_ptII = 0.1; t_hla = 0.10999999999999999
+    _putRAVon(0.11) - put event: RAV(attr= q, timestamp=0.11) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.11) - put event: RAV(attr= ELEVATOR, timestamp=0.11) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.11) - put event: RAV(attr= alpha, timestamp=0.11) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.11; t_hla = 0.10999999999999999 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.115,value=1.0737332420798)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.11999999999999998)
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.115 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.115 ,value=-0.00290499198286622) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.115 ,value=-0.08867757209750955) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.11999999999999998) by calling tick2()
+
+INNER callback: timeAdvanceGrant(): TAG(0.11999999999999998 * (HLA time unit=1.0)) received
+starting _putRAVon(0.12000000000000001) - current status - t_ptII = 0.11; t_hla = 0.11999999999999998
+    _putRAVon(0.12000000000000001) - put event: RAV(attr= q, timestamp=0.12000000000000001) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.12000000000000001) - put event: RAV(attr= ELEVATOR, timestamp=0.12000000000000001) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.12000000000000001) - put event: RAV(attr= alpha, timestamp=0.12000000000000001) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.12000000000000001; t_hla = 0.11999999999999998 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.125,value=1.1350172178902)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.12999999999999998)
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.12999999999999998) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.12000000000000001; t_hla = 0.11999999999999998
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.125 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= alpha, timestamp=0.125 ,value=-0.004425756639617609) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+    ravValues() - receive RAV(attr= q, timestamp=0.125 ,value=-0.12389241740020912) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.12999999999999998) by calling tick2()
+
+INNER callback: timeAdvanceGrant(): TAG(0.12999999999999998 * (HLA time unit=1.0)) received
+starting _putRAVon(0.13) - current status - t_ptII = 0.12000000000000001; t_hla = 0.12999999999999998
+    _putRAVon(0.13) - put event: RAV(attr= q, timestamp=0.13) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.13) - put event: RAV(attr= ELEVATOR, timestamp=0.13) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.13) - put event: RAV(attr= alpha, timestamp=0.13) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+
+starting uav() - current status t_ptII = 0.13; t_hla = 0.12999999999999998 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.135,value=1.1812120992875)
+starting proposeTime(0.13) - current status - t_ptII = 0.13; t_hla = 0.12999999999999998
+    proposeTime(0.13) - called but the currentTime is equal to the proposedTime -> tick() one time -> returning currentTime
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.13999999999999999)
+
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.135 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.13999999999999999) by calling tick2()
+
+INNER callback: timeAdvanceGrant(): TAG(0.13999999999999999 * (HLA time unit=1.0)) received
+starting _putRAVon(0.14) - current status - t_ptII = 0.13; t_hla = 0.13999999999999999
+    _putRAVon(0.14) - put event: RAV(attr= q, timestamp=0.14) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+ 
+starting uav() - current status t_ptII = 0.14; t_hla = 0.13999999999999999 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.14500000000000002,value=1.2127290192703)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.15)
+ INNER callback: ravValues(): starting - current status - t_ptII = 0.14; t_hla = 0.13999999999999999
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.14500000000000002 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+  
+INNER callback: timeAdvanceGrant(): TAG(0.15 * (HLA time unit=1.0)) received
+starting _putRAVon(0.15) - current status - t_ptII = 0.14; t_hla = 0.15
+    _putRAVon(0.15) - put event: RAV(attr= q, timestamp=0.15) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+
+starting uav() - current status t_ptII = 0.15; t_hla = 0.15 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.155,value=1.230215926103)
+
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.16)
+ 
+INNER callback: ravValues(): starting - current status - t_ptII = 0.15; t_hla = 0.15
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.155 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+ 
+INNER callback: timeAdvanceGrant(): TAG(0.16 * (HLA time unit=1.0)) received
+starting _putRAVon(0.16) - current status - t_ptII = 0.15; t_hla = 0.16
+    _putRAVon(0.16) - put event: RAV(attr= q, timestamp=0.16) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+
+starting uav() - current status t_ptII = 0.16; t_hla = 0.16 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.165,value=1.234517889351)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.17)
+
+INNER callback: ravValues(): starting - current status - t_ptII = 0.16; t_hla = 0.16
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.165 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+ 
+    ravValues() - receive RAV(attr= alpha, timestamp=0.165 ,value=-0.015574692956929924) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+ 
+INNER callback: timeAdvanceGrant(): TAG(0.17 * (HLA time unit=1.0)) received
+starting _putRAVon(0.17) - current status - t_ptII = 0.16; t_hla = 0.17
+    _putRAVon(0.17) - put event: RAV(attr= q, timestamp=0.17) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+
+starting uav() - current status t_ptII = 0.17; t_hla = 0.17 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.17500000000000002,value=1.2266388327075)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.18000000000000002)
+ 
+INNER callback: ravValues(): starting - current status - t_ptII = 0.17; t_hla = 0.17
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.17500000000000002 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.18 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+
+INNER callback: timeAdvanceGrant(): TAG(0.18000000000000002 * (HLA time unit=1.0)) received
+starting _putRAVon(0.18) - current status - t_ptII = 0.17; t_hla = 0.18000000000000002
+    _putRAVon(0.18) - put event: RAV(attr= ELEVATOR, timestamp=0.18) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.18) - put event: RAV(attr= ELEVATOR, timestamp=0.18) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+
+starting uav() - current status t_ptII = 0.18; t_hla = 0.18000000000000002 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.185,value=1.207705139704)
+starting proposeTime(0.18) - current status - t_ptII = 0.18; t_hla = 0.18000000000000002
+    proposeTime(0.18) - called but the currentTime is equal to the proposedTime -> tick() one time -> returning currentTime
+
+(5 proposeTime(t), t=TAR)
+(2 proposeTime(t), t=TAR)
+
+starting uav() - current status t_ptII = 0.18; t_hla = 0.18000000000000002 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.185,value=1.1789314658278)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.19000000000000003)
+
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.19 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+ 
+INNER callback: timeAdvanceGrant(): TAG(0.19000000000000003 * (HLA time unit=1.0)) received
+starting _putRAVon(0.19) - current status - t_ptII = 0.18; t_hla = 0.19000000000000003
+    _putRAVon(0.19) - put event: RAV(attr= q, timestamp=0.19) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.19) - put event: RAV(attr= ELEVATOR, timestamp=0.19) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+ 
+(.......)
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.23000000000000007)
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.23000000000000007) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.22; t_hla = 0.22000000000000006
+ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.23 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+
+INNER callback: timeAdvanceGrant(): TAG(0.23000000000000007 * (HLA time unit=1.0)) received
+starting _putRAVon(0.23) - current status - t_ptII = 0.22; t_hla = 0.23000000000000007
+
+starting uav() - current status t_ptII = 0.23; t_hla = 0.23000000000000007 - Ptolemy encoded for Hla msg
+    uav() - sending UAV(HLA publisher=.f14AutoPilot.elevCom,attr=elevCom,timestamp=0.23500000000000001,value=0.9349744595774)
+
+
+  _timeSteppedBasedTimeAdvance(0.3):  call CERTI TAR(0.24000000000000007)
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.24000000000000007) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.23; t_hla = 0.23000000000000007
+    ravValues() - receive RAV(attr= ELEVATOR, timestamp=0.24000000000000002 ,value=-1.0) received + stored .f14AutoPilot.HlaSub3PilotStick
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.24000000000000007) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.23; t_hla = 0.23000000000000007
+    ravValues() - receive RAV(attr= alpha, timestamp=0.24000000000000002 ,value=-0.06790941160235639) received + stored .f14AutoPilot.HlaSub1AircraftSAct
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.24000000000000007) by calling tick2()
+INNER callback: ravValues(): starting - current status - t_ptII = 0.23; t_hla = 0.23000000000000007
+    ravValues() - receive RAV(attr= q, timestamp=0.24000000000000002 ,value=-0.8503680226453244) received + stored .f14AutoPilot.HlaSub2AircraftSAct
+  _timeSteppedBasedTimeAdvance(0.3):  waiting for CERTI TAG(0.24000000000000007) by calling tick2()
+
+INNER callback: timeAdvanceGrant(): TAG(0.24000000000000007 * (HLA time unit=1.0)) received
+starting _putRAVon(0.24000000000000002) - current status - t_ptII = 0.23; t_hla = 0.24000000000000007
+    _putRAVon(0.24000000000000002) - put event: RAV(attr= q, timestamp=0.24000000000000002) in the HlaSubscriber=.f14AutoPilot.HlaSub2AircraftSAct
+    _putRAVon(0.24000000000000002) - put event: RAV(attr= ELEVATOR, timestamp=0.24000000000000002) in the HlaSubscriber=.f14AutoPilot.HlaSub3PilotStick
+    _putRAVon(0.24000000000000002) - put event: RAV(attr= alpha, timestamp=0.24000000000000002) in the HlaSubscriber=.f14AutoPilot.HlaSub1AircraftSAct
+    _putRAVon(0.24000000000000002) - no more RAVs to deal with
+starting proposeTime(0.24000000000000002) - current status - t_ptII = 0.24000000000000002; t_hla = 0.24000000000000007
+    proposeTime(0.24000000000000002) - called but the currentTime is equal to the proposedTime -> tick() one time -> returning currentTime
+
+(5 proposeTime(t), t=TAR)
+
+
+starting uav() - current status t_ptII = 0.24000000000000002; t_hla = 0.24000000000000007 - Ptolemy encoded for Hla msg
+wrapup() - ... so termination
+wrapup() - unsubscribe .f14AutoPilot.HlaSub2AircraftSAct(classHandle = 1)
+wrapup() - unsubscribe .f14AutoPilot.HlaSub3PilotStick(classHandle = 3)
+wrapup() - unsubscribe .f14AutoPilot.HlaSub1AircraftSAct(classHandle = 1)
+wrapup() - unpublish .f14AutoPilot.elevCom(classHandle = 1)
+wrapup() - Resign Federation execution
+wrapup() - WARNING: FederatesCurrentlyJoined
+wrapup() - Destroy Federation execution - no fail
+wrapup() - Destroy RTIG process (if authorized)
+-----------------------
+Added attribute _highlightColor to .f14AutoPilot.autopilot
