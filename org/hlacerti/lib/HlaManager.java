@@ -992,7 +992,9 @@ implements TimeRegulator {
         // Let us recall the lookahead rule: a federate promises that no events will be sent
         // before hlaCurrentTime + lookahead.
         // To avoid CERTI exception when calling UAV service
-        // with condition: uav(tau) tau >= hlaCurrentTime + lookahead.        
+        // with condition: uav(tau) tau >= hlaCurrentTime + lookahead.  
+        
+        // Table 2: UAV timestamp sent by a HlaPublisher
         CertiLogicalTime uavTimeStamp = null;
         if (_eventBased) {
             // In the NER case, we have the equality currentTime = hlaCurrentTime.
@@ -1007,28 +1009,34 @@ implements TimeRegulator {
             // case 2: if  hlaCurrentTime <= currentTime < hlaCurrentTime + lookAhead
             //         in order not to break the lookahead rule, we must delay the UAV.
             //         tau <- hlaCurrentTime + lookahead
+            
+            // double _hlaLookAHead
+            
+            // f() => _convertToPtolemyTime()
+            // g() => _convertToCertiLogicalTime()
+            
+            // currentTime => t => Ptolemy time => getModelTime()
+            
+            // hlaCurrentTime => h => HLA logical time => _federateAmbassador.logicalTimeHLA
             CertiLogicalTime hlaCurrentTime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
             
+            // g(t)
             CertiLogicalTime ptIICurrentTime = _convertToCertiLogicalTime(currentTime);
             
+            // h + lah
             CertiLogicalTime hlaNextTARTime = new CertiLogicalTime(hlaCurrentTime.getTime() + _hlaLookAHead);
             
+            // if h + lah > g(t) <=> if g(t) < h +lah
             if (hlaNextTARTime.isGreaterThan(ptIICurrentTime)) {
-                uavTimeStamp = hlaNextTARTime;
-            } else {
-                if (_debugging) {
-                    _debug("XXXXXXXXXXXXXXX = "
-                            + " uavTimeStamp (avant modif) = " + uavTimeStamp);
-                }
                 
+                // UAV(g(t) + lah)
+                uavTimeStamp = new CertiLogicalTime(ptIICurrentTime.getTime() + _hlaLookAHead);
+            
+            } else {
+                     
+                // UAV(g(t)
                 uavTimeStamp = ptIICurrentTime;
                 
-                if (_debugging) {
-                    _debug("XXXXXXXXXXXXXXX = "
-                            + "hla_time = _federateAmbassador.hlaLogicalTime = " + (CertiLogicalTime) _federateAmbassador.hlaLogicalTime
-                            + " ptII_time = currentTime = " + currentTime 
-                            + " uavTimeStamp = " + uavTimeStamp);
-                }
             }
             
             
