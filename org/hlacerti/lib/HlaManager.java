@@ -996,49 +996,38 @@ implements TimeRegulator {
         
         // Table 2: UAV timestamp sent by a HlaPublisher
         CertiLogicalTime uavTimeStamp = null;
+        
+        // NER (_eventBased case)
         if (_eventBased) {
             // In the NER case, we have the equality currentTime = hlaCurrentTime.
             // So, we chose tau <- currentTime + lookahead and we respect the condition
             // above.            
             uavTimeStamp = new CertiLogicalTime(currentTime.getDoubleValue() + _hlaLookAHead);          
-        } else { // _timeStepped case
-            // In the TAR case, currentTime >= hlaCurrentTime.
-            // So, we have two possible cases:
-            // case 1: if currentTime >= hlaCurrentTime + lookAhead
-            //         we will not break the lookahead rule, therefore tau <- currentTime.
-            // case 2: if  hlaCurrentTime <= currentTime < hlaCurrentTime + lookAhead
-            //         in order not to break the lookahead rule, we must delay the UAV.
-            //         tau <- hlaCurrentTime + lookahead
-            
-            // double _hlaLookAHead
-            
+        } else {
+            // TAR (_timeStepped case)
+                        
             // f() => _convertToPtolemyTime()
             // g() => _convertToCertiLogicalTime()
             
-            // currentTime => t => Ptolemy time => getModelTime()
+            // t => currentTime => Ptolemy time => getModelTime()
             
-            // hlaCurrentTime => h => HLA logical time => _federateAmbassador.logicalTimeHLA
+            // h => hlaCurrentTime => HLA logical time => _federateAmbassador.logicalTimeHLA
             CertiLogicalTime hlaCurrentTime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
             
             // g(t)
             CertiLogicalTime ptIICurrentTime = _convertToCertiLogicalTime(currentTime);
             
-            // h + lah => TAR contract time
-            CertiLogicalTime tarContractTime = new CertiLogicalTime(hlaCurrentTime.getTime() + _hlaLookAHead);
+            // h + lah => minimal next UAV time
+            CertiLogicalTime minimalNextUAVTime = new CertiLogicalTime(hlaCurrentTime.getTime() + _hlaLookAHead);
             
             // if h + lah > g(t) <=> if g(t) < h +lah
-            if (tarContractTime.isGreaterThan(ptIICurrentTime)) {
-                
+            if (minimalNextUAVTime.isGreaterThan(ptIICurrentTime)) {
                 // UAV(h + lah)
-                uavTimeStamp = tarContractTime;
-            
-            } else {
-                     
+                uavTimeStamp = minimalNextUAVTime;
+            } else { 
                 // UAV(g(t))
                 uavTimeStamp = ptIICurrentTime;
-                
-            }
-                        
+            }            
         }
 
         // XXX: FIXME: HLA Reporter support
@@ -1452,31 +1441,32 @@ implements TimeRegulator {
             // algo3: 6: h <- h''    => Update HLA time
             _federateAmbassador.hlaLogicalTime = (CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime;
 
-            // algo3: 7: if receivedRAV then  <= FIXME: XXX: not implemented ?
-            // if (_federateAmbassador.hasReceivedRAV) {
+            // algo3: 7: if receivedRAV then
+            if (_federateAmbassador.hasReceivedRAV) {
 
-            // algo3: 8: t'' <- f(h'')
-            Time newPtolemyTime = _convertToPtolemyTime((CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime);
+                // algo3: 8: t'' <- f(h'')
+                Time newPtolemyTime = _convertToPtolemyTime(
+                        (CertiLogicalTime) _federateAmbassador.grantedHlaLogicalTime);
 
-            // algo3: 9: if t'' > t then  => True in the general case
-            if (newPtolemyTime.compareTo(ptolemyTime) > 0) {
-                // algo3: 10: t' <- t''
-                proposedTime = newPtolemyTime;
-            } else {  // algo3: 11: else
-                // algo3: 12: t' <- t'' + r
+                // algo3: 9: if t'' > t then  => True in the general case
+                if (newPtolemyTime.compareTo(ptolemyTime) > 0) {
+                    // algo3: 10: t' <- t''
+                    proposedTime = newPtolemyTime;
+                } else { // algo3: 11: else
+                    // algo3: 12: t' <- t'' + r
 
-                //proposedTime = newPtolemyTime.add(r);
-                proposedTime = ptolemyTime.add(r); // FIXME: XXX: GiL: modif. from mail JC 24/10/2017
+                    //proposedTime = newPtolemyTime.add(r);
+                    proposedTime = ptolemyTime.add(r); // FIXME: XXX: GiL: modif. from mail JC 24/10/2017
 
-            } // algo3: 13: end if
+                } // algo3: 13: end if
 
-            // algo3: 14: putRAVonHlaSubs(t')
-            // Store reflected attributes RAV as events on HLASubscriber actors.
-            _putReflectedAttributesOnHlaSubscribers(proposedTime);
+                // algo3: 14: putRAVonHlaSubs(t')
+                // Store reflected attributes RAV as events on HLASubscriber actors.
+                _putReflectedAttributesOnHlaSubscribers(proposedTime);
 
-            // _federateAmbassador.hasReceivedRAV = false;
+                _federateAmbassador.hasReceivedRAV = false;
 
-            // } // algo3: 15: end if => if receivedRAV then  <= FIXME: XXX: not implemented ?
+            } // algo3: 15: end if => if receivedRAV then
 
         } // algo3: 16: end if
 
@@ -1493,9 +1483,8 @@ implements TimeRegulator {
     private Time _timeSteppedBasedTimeAdvance(Time proposedTime)
             throws IllegalActionException {
 
-        // FIXME: XXX: why this kind of representation ? toString() ?
         // Custom string representation of proposedTime.
-        String strProposedTime = proposedTime.toString();//_printTimes(proposedTime);
+        String strProposedTime = proposedTime.toString();
 
         // Header for debug purpose and listener
         String headMsg = "_timeSteppedBasedTimeAdvance(" + proposedTime.toString() + "): ";
@@ -1511,7 +1500,6 @@ implements TimeRegulator {
         // g() => _convertToCertiLogicalTime()
 
         // t   => Ptolemy time => getModelTime()
-        //Time ptolemyTime = _director.getModelTime();
 
         // t'    => proposedTime
         // g(t') => certiProposedTime
@@ -1522,42 +1510,29 @@ implements TimeRegulator {
         CertiLogicalTime hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
 
         // TS     => _hlaTimeStep
-        // h + TS => tarContractTime
-        CertiLogicalTime tarContractTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
-
-        if (_debugging) {
-            _debug("YYYYYYYYYY " 
-                    + "t': =" + proposedTime
-                    + " g(t'): certiProposedTime=" + certiProposedTime
-                    + " hlaLogicaltime=" + hlaLogicaltime
-                    + " tarContractTime=" + tarContractTime
-                    + " test = certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)");
-        }
+        // h + TS => nextPointInTime
+        CertiLogicalTime nextPointInTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
         
         // algo4: 1: while g(t') > h + TS then
 
         // NOTE: Microstep reset problem
         //  To retrieve the old behavior with the microstep reset problem, you may change the line below:
-        //  reset    => while (certiProposedTime.isGreaterThan(tarContractTime)) {
-        //  no reset => while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {
-        while (certiProposedTime.isGreaterThanOrEqualTo(tarContractTime)) {            
-            //System.out.println("  " + headMsg + "while certiProposedTime=" + _printTimes(_convertToPtolemyTime(certiProposedTime)) + " >= tarContractTime=" + tarContractTime.toString());
-
+        //  reset    => while (certiProposedTime.isGreaterThan(nextPointInTime)) {
+        //  no reset => while (certiProposedTime.isGreaterThanOrEqualTo(nextPointInTime)) {
+        while (certiProposedTime.isGreaterThanOrEqualTo(nextPointInTime)) {            
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
 
             // algo4: 2: TAR(h + TS))
             try {
-                // XXX: FIXME: HLA Reporter support
                 if (_enableHlaReporter) {
                     // Set time of last time advance request.
                     _hlaReporter.setTimeOfTheLastAdvanceRequest(System.nanoTime());
                 }
                 
                 // Call CERTI TAR HLA service.
-                _rtia.timeAdvanceRequest(tarContractTime);
+                _rtia.timeAdvanceRequest(nextPointInTime);
 
-                // XXX: FIXME: HLA Reporter support
                 if (_enableHlaReporter) {
                 	// Increment counter of TAR calls.
                 	_hlaReporter.incrNumberOfTARs();
@@ -1565,7 +1540,7 @@ implements TimeRegulator {
                 
                 if (_debugging) {
                     _debug("  " + headMsg
-                            + " call CERTI TAR(" + tarContractTime.getTime() + ")");
+                            + " call CERTI TAR(" + nextPointInTime.getTime() + ")");
                 }
             } catch (InvalidFederationTime | FederationTimeAlreadyPassed | TimeAdvanceAlreadyInProgress
                     | EnableTimeRegulationPending | EnableTimeConstrainedPending | FederateNotExecutionMember
@@ -1577,14 +1552,13 @@ implements TimeRegulator {
             while (!(_federateAmbassador.timeAdvanceGrant)) {
                 if (_debugging) {
                     _debug("  " + headMsg
-                            + " waiting for CERTI TAG(" + tarContractTime.getTime()
+                            + " waiting for CERTI TAG(" + nextPointInTime.getTime()
                             + ") by calling tick2()");
                 }
 
                 try {
                     _rtia.tick2();
 
-                    // XXX: FIXME: HLA Reporter support
                     if (_enableHlaReporter) {
                         _hlaReporter._numberOfTicks2++;
                         _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
@@ -1598,9 +1572,9 @@ implements TimeRegulator {
             } // algo4: 5: end while
 
             // algo4: 6: h <- h + TS    => Update HLA time
-            _federateAmbassador.hlaLogicalTime = tarContractTime;
+            _federateAmbassador.hlaLogicalTime = nextPointInTime;
 
-            // algo4: 7: if receivedRAV then  <= FIXME: XXX: to discuss ?
+            // algo4: 7: if receivedRAV then
             if (_federateAmbassador.hasReceivedRAV) {
 
                 // algo4: 8: t'' <- f(h)
@@ -1621,11 +1595,11 @@ implements TimeRegulator {
                 // algo4: 13: return t'
                 return proposedTime;
 
-            } // algo4: 14: end if receivedRAV then  <= FIXME: XXX: to discuss ?
+            } // algo4: 14: end if receivedRAV then
 
             // Update local variables with the new HLA logical time.
             hlaLogicaltime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
-            tarContractTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
+            nextPointInTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
 
         } // algo4: 15: end while
 
