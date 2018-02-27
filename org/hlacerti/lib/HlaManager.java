@@ -1023,23 +1023,22 @@ implements TimeRegulator {
             // g(t)
             CertiLogicalTime ptIICurrentTime = _convertToCertiLogicalTime(currentTime);
             
-            // h + lah
-            CertiLogicalTime hlaNextTARTime = new CertiLogicalTime(hlaCurrentTime.getTime() + _hlaLookAHead);
+            // h + lah => TAR contract time
+            CertiLogicalTime tarContractTime = new CertiLogicalTime(hlaCurrentTime.getTime() + _hlaLookAHead);
             
             // if h + lah > g(t) <=> if g(t) < h +lah
-            if (hlaNextTARTime.isGreaterThan(ptIICurrentTime)) {
+            if (tarContractTime.isGreaterThan(ptIICurrentTime)) {
                 
-                // UAV(g(t) + lah)
-                uavTimeStamp = new CertiLogicalTime(ptIICurrentTime.getTime() + _hlaLookAHead);
+                // UAV(h + lah)
+                uavTimeStamp = tarContractTime;
             
             } else {
                      
-                // UAV(g(t)
+                // UAV(g(t))
                 uavTimeStamp = ptIICurrentTime;
                 
             }
-            
-            
+                        
         }
 
         // XXX: FIXME: HLA Reporter support
