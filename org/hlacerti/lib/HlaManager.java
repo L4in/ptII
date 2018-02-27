@@ -986,18 +986,19 @@ implements TimeRegulator {
         byte[] tag = EncodingHelpers
                 //.encodeString(pub.getClassInstanceName());
                 .encodeString(hp.getFullName());
+        
         // Create a representation of uav-event timestamp for CERTI.
         // HLA implies to send event in the future when using NER or TAR services with lookahead > 0.
         // Let us recall the lookahead rule: a federate promises that no events will be sent
         // before hlaCurrentTime + lookahead.
         // To avoid CERTI exception when calling UAV service
-        // with condition: uav(tau) tau >= hlaCurrentTime + lookahead.
-        Time uavTimeStamp = null;
+        // with condition: uav(tau) tau >= hlaCurrentTime + lookahead.        
+        CertiLogicalTime uavTimeStamp = null;
         if (_eventBased) {
             // In the NER case, we have the equality currentTime = hlaCurrentTime.
             // So, we chose tau <- currentTime + lookahead and we respect the condition
-            // above.
-            uavTimeStamp = currentTime.add(_hlaLookAHead);
+            // above.            
+            uavTimeStamp = new CertiLogicalTime(currentTime.getDoubleValue() + _hlaLookAHead);          
         } else { // _timeStepped case
             // In the TAR case, currentTime >= hlaCurrentTime.
             // So, we have two possible cases:
@@ -1006,20 +1007,21 @@ implements TimeRegulator {
             // case 2: if  hlaCurrentTime <= currentTime < hlaCurrentTime + lookAhead
             //         in order not to break the lookahead rule, we must delay the UAV.
             //         tau <- hlaCurrentTime + lookahead
-            CertiLogicalTime certiCurrentTime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
-            Time hlaCurrentTime = _convertToPtolemyTime(certiCurrentTime);
-            /*  if (currentTime.compareTo(hlaCurrentTime.add(_hlaTimeStep))==0) {
-                hlaCurrentTime= hlaCurrentTime.add(_hlaTimeStep);
-            }*/
-            if (hlaCurrentTime.add(_hlaLookAHead).compareTo(currentTime) > 0) {
-                uavTimeStamp = hlaCurrentTime.add(_hlaLookAHead);
+            CertiLogicalTime hlaCurrentTime = (CertiLogicalTime) _federateAmbassador.hlaLogicalTime;
+            
+            CertiLogicalTime ptIICurrentTime = _convertToCertiLogicalTime(currentTime);
+            
+            CertiLogicalTime hlaNextTARTime = new CertiLogicalTime(hlaCurrentTime.getTime() + _hlaLookAHead);
+            
+            if (hlaNextTARTime.isGreaterThan(ptIICurrentTime)) {
+                uavTimeStamp = hlaNextTARTime;
             } else {
                 if (_debugging) {
                     _debug("XXXXXXXXXXXXXXX = "
                             + " uavTimeStamp (avant modif) = " + uavTimeStamp);
                 }
                 
-                uavTimeStamp = currentTime;
+                uavTimeStamp = ptIICurrentTime;
                 
                 if (_debugging) {
                     _debug("XXXXXXXXXXXXXXX = "
@@ -1028,14 +1030,13 @@ implements TimeRegulator {
                             + " uavTimeStamp = " + uavTimeStamp);
                 }
             }
+            
+            
         }
-        
-        // Convert UAV timestamp to CERTI logical time.
-        CertiLogicalTime ct = _convertToCertiLogicalTime(uavTimeStamp);
 
         // XXX: FIXME: HLA Reporter support
         if (_enableHlaReporter) {
-            _hlaReporter.updateUAVsInformation(hp, in, _getHlaCurrentTime(), currentTime, _director.getMicrostep(), ct);
+            _hlaReporter.updateUAVsInformation(hp, in, _getHlaCurrentTime(), currentTime, _director.getMicrostep(), uavTimeStamp);
             /*
             int attributeIndex = 0;
 
@@ -1105,19 +1106,21 @@ implements TimeRegulator {
         int objectInstanceId = _registerObjectInstanceMap.get(senderName);
         
         System.out.println("updateHlaAttribute: UAV -"
-                + " id = " + objectInstanceId + " suppAttributes = " + suppAttributes + " tag = " + tag + " ct = " + ct);
+                + " id = " + objectInstanceId + " suppAttributes = " + suppAttributes + " tag = " + tag + " uavTimeStamp = " + uavTimeStamp);
+        
         try {
             if (_debugging) {
                 _debug("    updateHlaAttribute() - sending UAV("
                         + "HLA publisher=" + hp.getFullName()
                         + ",HLA attribute=" + hp.getAttributeName()
-                        + ",timestamp=" + ct.getTime() 
+                        + ",uavTimeStamp=" + uavTimeStamp.getTime() 
                         + ",value=" + in.toString()
                         + ")");
             }
             
-            _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, ct);
-
+            //_rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, ct);
+            _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, uavTimeStamp);
+            
             // XXX: FIXME: HLA Reporter support
             if (_enableHlaReporter) {
                 _hlaReporter.incrNumberOfUAVs();
@@ -1137,7 +1140,7 @@ implements TimeRegulator {
                     "InvalidFederationTime: " + e.getMessage() + "    updateHlaAttribute() - sending UAV("
                             + "HLA publisher=" + hp.getFullName()
                             + ",HLA attribute=" + hp.getAttributeName()
-                            + ",timestamp=" + ct.getTime() 
+                            + ",uavTimeStamp=" + uavTimeStamp.getTime() 
                             + ",value=" + in.toString()
                             + ")"
                             + " ptII_time=" + currentTime.toString() + " certi_time=" + (CertiLogicalTime) _federateAmbassador.hlaLogicalTime    
@@ -2504,7 +2507,7 @@ implements TimeRegulator {
             if (_debugging) {
                 _debug("INNER callback: reflectAttributeValues(): starting - "
                         + "current status - "
-                        + "t_ptII = " + _director.getModelTime()//_printTimes(_director.getModelTime())
+                        + "t_ptII = " + _director.getModelTime()
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             }
 
