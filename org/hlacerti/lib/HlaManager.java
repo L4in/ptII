@@ -565,21 +565,17 @@ implements TimeRegulator {
 
         newObject._hlaTimeUnitValue = _hlaTimeUnitValue;
 
-        // XXX: FIXME: joker support
         newObject._usedJokerFilterMap = new HashMap<String, Boolean>();
         newObject._usedJoker = false;
 
-        // XXX: FIXME: HLA Reporter support
         newObject._hlaReporter = null;
         newObject._enableHlaReporter = _enableHlaReporter;
-        // XXX: FIXME: what about HAL reports location (path)?
         try {
             newObject._hlaTimeStep = ((DoubleToken) hlaTimeStep.getToken())
                     .doubleValue();
             newObject._hlaLookAHead = ((DoubleToken) hlaLookAHead.getToken())
                     .doubleValue();
         } catch (IllegalActionException ex) {
-            // XXX: FIXME: GiL: check if working
             throw new CloneNotSupportedException("Failed to get a token.");
         }
 
@@ -617,9 +613,8 @@ implements TimeRegulator {
         // Initialize HLA attribute tables for publication/subscription.
         _populateHlaAttributeTables();
         
-        // XXX: FIXME: HLA Reporter support
+        // HLA Reporter support.
         if (_enableHlaReporter) {
-
             // Get model filename.
             String modelName =  _director.getFullName().substring(1, _director.getFullName().lastIndexOf('.'));
             try {
@@ -629,21 +624,12 @@ implements TimeRegulator {
                 throw new IllegalActionException(this, e, "HLA reporter: Failed to create folder or files: " + e.getMessage());
             }
 
-            _hlaReporter.initializeReportVariables(_hlaLookAHead,
-                    _hlaTimeStep,
-                    _hlaTimeUnitValue,
-                    _startTime,
-                    _director.getModelStopTime(),
-                    _federateName,
-                    fedFile.asFile().getPath(),
-                    _isCreator,
-                    _timeStepped,
-                    _eventBased);
+            _hlaReporter.initializeReportVariables(_hlaLookAHead, _hlaTimeStep, _hlaTimeUnitValue, _startTime,
+                    _director.getModelStopTime(), _federateName, fedFile.asFile().getPath(),
+                    _isCreator, _timeStepped, _eventBased);
 
             _hlaReporter.initializeAttributesToPublishVariables(_hlaAttributesToPublish);
-            //_hlaReporter.initializeAttributesSubscribedToVariables(_hlaAttributesToSubscribeTo);
         }
-        // XXX: FIXME: HLA Reporter support
 
         // Get a link to the RTI.
         RtiFactory factory = null;
@@ -716,10 +702,9 @@ implements TimeRegulator {
         _doInitialSynchronization();
     }
 
-    // XXX: FIXME: check if usage is required ?
     /** Return always true. 
      * 
-     *  This function is not used in this implementation of TimeRegulator
+     *  This function is no more used in this implementation of TimeRegulator
      *  interface. It must return true otherwise the proposeTime() will
      *  enter in an infinite loop.
      *  @return true always return true
@@ -788,18 +773,17 @@ implements TimeRegulator {
     public Time proposeTime(Time proposedTime) throws IllegalActionException {
         Time currentTime = _director.getModelTime();
 
-        //This variable is used to avoid rounding the Time more than once
-        String strProposedTime = proposedTime.toString();//_printTimes(proposedTime);
+        String strProposedTime = proposedTime.toString();
         if (_debugging) {
             if (_eventBased) {
                 _debug("starting proposeTime(t(lastFoundEvent)="
                         + strProposedTime + ") - current status - "
-                        + "t_ptII = " + currentTime.toString() //_printTimes(currentTime)
+                        + "t_ptII = " + currentTime.toString() 
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             } else {
                 _debug("starting proposeTime(" + strProposedTime
                         + ") - current status - " + "t_ptII = "
-                        + currentTime.toString() + "; t_hla = " //_printTimes(currentTime) + "; t_hla = "
+                        + currentTime.toString() + "; t_hla = "
                         + _federateAmbassador.hlaLogicalTime);
             }
         }
@@ -949,7 +933,7 @@ implements TimeRegulator {
      *  @exception IllegalActionException If a CERTI exception is raised then
      *  displayed it to the user.
      */
-    public void updateHlaAttribute(HlaPublisher hp, Token in, String senderName)
+    public void updateHlaAttribute(HlaPublisher hp, Token in)
             throws IllegalActionException {
 
         // Get current model time.
@@ -965,7 +949,6 @@ implements TimeRegulator {
         byte[] bAttributeValue = MessageProcessing.encodeHlaValue(hp, in);
         if (_debugging) {
             _debug("starting updateHlaAttribute() - current status t_ptII = "
-                    //+ _printTimes(currentTime) + "; t_hla = "
                     + currentTime + "; t_hla = "
                     + _federateAmbassador.hlaLogicalTime
                     + " - A HLA value from Ptolemy has been"
@@ -1099,9 +1082,8 @@ implements TimeRegulator {
             */
         }
         
-        // XXX: FIXME: this part of the code is legacy, but may be removed as we have
-        // removed the 'dynamic' multi instance feature.
-        int objectInstanceId = _registerObjectInstanceMap.get(senderName);
+        // XXX: FIXME: check if we may add the object instance id to the HLA publisher and remove this.
+        int objectInstanceId = _registerObjectInstanceMap.get(hp.getClassInstanceName());
         
         System.out.println("updateHlaAttribute: UAV -"
                 + " id = " + objectInstanceId + " suppAttributes = " + suppAttributes + " tag = " + tag + " uavTimeStamp = " + uavTimeStamp);
@@ -1116,10 +1098,8 @@ implements TimeRegulator {
                         + ")");
             }
             
-            //_rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, ct);
             _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, uavTimeStamp);
             
-            // XXX: FIXME: HLA Reporter support
             if (_enableHlaReporter) {
                 _hlaReporter.incrNumberOfUAVs();
             }
@@ -1176,7 +1156,6 @@ implements TimeRegulator {
 
         super.wrapup();
 
-        // XXX: FIXME: HLA Reporter support
         if (_enableHlaReporter) {
             if (_debugging) {
                 _debug(_hlaReporter.displayAnalysisValues());
@@ -1280,10 +1259,10 @@ implements TimeRegulator {
         _registerObjectInstanceMap.clear();
         _discoverObjectInstanceMap.clear();
 
-        // XXX: FIXME: joker support
+        // Joker wildcard support.
         _usedJokerFilterMap.clear();
 
-        // XXX: FIXME: HLA Reporter support
+        // HLA Reporter support.
         _hlaReporter = null;
         
         if (_debugging) {
@@ -1318,8 +1297,7 @@ implements TimeRegulator {
      */
     protected HashMap<Integer, Integer> _objectIdToClassHandle;
 
-    // XXX: FIXME: joker support
-    /** Table of used joker filter. */
+    /** Table of used joker (wildcard) filter. */
     protected HashMap<String, Boolean> _usedJokerFilterMap;
 
     ///////////////////////////////////////////////////////////////////
@@ -1361,13 +1339,11 @@ implements TimeRegulator {
             RestoreInProgress, RTIinternalError, ConcurrentAccessAttempted,
             SpecifiedSaveLabelDoesNotExist {
 
-        // FIXME: XXX: why this kind of representation ? toString() ?
         // Custom string representation of proposedTime.
-        String strProposedTime = proposedTime.toString();//_printTimes(proposedTime);
+        String strProposedTime = proposedTime.toString();
 
-        // XXX: FIXME: HLA Reporter support
+        // HLA Reporter support.
         if (_enableHlaReporter) {
-            //_storeTimes("NER(" + proposedTimeInString + ")");
             _hlaReporter.storeTimes("NER()", proposedTime, _director.getModelTime());
         }
         
@@ -1673,15 +1649,19 @@ implements TimeRegulator {
             // attribute from a same HLA object class and a same HLA instance
             // class name.
             for (HlaPublisher hpIndex : _hlaPublishers) {
-                if (!hp.getFullName().equals(hpIndex.getFullName()) 
+                if ((!hp.getFullName().equals(hpIndex.getFullName())
                         && (hp.getAttributeName().compareTo(hpIndex.getAttributeName()) == 0)
                         && (hp.getClassObjectName().compareTo(hpIndex.getClassObjectName()) == 0)
-                        && (hp.getClassInstanceName().compareTo(hpIndex.getClassInstanceName()) == 0)) {
+                        && (hp.getClassInstanceName().compareTo(hpIndex.getClassInstanceName()) == 0))
+                        || (!hp.getFullName().equals(hpIndex.getFullName())
+                            && (!hp.getClassObjectName().equals(hpIndex.getClassObjectName()))
+                            && (hp.getClassInstanceName().compareTo(hpIndex.getClassInstanceName()) == 0))) {
 
                     // FIXME: XXX: Highlight the faulty HlaPublisher actor here.
 
                     throw new IllegalActionException(this,
-                            "A HlaPublisher with the same HLA information specified by the "
+                            "A HlaPublisher '" + hpIndex.getFullName() 
+                                    + "' with the same HLA information specified by the "
                                     + "HlaPublisher '" + hp.getFullName() 
                                     + "' \nis already registered for publication."); 
                 }
@@ -1735,15 +1715,20 @@ implements TimeRegulator {
             // attribute from a same HLA object class and a same HLA instance
             // class name.
             for (HlaSubscriber hsIndex : _hlaSubscribers) {
-                if (!hs.getFullName().equals(hsIndex.getFullName())
+                if ((!hs.getFullName().equals(hsIndex.getFullName())
                         && (hs.getAttributeName().compareTo(hsIndex.getAttributeName()) == 0)
                         && (hs.getClassObjectName().compareTo(hsIndex.getClassObjectName()) == 0)
-                        && (hs.getClassInstanceName().compareTo(hsIndex.getClassInstanceName()) == 0)) {
+                        && (hs.getClassInstanceName().compareTo(hsIndex.getClassInstanceName()) == 0))
+                        || (!hs.getFullName().equals(hsIndex.getFullName())
+                            && (!hs.getClassObjectName().equals(hsIndex.getClassObjectName()))
+                            && (hs.getClassInstanceName().compareTo(hsIndex.getClassInstanceName()) == 0))) {
+
 
                     // FIXME: XXX: Highlight the faulty HlaSubscriber actor here, see UCB for API.
 
                     throw new IllegalActionException(this,
-                            "A HlaSubscriber with the same HLA information specified by the "
+                            "A HlaSubscriber '" + hsIndex.getFullName() 
+                                    + "' with the same HLA information specified by the "
                                     + "HlaSubscriber '" + hs.getFullName() 
                                     + "' \nis already registered for subscription."); 
                 }
@@ -1899,7 +1884,7 @@ implements TimeRegulator {
             + ") - no more RAVs to deal with");
         }
     }
-
+    
     ///////////////////////////////////////////////////////////////////
     ////                         private variables                 ////
 
@@ -2457,6 +2442,7 @@ implements TimeRegulator {
                                 && classHandle == hs.getClassHandle()
                                 && (classInstanceOrJokerName != null 
                                 && hs.getClassInstanceName().compareTo(classInstanceOrJokerName) == 0)) {
+                                //&& hs.getClassInstanceName().compareTo(classInstanceOrJokerName) == 0)) {
 
                             double timeValue = ((CertiLogicalTime) theTime)
                                     .getTime() / _hlaTimeUnitValue;
@@ -2840,9 +2826,6 @@ implements TimeRegulator {
                 // Get corresponding HlaPublisher actor.
                 HlaPublisher pub = (HlaPublisher) _getPortFromTab(tObj).getContainer();
 
-                // Object class handle and object attribute handle are IDs that
-                // allow to identify an HLA attribute.
-
                 // Object class handle and attribute handle are IDs that
                 // allow to identify an HLA attribute.
 
@@ -2850,7 +2833,8 @@ implements TimeRegulator {
                 int classHandle = Integer.MIN_VALUE;
 
                 try {
-                    classHandle = rtia.getObjectClassHandle(_getClassObjectNameFromTab(tObj));
+                    //classHandle = rtia.getObjectClassHandle(_getClassObjectNameFromTab(tObj));
+                    classHandle = rtia.getObjectClassHandle(pub.getClassObjectName());
                 } catch (NameNotFound e) {
                     throw new IllegalActionException(null, e, "NameNotFound: " + e.getMessage() + " is not a HLA class from the FOM (see .fed file).");
                 }
@@ -2858,9 +2842,6 @@ implements TimeRegulator {
                 // Retrieve HLA attribute handle from RTI.
                 int attributeHandle = Integer.MIN_VALUE;
                 try {
-                    //System.out.println("setupHlaPublishers: container name = " + pub.getFullName());
-                    //System.out.println("setupHlaPublishers: object name = " + pub.getAttributeName());
-
                     attributeHandle = rtia
                             .getAttributeHandle(pub.getAttributeName(), classHandle);
 
@@ -2898,8 +2879,6 @@ implements TimeRegulator {
                         attributeHandle });
             }
 
-            //System.out.println("ciele_debug: setupHlaPublishers: classInstanceName list: step 2.1");
-
             // 2.1 Create a table of HlaPublishers indexed by their corresponding
             //     classInstanceName (no duplication).
             HashMap<String, LinkedList<String>> classInstanceNameHlaPublisherTable = new HashMap<String, LinkedList<String>>();
@@ -2912,7 +2891,11 @@ implements TimeRegulator {
                 // elt.getValue() => tObj[] array.
                 Object[] tObj = elt.getValue();
 
-                String classInstanceName = _getClassInstanceNameFromTab(tObj);
+                //String classInstanceName = _getClassInstanceNameFromTab(tObj);
+
+                // Get corresponding HlaPublisher actor.
+                HlaPublisher pub = (HlaPublisher) _getPortFromTab(tObj).getContainer();
+                String classInstanceName = pub.getClassInstanceName();
 
                 if (classInstanceNameHlaPublisherTable.containsKey(classInstanceName)) {
                     classInstanceNameHlaPublisherTable.get(classInstanceName).add(elt.getKey());
@@ -2922,8 +2905,6 @@ implements TimeRegulator {
                     classInstanceNameHlaPublisherTable.put(classInstanceName, list);
                 }
             }
-
-            //System.out.println("ciele_debug: setupHlaPublishers: classHandle list: step 2.2");
 
             // 2.2 Create a table of HlaPublishers indexed by their corresponding
             //     class handle (no duplication).
@@ -2947,8 +2928,6 @@ implements TimeRegulator {
                     classHandleHlaPublisherTable.put(classHandle, list);
                 }
             }
-
-            //System.out.println("ciele_debug: setupHlaPublishers: step 3");
 
             // 3. Declare to the Federation the HLA attributes to publish. If
             //    these attributes belongs to the same object class then only
@@ -2984,8 +2963,13 @@ implements TimeRegulator {
 
                 // Declare to the Federation the HLA attribute(s) to publish.
                 try {
-                    //System.out.println("setupHlaPublishers: publish classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
                     rtia.publishObjectClass(classHandle, _attributesLocal);
+
+                    if (_debugging) {
+                        _debug("_setupHlaPublishers() - Publish Object Class: "
+                                + " classHandle = " + classHandle
+                                + " _attributesLocal = " + _attributesLocal.toString());
+                    }
                 } catch (OwnershipAcquisitionPending e) {
                     throw new IllegalActionException(null, e, "OwnershipAcquisitionPending: " + e.getMessage());
                 } catch (AttributeNotDefined e) {
@@ -3012,16 +2996,18 @@ implements TimeRegulator {
 
                 int classHandle = _getClassHandleFromTab(tObj);
                 String classInstanceName = _getClassInstanceNameFromTab(tObj);
-
+                
                 if (!_registerObjectInstanceMap.containsKey(classInstanceName)) {
                     int objectInstanceId = -1;
                     try {
                         objectInstanceId = rtia.registerObjectInstance(classHandle, classInstanceName);
 
-                        System.out.println("setupHlaPublishers: register object instance:"
-                                + " classHandle = " + classHandle
-                                + " classIntanceName = " + classInstanceName
-                                + " objectInstanceId = " + objectInstanceId);
+                        if (_debugging) {
+                            _debug("_setupHlaPublishers() - Register Object Instance: "
+                                    + " classHandle = " + classHandle
+                                    + " classIntanceName = " + classInstanceName 
+                                    + " objectInstanceId = " + objectInstanceId);
+                        }
 
                         _registerObjectInstanceMap.put(classInstanceName, objectInstanceId);
                     } catch (ObjectClassNotPublished e) {
@@ -3190,7 +3176,11 @@ implements TimeRegulator {
                     throw new IllegalActionException(null, e, "AttributeNotDefined: " + e.getMessage());
                 }
 
-                System.out.println("setupHlaSubscribers: subscribeObjectClassAttributes: register classHandle = " + classHandle + " attributesLocal = " + _attributesLocal.toString());
+                if (_debugging) {
+                    _debug("_setupHlaSubscribers() - Subscribe Object Class Attributes: "
+                            + " classHandle = " + classHandle
+                            + " _attributesLocal = " + _attributesLocal.toString());
+                }
             }
         } // end 'private void setupHlaSubscribers(RTIambassador rtia) ...'
     } // end 'private class PtolemyFederateAmbassadorInner extends NullFederateAmbassador { ...'

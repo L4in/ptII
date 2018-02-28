@@ -279,10 +279,8 @@ public class HlaReporter {
             stb[attributeIndex].replace(stb[attributeIndex].length() - 2, stb[attributeIndex].length(), in.toString() + ";");
         } else {
             _preUAVsTimes.append(preUAVTimeStamp);
-            //_hlaReporter.appendToPreUAVsTimes(preUAVTimeStamp);
 
             _pUAVsTimes.append(pUAVTimeStamp);
-            //_hlaReporter.appendToPUAVsTimes(pUAVTimeStamp);
 
             for (int i = 0; i < _numberOfAttributesToPublish; i++) {
                 StringBuffer[] stb = _UAVsValues;
@@ -309,7 +307,7 @@ public class HlaReporter {
             String pRAVTimeStamp = printTimes(te.timeStamp) + ";";
 
             if (getNumberOfRAVs() > 0 
-                    && (getPRAVsTimes().length() - getPRAVsTimes().lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
+                    && (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
 
                 int indexOfAttribute = 0;
 
@@ -348,10 +346,8 @@ public class HlaReporter {
                     }
 
                     _folRAVsTimes.append("*");
-                    //_hlaReporter.appendToFolRAVsTimes("*"); 
 
                     _pRAVsTimes.append(pRAVTimeStamp);
-                    //_hlaReporter.appendToPRAVsTimes(pRAVTimeStamp);
 
                     for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
                         StringBuffer[] stb = _RAVsValues;
@@ -366,6 +362,15 @@ public class HlaReporter {
             }
     }
 
+    /**
+     * 
+     */
+    public void updateFolRAVsTimes(Time ravTimeStamp) {
+        if (_folRAVsTimes.lastIndexOf("*") >= 0) {
+            _folRAVsTimes.replace(_folRAVsTimes.lastIndexOf("*"), _folRAVsTimes.length(), ravTimeStamp + ";");
+        }
+    }
+    
     /** TBC
      * 
      * @param value
@@ -599,6 +604,7 @@ public class HlaReporter {
 
     /** Write the RAV information. */
     public void writeRAVsInformation() {
+        System.out.println("HLAREPORTER========================= _numberOfRAVs = " + _numberOfRAVs);
         if (_numberOfRAVs > 0) {
             StringBuffer header = new StringBuffer("LookAhead;TimeStep;StopTime;Information;");
             int count = String.valueOf(_RAVsValues[0]).split(";").length;
@@ -606,7 +612,8 @@ public class HlaReporter {
                 header.append("RAV" + i + ";");
             }
 
-            StringBuffer info = new StringBuffer(_date.toString() + "\n"
+            StringBuffer info = new StringBuffer(
+                    _date.toString() + "\n"
                     + header + "\n" 
                     + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "pRAV TimeStamp:;" + _pRAVsTimes + "\n"
                     + ";;;" + "folRAV TimeStamp:;" + _folRAVsTimes + "\n");
@@ -929,8 +936,6 @@ public class HlaReporter {
         return _UAVsValues;
     }
 
-
-
     /**
      * @param _UAVsValues the _UAVsValues to set
      */
@@ -985,24 +990,10 @@ public class HlaReporter {
     }
 
     /**
-     * @param _pUAVsTimes the _pUAVsTimes to set
-     */
-    public void appendToPUAVsTimes(String strValue) {
-        this._pUAVsTimes.append(strValue);
-    }
-
-    /**
      * @return the _preUAVsTimes
      */
     public StringBuffer getPreUAVsTimes() {
         return _preUAVsTimes;
-    }
-
-    /**
-     * @param _preUAVsTimes the _preUAVsTimes to set
-     */
-    public void appendToPreUAVsTimes(String strValue) {
-        this._preUAVsTimes.append(strValue);
     }
 
     /** .. */
@@ -1015,64 +1006,27 @@ public class HlaReporter {
     private StringBuffer[] _RAVsValues;
 
     /** OK */
-    public StringBuffer[] getRAVsValues() {
-        return _RAVsValues;
-    }
-
-    /** OK */
     private StringBuffer _pRAVsTimes;
-
-    /** OK */
-    public StringBuffer getPRAVsTimes() {
-        return _pRAVsTimes;
-    }
-
-    /** OK */
-    public void appendToPRAVsTimes(String strValue) {
-        _pRAVsTimes.append(strValue);
-    }
 
     /** OK */
     private StringBuffer _folRAVsTimes;
 
-    /** OK */
-    public StringBuffer getFolRAVsTimes() {
-        return _folRAVsTimes;
-    }
-
-    /** OK */
-    public void appendToFolRAVsTimes(String strValue) {
-        _folRAVsTimes.append(strValue);
-    }
-
     /** Represents the instant when the simulation is fully started
-     * (when the last federate starts running).
+     *  (when the last federate starts running).
      */
     private static double _startTime;
-    
-    /*
-    public void updateTick2() {
-        _numberOfTicks2++;
-        _numberOfTicks.set(_numberOfTAGs, _numberOfTicks.get(_numberOfTAGs) + 1);
-  
-    }*/
 
     /** The time of the last TAR or last NER. */
     private double _timeOfTheLastAdvanceRequest;
     
     public void setTimeOfTheLastAdvanceRequest(long value) {
-        //_timeOfTheLastAdvanceRequest = System.nanoTime();
         _timeOfTheLastAdvanceRequest = value;
     }
     
+    /** .. */
     public double getTimeOfTheLastAdvanceRequest() {
-        //_timeOfTheLastAdvanceRequest = System.nanoTime();
         return _timeOfTheLastAdvanceRequest;
     }
-    
-    //public void setTimeOfTheLastAdvanceRequest() {
-    //    _timeOfTheLastAdvanceRequest = System.nanoTime();
-    //}
 
     /** Array that contains the number of ticks between a NER or TAR and its respective TAG. */
     public ArrayList<Integer> _numberOfTicks;
@@ -1107,6 +1061,11 @@ public class HlaReporter {
     /** Represents the number of received UAV. */
     private int _numberOfUAVs;
 
+    /** OK */
+    public int getNumberOfUAVs() {
+        return _numberOfUAVs;
+    }
+    
     /**
      * @param _numberOfUAVs the _numberOfUAVs to set
      */
@@ -1114,17 +1073,13 @@ public class HlaReporter {
         _numberOfUAVs++;
     }
 
+    /** OK */
     public void resetNumberOfUAVs() {
         _numberOfUAVs = 0;
     }
 
-    public int getNumberOfUAVs() {
-        return _numberOfUAVs;
-    }
-
     /** Array that contains the delays between a NER or TAR and its respective TAG. */
     public ArrayList<Double> _TAGDelay;
-
 
     /** The lookahead value of the Ptolemy Federate. */
     private Double _hlaLookAHead;
