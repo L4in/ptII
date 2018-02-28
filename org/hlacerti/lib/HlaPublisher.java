@@ -235,8 +235,7 @@ public class HlaPublisher extends TypedAtomicActor {
         for (int i = 0 ; i < input.getWidth() ; ++i) {
             if (input.hasToken(i)) {
                 Token in = input.get(i);
-                _hlaManager.updateHlaAttribute(this, in, getClassInstanceName());
-
+                _hlaManager.updateHlaAttribute(this, in);
                 if (_debugging) {
                     _debug(this.getDisplayName()
                             + " Called fire() - the update value \""
