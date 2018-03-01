@@ -110,7 +110,7 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[185.0, -45.0]">
         </property>
     </property>
-    <property name="stopTime" class="ptolemy.data.expr.Parameter" value="12">
+    <property name="stopTime" class="ptolemy.data.expr.Parameter" value="2.5">
         <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
         </property>
         <property name="_icon" class="ptolemy.vergil.icon.ValueIcon">

@@ -1090,7 +1090,7 @@ implements TimeRegulator {
         
         try {
             if (_debugging) {
-                _debug("    updateHlaAttribute() - sending UAV("
+                _debug(" ###> sending UAV("
                         + "HLA publisher=" + hp.getFullName()
                         + ",HLA attribute=" + hp.getAttributeName()
                         + ",uavTimeStamp=" + uavTimeStamp.getTime() 
@@ -1495,7 +1495,7 @@ implements TimeRegulator {
         String headMsg = "_timeSteppedBasedTimeAdvance(" + proposedTime.toString() + "): ";
 
         if (_debugging) {
-            _debug("starting " + headMsg
+            _debug("\n" + "starting " + headMsg
                     + "strProposedTime=" + strProposedTime
                     + " proposedTime=" + proposedTime.toString());
         }
@@ -1519,13 +1519,19 @@ implements TimeRegulator {
         // h + TS => nextPointInTime
         CertiLogicalTime nextPointInTime = new CertiLogicalTime(hlaLogicaltime.getTime() + _hlaTimeStep);
         
-        // algo4: 1: while g(t') > h + TS then
+        // algo4: 1: while g(t') >= h + TS then
 
         // NOTE: Microstep reset problem
         //  To retrieve the old behavior with the microstep reset problem, you may change the line below:
         //  reset    => while (certiProposedTime.isGreaterThan(nextPointInTime)) {
         //  no reset => while (certiProposedTime.isGreaterThanOrEqualTo(nextPointInTime)) {
-        while (certiProposedTime.isGreaterThanOrEqualTo(nextPointInTime)) {            
+        
+        if (_debugging) {
+            _debug("  " + headMsg
+                   + " Just before While g(t') > h+TS; g(t')= " + certiProposedTime.getTime() + "; h+TS= " + nextPointInTime.getTime());
+        }
+                
+        while (certiProposedTime.isGreaterThanOrEqualTo(nextPointInTime)) {
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
 
@@ -1545,7 +1551,7 @@ implements TimeRegulator {
                 }
                 
                 if (_debugging) {
-                    _debug("  " + headMsg
+                    _debug(" ---> " + headMsg
                             + " call CERTI TAR(" + nextPointInTime.getTime() + ")");
                 }
             } catch (InvalidFederationTime | FederationTimeAlreadyPassed | TimeAdvanceAlreadyInProgress
@@ -1808,7 +1814,7 @@ implements TimeRegulator {
         // in PtolemyFederateAmbassadorInner class).
 
         if (_debugging) {
-            _debug("starting _putReflectedAttributesOnHlaSubscribers("
+            _debug("=**=> starting _putReflectedAttributesOnHlaSubscribers("
             + proposedTime.toString() + ") - current status - "
             + "t_ptII = " + _director.getModelTime().toString()
             + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
@@ -2468,7 +2474,7 @@ implements TimeRegulator {
 
                             _fromFederationEvents.get(hs.getFullName()).add(te);
                             if (_debugging) {
-                                _debug("    reflectAttributeValues() - receive RAV("
+                                _debug(" =*=> receive RAV("
                                         + "HLA attribute= " + hs.getAttributeName()
                                         + ", timestamp=" + te.timeStamp.toString() //_printTimes(te.timeStamp)
                                         + " ,value=" + value.toString()
@@ -2732,7 +2738,7 @@ implements TimeRegulator {
             }
             
             if (_debugging) {
-                _debug("INNER callback: timeAdvanceGrant(): "
+                _debug("<<-- INNER callback: timeAdvanceGrant(): "
                         + "TAG(" + grantedHlaLogicalTime.toString()
                         + " * (HLA time unit=" + _hlaTimeUnitValue + ")) received");
                 /*_debug("INNER callback: timeAdvanceGrant(): TAG(" + _hlaReporter._numberOfTAGs 

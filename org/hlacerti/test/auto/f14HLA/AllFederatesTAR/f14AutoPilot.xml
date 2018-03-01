@@ -4,13 +4,13 @@
 <entity name="f14AutoPilot" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={23, 217, 753, 632}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={781, 338, 753, 632}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[519, 522]">
     </property>
-    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.7276531722334098">
+    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.7749392460036917">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{174.1041613650243, 207.77947501017914}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{175.41284179687497, 247.53011803167982}">
     </property>
     <property name="DE Director" class="ptolemy.domains.de.kernel.DEDirector">
         <property name="stopTime" class="ptolemy.data.expr.Parameter" value="stopTime">
@@ -53,7 +53,7 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[350.0, -35.0]">
         </property>
     </property>
-    <property name="stopTime" class="ptolemy.data.expr.Parameter" value="12">
+    <property name="stopTime" class="ptolemy.data.expr.Parameter" value="2.5">
         <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
         </property>
         <property name="_icon" class="ptolemy.vergil.icon.ValueIcon">
@@ -123,7 +123,7 @@
     <entity name="AutoPilotDE" class="ptolemy.actor.TypedCompositeActor">
         <property name="_location" class="ptolemy.kernel.util.Location" value="[230.0, 85.0]">
         </property>
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={726, 548, 989, 634}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={726, 446, 989, 634}, maximized=false}">
         </property>
         <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[755, 524]">
         </property>
@@ -539,7 +539,7 @@
         <entity name="TimedPlotter" class="ptolemy.actor.lib.gui.TimedPlotter">
             <property name="legend" class="ptolemy.kernel.util.StringAttribute" value="AddS,Add,gain2">
             </property>
-            <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={120, 564, 509, 333}, maximized=false}">
+            <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={67, 661, 509, 336}, maximized=false}">
             </property>
             <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[509, 292]">
             </property>
@@ -560,8 +560,9 @@
 <title>TimedPlotter</title>
 <xLabel></xLabel>
 <yLabel></yLabel>
-<xRange min="1.7976931348623157E308" max="-1.7976931348623157E308"/>
-<yRange min="1.7976931348623157E308" max="-1.7976931348623157E308"/>
+<xRange min="0.01" max="2.5"/>
+<yRange min="-1.0714299408715644" max="0.08756908694700738"/>
+<default connected="no"/>
 </plot>?>
             </configure>
         </entity>
@@ -748,17 +749,17 @@
         </port>
     </entity>
     <entity name="Display" class="ptolemy.actor.lib.gui.Display">
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={836, 49, 442, 253}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={836, 49, 442, 256}, maximized=false}">
         </property>
         <property name="_paneSize" class="ptolemy.actor.gui.SizeAttribute" value="[442, 212]">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[220.0, 20.0]">
         </property>
     </entity>
-    <entity name="TimedPlotter" class="ptolemy.actor.lib.gui.TimedPlotter">
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={852, 196, 588, 253}, maximized=false}">
+    <entity name="AutoPilotTimedPlotter" class="ptolemy.actor.lib.gui.TimedPlotter">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={1288, 162, 431, 287}, maximized=false}">
         </property>
-        <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[588, 212]">
+        <property name="_plotSize" class="ptolemy.actor.gui.SizeAttribute" value="[431, 243]">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[225.0, -40.0]">
         </property>
@@ -769,8 +770,8 @@
 <title>TimedPlotter</title>
 <xLabel></xLabel>
 <yLabel></yLabel>
-<xRange min="0.01" max="12.0"/>
-<yRange min="-1.0" max="1.0"/>
+<xRange min="0.01" max="2.5"/>
+<yRange min="-1.4632789056304114" max="0.0"/>
 <default connected="no" marks="various"/>
 </plot>?>
         </configure>
@@ -849,9 +850,9 @@
     <link port="AutoPilotDE.qS" relation="relation4"/>
     <link port="elevCom.input" relation="relation"/>
     <link port="Display.input" relation="relation5"/>
-    <link port="TimedPlotter.input" relation="relation5"/>
-    <link port="TimedPlotter.input" relation="relation7"/>
-    <link port="TimedPlotter.input" relation="relation4"/>
+    <link port="AutoPilotTimedPlotter.input" relation="relation5"/>
+    <link port="AutoPilotTimedPlotter.input" relation="relation7"/>
+    <link port="AutoPilotTimedPlotter.input" relation="relation4"/>
     <link port="HlaSub1AircraftSAct.output" relation="relation7"/>
     <link port="HlaSub2AircraftSAct.output" relation="relation4"/>
     <link port="HlaSub3PilotStick.output" relation="relation5"/>
