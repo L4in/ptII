@@ -1595,6 +1595,9 @@ implements TimeRegulator {
                 // algo4: 9: if t'' > t' then  => Update t’ if the received time is smaller, otherwise keeps t’
                 if (newPtolemyTime.compareTo(proposedTime) < 0) {
                     // algo4: 10: t' <- t''
+                    if (_debugging) {
+                        _debug("@line 10 " + headMsg + " t'=f(h)=" + proposedTime.toString() + " newPtime " + newPtolemyTime.toString());
+                    }
                     proposedTime = newPtolemyTime;
                 } // algo4: 11: end if
 
@@ -1605,6 +1608,9 @@ implements TimeRegulator {
                 _federateAmbassador.hasReceivedRAV = false;
 
                 // algo4: 13: return t'
+                if (_debugging) {
+                    _debug("line 13 Received RAV " + headMsg + " returns proposedTime=" + proposedTime.toString());
+                }
                 return proposedTime;
 
             } // algo4: 14: end if receivedRAV then
