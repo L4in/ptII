@@ -258,7 +258,7 @@ implements TimeRegulator {
         _fromFederationEvents       = new HashMap<String, LinkedList<TimedEvent>>();
         _objectIdToClassHandle      = new HashMap<Integer, Integer>();
 
-        // XXX: FIXME: joker support
+        // Joker wildcard support.
         _usedJokerFilterMap = new HashMap<String, Boolean>();
 
         _hlaTimeStep  = null;
@@ -341,7 +341,7 @@ implements TimeRegulator {
         hlaTimeUnit.setDisplayName("HLA time unit");
         attributeChanged(hlaTimeUnit);
         
-        // XXX: FIXME: HLA Reporter support
+        // HLA Reporter support.
         enableHlaReporter = new Parameter(this, "enableHlaReporter");
         enableHlaReporter.setTypeEquals(BaseType.BOOLEAN);
         enableHlaReporter.setExpression("false");
@@ -431,7 +431,6 @@ implements TimeRegulator {
         }
     };
 
-    // XXX: FIXME: HLA Reporter support
     /** Boolean value, 'true' if the generation of HLA reports is enabled
      *  'false' if not. This parameter must contain an BooleanToken. */
     public Parameter enableHlaReporter;
@@ -570,6 +569,7 @@ implements TimeRegulator {
 
         newObject._hlaReporter = null;
         newObject._enableHlaReporter = _enableHlaReporter;
+
         try {
             newObject._hlaTimeStep = ((DoubleToken) hlaTimeStep.getToken())
                     .doubleValue();
@@ -1378,7 +1378,6 @@ implements TimeRegulator {
             // Wait the time grant from the HLA/CERTI Federation (from the RTI).
             _federateAmbassador.timeAdvanceGrant = false;
 
-            // XXX: FIXME: HLA Reporter support
             if (_enableHlaReporter) {
                 // Set time of last time advance request.
                 _hlaReporter.setTimeOfTheLastAdvanceRequest(System.nanoTime());
@@ -1388,7 +1387,6 @@ implements TimeRegulator {
             // Call CERTI NER HLA service.
             _rtia.nextEventRequest(certiProposedTime);
 
-            // XXX: FIXME: HLA Reporter support
             if (_enableHlaReporter) {
                 // Increment counter of NER calls.
                 _hlaReporter.incrNumberOfNERs();
@@ -1493,7 +1491,7 @@ implements TimeRegulator {
         // Custom string representation of proposedTime.
         String strProposedTime = proposedTime.toString();
 
-        // Header for debug purpose and listener
+        // Header for debug purpose and listener.
         String headMsg = "_timeSteppedBasedTimeAdvance(" + proposedTime.toString() + "): ";
 
         if (_debugging) {
@@ -1503,6 +1501,7 @@ implements TimeRegulator {
         }
 
         // Algorithm 4 - TAR
+
         // f() => _convertToPtolemyTime()
         // g() => _convertToCertiLogicalTime()
 
@@ -1568,11 +1567,11 @@ implements TimeRegulator {
 
                     if (_enableHlaReporter) {
                         _hlaReporter._numberOfTicks2++;
-                        _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
+                        _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs,
+                                _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                     }
 
                 } catch (SpecifiedSaveLabelDoesNotExist | ConcurrentAccessAttempted | RTIinternalError e) {
-                    System.out.println("DEBUG DEBUG DEBUG DEBUG");
                     throw new IllegalActionException(this, e, e.getMessage());
                 } // algo4: 4: tick()  > Wait TAG()
 
@@ -1672,7 +1671,9 @@ implements TimeRegulator {
 
             _hlaAttributesToPublish.put(
                     hp.getFullName(),
-                    // XXX: FIXME: simply replace by a HlaPublisher instance ?
+                    
+                    // XXX: FIXME: simply replace Object[] by a HlaPublisher instance ?
+                    
                     // tObj[] object as the following structure:
 
                     // tObj[0] => input port which receives the token to transform
@@ -1740,7 +1741,8 @@ implements TimeRegulator {
             _hlaAttributesToSubscribeTo.put(
                     hs.getFullName(),
 
-                    // XXX: FIXME: simply replace by a HlaSubscriber instance ?
+                    // XXX: FIXME: simply replace bject[] by a HlaSubscriber instance ?
+                    
                     // tObj[] object as the following structure:
 
                     // tObj[0] => input port which receives the token to transform
@@ -1971,11 +1973,12 @@ implements TimeRegulator {
     private Boolean _enableHlaReporter;
 
     ///////////////////////////////////////////////////////////////////
-    ////                    private  methods                 ////
+    ////                    private  methods                       ////
 
-    /**
-     * Will do the initial synchronization loop among the fedeate
-     * and register the synchronization point if the federate is
+    /** The method do the initial synchronization loop among the 
+     *  federate and register the synchronization point if the federate
+     *  is the synchronization point creator.
+     *  @exception IllegalActionException If the RTI throws it.
      */
     private void _doInitialSynchronization() throws IllegalActionException {
         if (!_requireSynchronization) {
@@ -2003,7 +2006,8 @@ implements TimeRegulator {
                     if (_enableHlaReporter) {
                         _hlaReporter._numberOfTicks2++;
                         if (_hlaReporter.getTimeOfTheLastAdvanceRequest() > 0) {
-                            _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
+                            _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs,
+                                    _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                         } else {
                             _hlaReporter._numberOfOtherTicks++;
                         }
@@ -2028,7 +2032,8 @@ implements TimeRegulator {
                 if (_enableHlaReporter) {
                     _hlaReporter._numberOfTicks2++;
                     if (_hlaReporter.getTimeOfTheLastAdvanceRequest() > 0) {
-                        _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
+                        _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs,
+                                _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                     } else {
                         _hlaReporter._numberOfOtherTicks++;
                     }
@@ -2063,7 +2068,8 @@ implements TimeRegulator {
                 if (_enableHlaReporter) {
                     _hlaReporter._numberOfTicks2++;
                     if (_hlaReporter.getTimeOfTheLastAdvanceRequest() > 0) {
-                        _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs, _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
+                        _hlaReporter._numberOfTicks.set(_hlaReporter._numberOfTAGs,
+                                _hlaReporter._numberOfTicks.get(_hlaReporter._numberOfTAGs) + 1);
                     } else {
                         _hlaReporter._numberOfOtherTicks++;
                     }
@@ -2074,11 +2080,10 @@ implements TimeRegulator {
         }
     }
 
-    /**
-     * Will enable all time regulating aspect for the federate. After this call
-     * the federate as stated to the RTI if it time regulating and/or time regulator
-     * and has enable asynchronous delivery for RO messages
-     * @exception IllegalActionException
+    /** This method enables all time regulating aspect for the federate. After this call
+     *  the federate as stated to the RTI if it is time regulating and/or time regulator
+     *  and has enable asynchronous delivery for RO messages
+     *  @exception IllegalActionException if the RTI throws it.
      */
     private void _initializeTimeAspects() throws IllegalActionException {
 
@@ -2159,56 +2164,60 @@ implements TimeRegulator {
     ////                    private static methods                 ////
 
     /* Getter functions to ease access to information stored in an object
-     * array about _hlaAttributesToPublish and _hlaAttributesSubscribedTo
-     * tables. */
+     * array about HLA attributes to publish or to subscribe to. */
 
-    /**
-     * 
-     * @param tab
-     * @return
+    /** Simple getter function to retrieve the TypedIOPort instance from
+     *  the opaque Object[] array.
+     *  @param array the opaque Object[] array
+     *  @return the instance of TypedIOPort
      */
-    private static TypedIOPort _getPortFromTab(Object[] tab) {
-        return (TypedIOPort) tab[0];
+    private static TypedIOPort _getPortFromTab(Object[] array) {
+        return (TypedIOPort) array[0];
     }
 
-    /**
-     * @param tab
-     * @return
+    /** Simple getter function to retrieve the Type instance from
+     *  the opaque Object[] array.
+     *  @param array the opaque Object[] array
+     *  @return the instance of Type
      */
-    static private Type _getTypeFromTab(Object[] tab) {
-        return (Type) tab[1];
+    static private Type _getTypeFromTab(Object[] array) {
+        return (Type) array[1];
     }
 
-    /**
-     * @param tab
-     * @return
+    /** Simple getter function to retrieve the class object name from
+     *  the opaque Object[] array.
+     *  @param array the opaque Object[] array
+     *  @return the class object name as String
      */
-    static private String _getClassObjectNameFromTab(Object[] tab) {
-        return (String) tab[2];
+    static private String _getClassObjectNameFromTab(Object[] array) {
+        return (String) array[2];
     }
 
-    /**
-     * @param tab
-     * @return
+    /** Simple getter function to retrieve the class instance name from
+     *  the opaque Object[] array.
+     *  @param array the opaque Object[] array
+     *  @return the class instance name as String
      */
-    static private String _getClassInstanceNameFromTab(Object[] tab) {
-        return (String) tab[3];
+    static private String _getClassInstanceNameFromTab(Object[] array) {
+        return (String) array[3];
     }
 
-    /**
-     * @param tab
-     * @return
+    /** Simple getter function to retrieve the class handle from
+     *  the opaque Object[] array.
+     *  @param array the opaque Object[] array
+     *  @return the class handle as Integer
      */
-    static private Integer _getClassHandleFromTab(Object[] tab) {
-        return (Integer) tab[4];
+    static private Integer _getClassHandleFromTab(Object[] array) {
+        return (Integer) array[4];
     }
 
-    /**
-     * @param tab
-     * @return
+    /** Simple getter function to retrieve the attribute handle from
+     *  the opaque Object[] array.
+     *  @param array the opaque Object[] array
+     *  @return the attribute handle as Integer
      */
-    static private Integer _getAttributeHandleFromTab(Object[] tab) {
-        return (Integer) tab[5];
+    static private Integer _getAttributeHandleFromTab(Object[] array) {
+        return (Integer) array[5];
     }
 
     ///////////////////////////////////////////////////////////////////
