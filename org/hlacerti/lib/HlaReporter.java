@@ -185,7 +185,7 @@ public class HlaReporter {
         // XXX: FIXME: GiL: todo, _nameOfTheAttributesToPublish => _hlaPublisherFullname,
         //                        _numberOfAttributesToPublish => _numberOfHlaPublisher
         _numberOfAttributesToPublish = hlaAttributesToPublish.size();
-        
+
         _nameOfTheAttributesToPublish = new String[_numberOfAttributesToPublish];
 
         _UAVsValues = new StringBuffer[_numberOfAttributesToPublish];
@@ -196,9 +196,6 @@ public class HlaReporter {
             // toString() will print the HlaPublisher fullName.
             _nameOfTheAttributesToPublish[i] = attributesToPublish[i].toString();
             _UAVsValues[i] = new StringBuffer("");
-
-            // XXX: FIXME: GiL: debug only
-            System.out.println("[DEBUG-REPORTER] _nameOfTheAttributesToPublish[i] " + _nameOfTheAttributesToPublish[i]);
         }
 
     }
@@ -225,9 +222,6 @@ public class HlaReporter {
             // toString() will print the HlaPublisher fullName.
             _nameOfTheAttributesSubscribedTo[i] = attributesSubscribedTo[i].toString();
             _RAVsValues[i] = new StringBuffer("");
-
-            // XXX: FIXME: GiL: debug only
-            System.out.println("[DEBUG-REPORTER] RAV: _nameOfTheAttributesSubscribedTo[i] " + _nameOfTheAttributesSubscribedTo[i]);
         }
     }
 
@@ -235,131 +229,89 @@ public class HlaReporter {
      * 
      */
     public void updateUAVsInformation(HlaPublisher hp, Token in, Time hlaTime, Time ptTime, int microstep, CertiLogicalTime uavTimeStamp) throws IllegalActionException {
+        String hlaPublisherName = hp.getFullName();
 
         int attributeIndex = 0;
-
-        //String attributeName = _getPortFromTab(tObj).getContainer().getName();
-        // XXX: FIXME: GiL: todo, attributeName => hlaPublisherFullname
-        //String attributeName = hp.getAttributeName();
-        String attributeName = hp.getFullName();
-
-        // _numberOfAttributesToPublish = _hlaAttributesToPublish.size()
-        // _nameOfTheAttributesToPublish[i] = _hlaAttributesToPublish
-        //_hlaReporter.getNumberOfAttributesToPublish() = _hlaAttributesToPublish.size()
-        String[] arrayStr = _nameOfTheAttributesToPublish;
-        System.out.println("DEBUG HLA-MANAGER: arrayStr " + arrayStr.toString() );
-        for (int i = 0; i < arrayStr.length; i++) {
-            System.out.println("DEBUG HLA-MANAGER: arrayStr value " + i + " " + arrayStr[i]);
-
-        }
-
         for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-            if (attributeName.equals(arrayStr[i])) {
+            if (hlaPublisherName.equals(_nameOfTheAttributesToPublish[i])) {
                 attributeIndex = i;
                 break;
             }
         }
 
         String pUAVTimeStamp = uavTimeStamp.getTime() + ";";
-
-        //String preUAVTimeStamp = "(" + _printTimes(currentTime) + "," + microstep + ");";
         String preUAVTimeStamp = "(" + ptTime + "," + microstep + ");";
-
-            storeTimes("UAV " + attributeName + "." + hp.getAttributeName(),
-                    hlaTime,
-                    ptTime);
-
+        storeTimes("UAV " + hlaPublisherName + "." + hp.getAttributeName(), hlaTime, ptTime);
 
         if (_numberOfUAVs > 0
                 && (_preUAVsTimes.length() - _preUAVsTimes.lastIndexOf(preUAVTimeStamp)) == preUAVTimeStamp.length()
                 && (_preUAVsTimes.length() - _preUAVsTimes.lastIndexOf(pUAVTimeStamp)) == pUAVTimeStamp.length()) {
 
             // 'in' is the Token.
-            StringBuffer[] stb = _UAVsValues;
-            stb[attributeIndex].replace(stb[attributeIndex].length() - 2, stb[attributeIndex].length(), in.toString() + ";");
+            _UAVsValues[attributeIndex].replace(_UAVsValues[attributeIndex].length() - 2, _UAVsValues[attributeIndex].length(), in.toString() + ";");
         } else {
             _preUAVsTimes.append(preUAVTimeStamp);
-
             _pUAVsTimes.append(pUAVTimeStamp);
 
             for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-                StringBuffer[] stb = _UAVsValues;
                 if (i == attributeIndex) {
-                    //_UAVsValues[i].append(in.toString() + ";");
-                    stb[i].append(in.toString() + ";");
+                    _UAVsValues[i].append(in.toString() + ";");
                 } else {
-                    //_UAVsValues[i].append("-;");
-                    stb[i].append("-;");
+                    _UAVsValues[i].append("-;");
                 }
             }
         }
-        // XXX: FIXME: GiL: end HLA Reporter code ?
     }
-    
+
     /**
      * 
      */
     public void updateRAVsInformation(HlaSubscriber hs, HlaTimedEvent te, HashMap<String, Object[]> hlaAttributesToSubscribeTo, Object value) {
-            //String attributeName = hs.getParameterName();
-            String hlaSubcriberName = hs.getFullName();
+        String hlaSubscriberName = hs.getFullName();
 
-            //String pRAVTimeStamp = _printTimes(te.timeStamp) + ";";
-            String pRAVTimeStamp = printTimes(te.timeStamp) + ";";
+        String pRAVTimeStamp = printTimes(te.timeStamp) + ";";
 
-            if (getNumberOfRAVs() > 0 
-                    && (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
+        if (_numberOfRAVs > 0 
+                && (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
+            System.out.println("DEBUG HLA-REPORTER: RAV: IF CASE : _numberOfRAVs=" + _numberOfRAVs);
 
-                int indexOfAttribute = 0;
+            int indexOfAttribute = 0;
 
-                String[] arrayStr = _nameOfTheAttributesSubscribedTo;
-                System.out.println("DEBUG HLA-REPORTER: RAV: arrayStr " + arrayStr.toString() );
-                for (int j = 0; j < arrayStr.length; j++) {
-                    System.out.println("DEBUG HLA-REPORTER: RAV: arrayStr value " + j + " " + arrayStr[j]);
+            for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
+                if (hlaSubscriberName.equals(_nameOfTheAttributesSubscribedTo[j])) {
+                    indexOfAttribute = j;
+                    break;
+                }  
+            }
 
-                }
+            _RAVsValues[indexOfAttribute].replace(_RAVsValues[indexOfAttribute].length() - 2, _RAVsValues[indexOfAttribute].length(), value.toString() + ";");
 
-                for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                    //if (_nameOfTheAttributesSubscribedTo[j].substring(_nameOfTheAttributesSubscribedTo[j].lastIndexOf("-" + attributeName) + 1).equals(attributeName)) {
-                    if (hlaSubcriberName.equals(arrayStr[j])) {
-                        indexOfAttribute = j;
-                        break;
-                    }  
-                }
-                StringBuffer[] stb = _RAVsValues;
+        } else {
+            if (_numberOfRAVs < 1) {
+                // Initialize RAVs data structures.
+                initializeAttributesSubscribedToVariables(hlaAttributesToSubscribeTo);
+            }
+            int indexOfAttribute = 0;
 
-                stb[indexOfAttribute].replace(stb[indexOfAttribute].length() - 2, stb[indexOfAttribute].length(), value.toString() + ";");
-
-            } else { // setup XXX: FIXME: GiL: to reverse
-                if (getNumberOfRAVs() < 1) {
-                    // initialize
-                    initializeAttributesSubscribedToVariables(hlaAttributesToSubscribeTo);
-
-                    int indexOfAttribute = 0;
-
-                    String[] arrayStr = _nameOfTheAttributesSubscribedTo;
-                    for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                        //if (_nameOfTheAttributesSubscribedTo[j].substring(_nameOfTheAttributesSubscribedTo[j].lastIndexOf("-" + attributeName) + 1).equals(attributeName)) {
-                        if (hlaSubcriberName.equals(arrayStr[j])) {
-                            indexOfAttribute = j;
-                            break;
-                        }
-                    }
-
-                    _folRAVsTimes.append("*");
-
-                    _pRAVsTimes.append(pRAVTimeStamp);
-
-                    for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                        StringBuffer[] stb = _RAVsValues;
-
-                        if (j == indexOfAttribute) {
-                            stb[j].append(value.toString() + ";");
-                        } else {
-                            stb[j].append("-;");
-                        }
-                    }
+            for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
+                if (hlaSubscriberName.equals(_nameOfTheAttributesSubscribedTo[j])) {
+                    indexOfAttribute = j;
+                    break;
                 }
             }
+
+            _folRAVsTimes.append("*");
+
+            _pRAVsTimes.append(pRAVTimeStamp);
+
+            for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
+                if (j == indexOfAttribute) {
+                    _RAVsValues[j].append(value.toString() + ";");
+                } else {
+                    _RAVsValues[j].append("-;");
+                }
+            }
+        }
     }
 
     /**
@@ -369,8 +321,9 @@ public class HlaReporter {
         if (_folRAVsTimes.lastIndexOf("*") >= 0) {
             _folRAVsTimes.replace(_folRAVsTimes.lastIndexOf("*"), _folRAVsTimes.length(), ravTimeStamp + ";");
         }
+
     }
-    
+
     /** TBC
      * 
      * @param value
@@ -604,7 +557,6 @@ public class HlaReporter {
 
     /** Write the RAV information. */
     public void writeRAVsInformation() {
-        System.out.println("HLAREPORTER========================= _numberOfRAVs = " + _numberOfRAVs);
         if (_numberOfRAVs > 0) {
             StringBuffer header = new StringBuffer("LookAhead;TimeStep;StopTime;Information;");
             int count = String.valueOf(_RAVsValues[0]).split(";").length;
@@ -614,9 +566,9 @@ public class HlaReporter {
 
             StringBuffer info = new StringBuffer(
                     _date.toString() + "\n"
-                    + header + "\n" 
-                    + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "pRAV TimeStamp:;" + _pRAVsTimes + "\n"
-                    + ";;;" + "folRAV TimeStamp:;" + _folRAVsTimes + "\n");
+                            + header + "\n" 
+                            + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "pRAV TimeStamp:;" + _pRAVsTimes + "\n"
+                            + ";;;" + "folRAV TimeStamp:;" + _folRAVsTimes + "\n");
             for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
                 info.append(";;;" + _nameOfTheAttributesSubscribedTo[i] + ";" + _RAVsValues[i] + "\n");
             }
@@ -1018,11 +970,11 @@ public class HlaReporter {
 
     /** The time of the last TAR or last NER. */
     private double _timeOfTheLastAdvanceRequest;
-    
+
     public void setTimeOfTheLastAdvanceRequest(long value) {
         _timeOfTheLastAdvanceRequest = value;
     }
-    
+
     /** .. */
     public double getTimeOfTheLastAdvanceRequest() {
         return _timeOfTheLastAdvanceRequest;
@@ -1065,7 +1017,7 @@ public class HlaReporter {
     public int getNumberOfUAVs() {
         return _numberOfUAVs;
     }
-    
+
     /**
      * @param _numberOfUAVs the _numberOfUAVs to set
      */
