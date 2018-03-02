@@ -776,13 +776,13 @@ implements TimeRegulator {
         String strProposedTime = proposedTime.toString();
         if (_debugging) {
             if (_eventBased) {
-                _debug("starting proposeTime(t(lastFoundEvent)="
-                        + strProposedTime + ") - current status - "
+                _debug("   start proposeTime(t(lastFoundEvent)="
+                        + strProposedTime + ") "
                         + "t_ptII = " + currentTime.toString() 
                         + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
             } else {
-                _debug("starting proposeTime(" + strProposedTime
-                        + ") - current status - " + "t_ptII = "
+                _debug("     starting proposeTime(" + strProposedTime
+                        + ") " + "t_ptII = "
                         + currentTime.toString() + "; t_hla = "
                         + _federateAmbassador.hlaLogicalTime);
             }
@@ -797,7 +797,7 @@ implements TimeRegulator {
             // XXX: FIXME: clarify SKIP RTI
             if (_debugging) {
                 _debug("    proposeTime(" + strProposedTime + ") -"
-                        + " called but the proposedTime is bigger than the stopTime"
+                        + " proposedTime > stopTime"
                         + " -> SKIP RTI -> returning stopTime");
             }
             return _stopTime;
@@ -825,11 +825,11 @@ implements TimeRegulator {
             // service for optimization, it could be possible to have events
             // from the Federation in the Federate's priority timestamp queue,
             // so we tick() to get these events (if they exist).
-            if (_debugging) {
-                _debug("    proposeTime(" + strProposedTime
-                        + ") - called but the currentTime is equal to"
-                        + " the proposedTime -> tick() one time -> returning currentTime");
+         /*   if (_debugging) {
+                _debug("       proposeTime(" + strProposedTime
+                       + "): currentTime t_ptII = proposedTime: tick() one time");  //-> returning currentTime");
             }
+          */  //jc: for make the reading easier. If needed, we can go back to this print.
             try {
                 // XXX: FIXME: GiL, why tick2() hangs the simulation?
                 _rtia.tick();
@@ -948,11 +948,9 @@ implements TimeRegulator {
         // Encode the value to be sent to the CERTI.
         byte[] bAttributeValue = MessageProcessing.encodeHlaValue(hp, in);
         if (_debugging) {
-            _debug("starting updateHlaAttribute() - current status t_ptII = "
+            _debug("      start updateHlaAttribute() t_ptII = "
                     + currentTime + "; t_hla = "
-                    + _federateAmbassador.hlaLogicalTime
-                    + " - A HLA value from Ptolemy has been"
-                    + " encoded for HLA/CERTI message usage");
+                    + _federateAmbassador.hlaLogicalTime);
         }
         SuppliedAttributes suppAttributes = null;
         try {
@@ -1087,15 +1085,12 @@ implements TimeRegulator {
         
         System.out.println("updateHlaAttribute: UAV -"
                 + " id = " + objectInstanceId + " suppAttributes = " + suppAttributes + " tag = " + tag + " uavTimeStamp = " + uavTimeStamp);
-        
         try {
             if (_debugging) {
-                _debug(" ###> sending UAV("
-                        + "HLA publisher=" + hp.getFullName()
-                        + ",HLA attribute=" + hp.getAttributeName()
-                        + ",uavTimeStamp=" + uavTimeStamp.getTime() 
-                        + ",value=" + in.toString()
-                        + ")");
+                _debug("      * UAV '" + hp.getAttributeName()
+                       + "', uavTimeStamp=" + uavTimeStamp.getTime()
+                        + ", value=" + in.toString()
+                        + ", HlaPub=" + hp.getFullName());
             }
             
             _rtia.updateAttributeValues(objectInstanceId, suppAttributes, tag, uavTimeStamp);
@@ -1399,8 +1394,7 @@ implements TimeRegulator {
                             + strProposedTime
                             + ") - _eventsBasedTimeAdvance("
                             + strProposedTime + ") - "
-                            + " waiting for CERTI TAG("
-                            + certiProposedTime.getTime()
+                           + " waiting TAG(" //jc: + certiProposedTime.getTime()
                             + ") by calling tick2()");
                 }
                 _rtia.tick2(); // algo3: 4: tick()  > Wait TAG(h'')
@@ -1495,9 +1489,8 @@ implements TimeRegulator {
         String headMsg = "_timeSteppedBasedTimeAdvance(" + proposedTime.toString() + "): ";
 
         if (_debugging) {
-            _debug("\n" + "starting " + headMsg
-                    + "strProposedTime=" + strProposedTime
-                    + " proposedTime=" + proposedTime.toString());
+            _debug("\n" + "start " + headMsg
+                    + " print proposedTime.toString=" + proposedTime.toString());
         }
 
         // Algorithm 4 - TAR
@@ -1527,8 +1520,8 @@ implements TimeRegulator {
         //  no reset => while (certiProposedTime.isGreaterThanOrEqualTo(nextPointInTime)) {
         
         if (_debugging) {
-            _debug("  " + headMsg
-                   + " Just before While g(t') > h+TS; g(t')= " + certiProposedTime.getTime() + "; h+TS= " + nextPointInTime.getTime());
+            _debug("Before While g(t') > h+TS; g(t')= " + certiProposedTime.getTime() + "; h+TS= " + nextPointInTime.getTime()
+                   + " @ " + headMsg);
         }
                 
         while (certiProposedTime.isGreaterThanOrEqualTo(nextPointInTime)) {
@@ -1551,8 +1544,7 @@ implements TimeRegulator {
                 }
                 
                 if (_debugging) {
-                    _debug(" ---> " + headMsg
-                            + " call CERTI TAR(" + nextPointInTime.getTime() + ")");
+                    _debug("  TAR(" + nextPointInTime.getTime() + ") in " + headMsg);
                 }
             } catch (InvalidFederationTime | FederationTimeAlreadyPassed | TimeAdvanceAlreadyInProgress
                     | EnableTimeRegulationPending | EnableTimeConstrainedPending | FederateNotExecutionMember
@@ -1563,9 +1555,8 @@ implements TimeRegulator {
             // algo4: 3: while not granted do
             while (!(_federateAmbassador.timeAdvanceGrant)) {
                 if (_debugging) {
-                    _debug("  " + headMsg
-                            + " waiting for CERTI TAG(" + nextPointInTime.getTime()
-                            + ") by calling tick2()");
+                    _debug("      waiting TAG(" // + nextPointInTime.getTime() //jc: no need
+                            + ") by calling tick2() in " + headMsg);
                 }
 
                 try {
@@ -1596,7 +1587,7 @@ implements TimeRegulator {
                 if (newPtolemyTime.compareTo(proposedTime) < 0) {
                     // algo4: 10: t' <- t''
                     if (_debugging) {
-                        _debug("@line 10 " + headMsg + " t'=f(h)=" + proposedTime.toString() + " newPtime " + newPtolemyTime.toString());
+                        _debug("    newPtolemyTime= t'=t''=f(h)=" + newPtolemyTime.toString() + " @line 10 in algo 4 " + headMsg);
                     }
                     proposedTime = newPtolemyTime;
                 } // algo4: 11: end if
@@ -1609,7 +1600,7 @@ implements TimeRegulator {
 
                 // algo4: 13: return t'
                 if (_debugging) {
-                    _debug("line 13 Received RAV " + headMsg + " returns proposedTime=" + proposedTime.toString());
+                    _debug("Returns proposedTime=" + proposedTime.toString() + "    @line 13 algo 4 (hasReceivedRAV) " + headMsg + "\n");
                 }
                 return proposedTime;
 
@@ -1622,7 +1613,7 @@ implements TimeRegulator {
         } // algo4: 15: end while
 
         if (_debugging) {
-            _debug("stopping " + headMsg + " returns proposedTime=" + proposedTime.toString());
+            _debug("returns proposedTime=" + proposedTime.toString() + "from "+ headMsg);
         }
 
         // algo4: 16: return t' => Update PtII time
@@ -1820,10 +1811,9 @@ implements TimeRegulator {
         // in PtolemyFederateAmbassadorInner class).
 
         if (_debugging) {
-            _debug("=**=> starting _putReflectedAttributesOnHlaSubscribers("
-            + proposedTime.toString() + ") - current status - "
-            + "t_ptII = " + _director.getModelTime().toString()
-            + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
+            _debug("       t_ptII = " + _director.getModelTime().toString()
+                   + "; t_hla = " + _federateAmbassador.hlaLogicalTime
+                   + " in _putReflectedAttributesOnHlaSubscribers(" + proposedTime.toString() + ")");
         }
 
         Iterator<Entry<String, LinkedList<TimedEvent>>> it = _fromFederationEvents
@@ -1873,11 +1863,10 @@ implements TimeRegulator {
                 + " put event: HlaAttribute = " + hs.getAttributeName() + ", timestamp = " + ravEvent.timeStamp);
 
                 if (_debugging) {
-                    _debug("    _putReflectedAttributesOnHlaSubscribers(" + proposedTime.toString()
-                    + ") - put event: RAV("
-                    + "HLA attribute= " + hs.getAttributeName()
-                    + ", timestamp=" + ravEvent.timeStamp
-                    + ") in the HlaSubscriber=" + hs.getFullName());
+                    _debug("       _putRAVOnHlaSubs(" + proposedTime.toString()
+                           + ") for '" + hs.getAttributeName()
+                           //+ "',timestamp=" + ravEvent.timeStamp //jc: non need
+                    + " in HlaSubs=" + hs.getFullName());
                 }
 
                 if (_enableHlaReporter) {
@@ -1894,7 +1883,7 @@ implements TimeRegulator {
         _federateAmbassador.hasReceivedRAV = false;
 
         if (_debugging) {
-            _debug("    _putReflectedAttributesOnHlaSubscribers(" + proposedTime.toString()
+            _debug("        _putRAVOnHlaSubs(" + proposedTime.toString()
             + ") - no more RAVs to deal with");
         }
     }
@@ -2395,10 +2384,8 @@ implements TimeRegulator {
                         FederateInternalError {
 
             if (_debugging) {
-                _debug("INNER callback: reflectAttributeValues(): starting - "
-                        + "current status - "
-                        + "t_ptII = " + _director.getModelTime()
-                        + "; t_hla = " + _federateAmbassador.hlaLogicalTime);
+                _debug("      t_ptII = " + _director.getModelTime()
+                        + "; t_hla = " + _federateAmbassador.hlaLogicalTime + " start reflectAttributeValues(), INNER callback");
             }
 
             // Get the object class handle corresponding to
@@ -2480,11 +2467,10 @@ implements TimeRegulator {
 
                             _fromFederationEvents.get(hs.getFullName()).add(te);
                             if (_debugging) {
-                                _debug(" =*=> receive RAV("
-                                        + "HLA attribute= " + hs.getAttributeName()
-                                        + ", timestamp=" + te.timeStamp.toString() //_printTimes(te.timeStamp)
-                                        + " ,value=" + value.toString()
-                                        + ") has been received and stored for "
+                                _debug("       *RAV '" + hs.getAttributeName()
+                                        + "', timestamp=" + te.timeStamp.toString() //_printTimes(te.timeStamp)
+                                        + ",value=" + value.toString()
+                                        + " @ "
                                         + hs.getFullName());
                             }
                             System.out.println("INNER callback: reflectAttributeValues(): HLA attribute=" + hs.getAttributeName()
@@ -2744,9 +2730,8 @@ implements TimeRegulator {
             }
             
             if (_debugging) {
-                _debug("<<-- INNER callback: timeAdvanceGrant(): "
-                        + "TAG(" + grantedHlaLogicalTime.toString()
-                        + " * (HLA time unit=" + _hlaTimeUnitValue + ")) received");
+                _debug("  TAG(" + grantedHlaLogicalTime.toString()
+                        + " * (HLA time unit=" + _hlaTimeUnitValue + ")) received in INNER callback: timeAdvanceGrant()");
                 /*_debug("INNER callback: timeAdvanceGrant(): TAG(" + _hlaReporter._numberOfTAGs 
                         + ") delay between TAR/NER and this TAG _TAGDelay=" + _hlaReporter._TAGDelay.get(_hlaReporter._numberOfTAGs));*/
             }
@@ -2807,7 +2792,7 @@ implements TimeRegulator {
             inPause = false;
             if (_debugging) {
                 _debug("INNER callback: federationSynchronized(): inPause = "
-                        + inPause);
+                        + inPause + "\n");
             }
         }
 
