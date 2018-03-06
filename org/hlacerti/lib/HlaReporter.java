@@ -34,15 +34,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.RoundingMode;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
 import certi.rti.impl.CertiLogicalTime;
+
 import ptolemy.actor.util.Time;
 import ptolemy.data.Token;
 import ptolemy.kernel.util.IllegalActionException;
@@ -51,10 +50,13 @@ import ptolemy.kernel.util.IllegalActionException;
 //// HlaReporter
 
 /**
- * This class implements a HLA Reporter which collects and writes several
- * statistics to analyze the correct usage of HLA services.
+ *  This class implements a HLA Reporter which collects and writes several
+ *  statistics to analyze the correct usage of HLA services.
  * 
- *  @author Gilles Lasnier
+ *  TBC: this is a simple reformatting of the functions used to write the
+ *  HLA analysis reports. The usage of StringBuffer[] must be removed.
+ *  
+ *  @author Gilles Lasnier, Tarciana Cabral de Brito Guerra
  *  @version $Id$
  *  @since Ptolemy II 10.0
  *
@@ -63,7 +65,7 @@ import ptolemy.kernel.util.IllegalActionException;
  */
 public class HlaReporter {
 
-    /** Constructs a HLA analysis reporter.
+    /** Construct a HLA analysis reporter object instance.
      *  @throws IOException 
      */
     public HlaReporter(String folderName, String federateName, String modelName) throws IOException
@@ -92,9 +94,103 @@ public class HlaReporter {
         writeToCsvFile( _date.toString());
     }
 
-    /** Initialize the variables that are going to be used to create the reports
-     *  in the files {@link #_txtFile} and {@link #_csvFile}
+    ///////////////////////////////////////////////////////////////////
+    ////                         public methods                    ////
+    
+    /** Calculate the duration of the execution of the federation. */
+    public void calculateRuntime() {
+        double duration = System.nanoTime() - _startTime;
+        duration = duration / (Math.pow(10, 9));
+        _runtime = duration;
+    }
+    
+    /** Display some analysis results as string. */
+    public String displayAnalysisValues() {
+        calculateRuntime();
+
+        return "HLA analysis report:"
+        + "\n number of TARs: " + _numberOfTARs
+        + "\n number of NERs: " + _numberOfNERs 
+        + "\n number of TAGs: " + _numberOfTAGs
+        + "\n number of Ticks2: " + _numberOfTicks2
+        + "\n number of (other) Ticks: " +_numberOfOtherTicks
+        + "\n number of Ticks during TAR/TAG or NER/TAG:" + _numberOfTicks.toString()
+        + "\n number of delays between TAR/TAG or NER/TAG:" + _TAGDelay.toString()
+        + "\n number of UAVs:" + _numberOfUAVs
+        + "\n number of RAVs:" + _numberOfRAVs
+        + "\n runtime:        " + _runtime;
+    }
+
+    /** Increment the counter of NERs. */
+    public void incrNumberOfNERs() {
+        _numberOfNERs++;
+    }
+    
+    /** Increment the counter of RAV. */
+    public void incrNumberOfRAVs() {
+        _numberOfRAVs++;
+    }
+    
+    /** Increment the counter of UAV. */
+    public void incrNumberOfUAVs() {
+        _numberOfUAVs++;
+    }
+    
+    /** Increment the counter of TARs. */
+    public void incrNumberOfTARs() {
+        _numberOfTARs++;
+    }
+    
+    /** Initialize variables specific to HLA attribute value publication.
+     *  @param hlaAttributesToPublish the HashMap of HlaPublisher names and instances.
      */
+    public void initializeAttributesToPublishVariables(HashMap<String, Object[]> hlaAttributesToPublish) {
+        // XXX: FIXME: to improve, instead of using String[] and StringBuffer[] just set a
+        // HashMap<String, Object[]> where the key is the HlaPublisher fullName.
+
+        // XXX: FIXME: to replace, _nameOfTheAttributesToPublish => _hlaPublisherFullname,
+        //                         _numberOfAttributesToPublish => _numberOfHlaPublisher
+        _numberOfAttributesToPublish = hlaAttributesToPublish.size();
+
+        _nameOfTheAttributesToPublish = new String[_numberOfAttributesToPublish];
+
+        _UAVsValues = new StringBuffer[_numberOfAttributesToPublish];
+
+        Object attributesToPublish[] = hlaAttributesToPublish.keySet().toArray();
+        for (int i = 0; i < _numberOfAttributesToPublish; i++) {
+            // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, 
+            // so toString() prints the HlaPublisher fullName.
+            _nameOfTheAttributesToPublish[i] = attributesToPublish[i].toString();
+            _UAVsValues[i] = new StringBuffer("");
+        }
+
+    }
+
+    /** Initialize variables specific to HLA attribute value subscription.
+     *  @param hlaAttributesSubscribedTo the HashMap of HlaSubcribers names and instances.
+     */
+    public void initializeAttributesSubscribedToVariables(HashMap<String, Object[]> hlaAttributesSubscribedTo) {
+        // XXX: FIXME: to improve, instead of using String[] and StringBuffer[] just set a
+        // HashMap<String, Object[]> where the key is the HlaSubscrbier fullName.
+
+        // XXX: FIXME: GiL: to replace, _nameOfTheAttributesSubscribedTo => _hlaSubscriberFullname,
+        //                              _numberOfAttributesSubscribedTo => _numberOfHlaSubscriber
+        _numberOfAttributesSubscribedTo = hlaAttributesSubscribedTo.size();
+        _nameOfTheAttributesSubscribedTo = new String[_numberOfAttributesSubscribedTo];
+
+
+        _RAVsValues = new StringBuffer[_numberOfAttributesSubscribedTo];
+
+        Object attributesSubscribedTo[] = hlaAttributesSubscribedTo.keySet().toArray();
+        for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
+            // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, so
+            // toString() will print the HlaPublisher fullName.
+            _nameOfTheAttributesSubscribedTo[i] = attributesSubscribedTo[i].toString();
+            _RAVsValues[i] = new StringBuffer("");
+        }
+    }
+
+    /** Initialize all variables used in reports. */
     public void initializeReportVariables(double hlaLookAHead, 
             double hlaTimeStep, 
             double hlaTimeUnitValue, 
@@ -143,133 +239,30 @@ public class HlaReporter {
         _numberOfTicks = new ArrayList<Integer>();
         _numberOfRAVs = 0;
         _numberOfUAVs = 0;
-
-        _hlaAttributesUAV = new HashMap<String, Object[]>();
-        _hlaAttributesRAV = new HashMap<String, Object[]>();
-        //_nbrTicksByTags = new HashMap<String, Object[]>();
-
-        // Define number format
-        int numberOfDecimalDigits;
-        if (_timeStepped) {
-            System.out.println(_hlaTimeStep);
-            String s = _hlaTimeStep.toString();
-            s = s.substring(s.indexOf(".") + 1);
-            int n1 = s.length();
-            s = _hlaLookAHead.toString();
-            s = s.substring(s.indexOf(".") + 1);
-            int n2 = s.length();
-            if (n1 > n2) {
-                numberOfDecimalDigits = n1;
-            } else {
-                numberOfDecimalDigits = n2;
-            }
-        } else {
-            numberOfDecimalDigits = 10;
-        }
-        StringBuffer format = new StringBuffer("#.#");
-        for (int i = 1; i < numberOfDecimalDigits; i++) {
-            format.append("#");
-        }
-        _decimalFormat = format.toString();
     }
 
-
-    /**
-     * 
-     * @param hlaAttributesToPublish
+    /** This method updates the _folRAVsTimes (StringBuffer) with the RAV's timestamp value.
+     *  @param ravTimeStamp The RAV timestamp.
      */
-    public void initializeAttributesToPublishVariables(HashMap<String, Object[]> hlaAttributesToPublish) {
-        // XXX: FIXME: GiL: to improve, instead of using String[] and StringBuffer[] just set a
-        // HashMap<String, Object[]> where the key is the HLAPublisher fullName ?
-
-        // XXX: FIXME: GiL: todo, _nameOfTheAttributesToPublish => _hlaPublisherFullname,
-        //                        _numberOfAttributesToPublish => _numberOfHlaPublisher
-        _numberOfAttributesToPublish = hlaAttributesToPublish.size();
-
-        _nameOfTheAttributesToPublish = new String[_numberOfAttributesToPublish];
-
-        _UAVsValues = new StringBuffer[_numberOfAttributesToPublish];
-
-        Object attributesToPublish[] = hlaAttributesToPublish.keySet().toArray();
-        for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-            // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, so
-            // toString() will print the HlaPublisher fullName.
-            _nameOfTheAttributesToPublish[i] = attributesToPublish[i].toString();
-            _UAVsValues[i] = new StringBuffer("");
-        }
-
-    }
-
-    /**
-     * 
-     * @param hlaAttributesToPublish
-     */
-    public void initializeAttributesSubscribedToVariables(HashMap<String, Object[]> hlaAttributesSubscribedTo) {
-        // XXX: FIXME: GiL: to improve, instead of using String[] and StringBuffer[] just set a
-        // HashMap<String, Object[]> where the key is the HLAPublisher fullName ?
-
-        // XXX: FIXME: GiL: todo, _nameOfTheAttributesSubscribedTo => _hlaSubscriberFullname,
-        //                        _numberOfAttributesSubscribedTo => _numberOfHlaSubscriber
-        _numberOfAttributesSubscribedTo = hlaAttributesSubscribedTo.size();
-        _nameOfTheAttributesSubscribedTo = new String[_numberOfAttributesSubscribedTo];
-
-
-        _RAVsValues = new StringBuffer[_numberOfAttributesSubscribedTo];
-
-        Object attributesSubscribedTo[] = hlaAttributesSubscribedTo.keySet().toArray();
-        for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
-            // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, so
-            // toString() will print the HlaPublisher fullName.
-            _nameOfTheAttributesSubscribedTo[i] = attributesSubscribedTo[i].toString();
-            _RAVsValues[i] = new StringBuffer("");
+    public void updateFolRAVsTimes(Time ravTimeStamp) {
+        if (_folRAVsTimes.lastIndexOf("*") >= 0) {
+            _folRAVsTimes.replace(_folRAVsTimes.lastIndexOf("*"), _folRAVsTimes.length(), ravTimeStamp + ";");
         }
     }
 
-    /**
-     * 
+    /** This method records in StringBuffer arrays all information about RAVs
+     *  during the simulation execution.
+     *  @param hs HlaSubscriber actor which has received the RAV.
+     *  @param te HLA timed event associated to the RAV in Ptolemy's DE domain.
+     *  @param hlaAttributesToSubscribeTo List of HlaSubscribers.
+     *  @param value The HLA update attribute value received.
+     *  NOTE: this method is responsible of the setup of all variable for the RAVs reporting part.
      */
-    public void updateUAVsInformation(HlaPublisher hp, Token in, Time hlaTime, Time ptTime, int microstep, CertiLogicalTime uavTimeStamp) throws IllegalActionException {
-        String hlaPublisherName = hp.getFullName();
-
-        int attributeIndex = 0;
-        for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-            if (hlaPublisherName.equals(_nameOfTheAttributesToPublish[i])) {
-                attributeIndex = i;
-                break;
-            }
-        }
-
-        String pUAVTimeStamp = uavTimeStamp.getTime() + ";";
-        String preUAVTimeStamp = "(" + ptTime + "," + microstep + ");";
-        storeTimes("UAV " + hlaPublisherName + "." + hp.getAttributeName(), hlaTime, ptTime);
-
-        if (_numberOfUAVs > 0
-                && (_preUAVsTimes.length() - _preUAVsTimes.lastIndexOf(preUAVTimeStamp)) == preUAVTimeStamp.length()
-                && (_preUAVsTimes.length() - _preUAVsTimes.lastIndexOf(pUAVTimeStamp)) == pUAVTimeStamp.length()) {
-
-            // 'in' is the Token.
-            _UAVsValues[attributeIndex].replace(_UAVsValues[attributeIndex].length() - 2, _UAVsValues[attributeIndex].length(), in.toString() + ";");
-        } else {
-            _preUAVsTimes.append(preUAVTimeStamp);
-            _pUAVsTimes.append(pUAVTimeStamp);
-
-            for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-                if (i == attributeIndex) {
-                    _UAVsValues[i].append(in.toString() + ";");
-                } else {
-                    _UAVsValues[i].append("-;");
-                }
-            }
-        }
-    }
-
-    /**
-     * 
-     */
-    public void updateRAVsInformation(HlaSubscriber hs, HlaTimedEvent te, HashMap<String, Object[]> hlaAttributesToSubscribeTo, Object value) {
+    public void updateRAVsInformation(HlaSubscriber hs, HlaTimedEvent te, 
+            HashMap<String, Object[]> hlaAttributesToSubscribeTo, Object value) {
         String hlaSubscriberName = hs.getFullName();
 
-        String pRAVTimeStamp = printTimes(te.timeStamp) + ";";
+        String pRAVTimeStamp = te.timeStamp.toString() + ";";
 
         if (_numberOfRAVs > 0 
                 && (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
@@ -314,323 +307,70 @@ public class HlaReporter {
         }
     }
 
-    /**
-     * 
+    /** This method records in StringBuffer arrays all information about UAVs
+     *  during the simulation execution.
+     *  @param hp HlaPublisher actor responsible of the UAV.
+     *  @param in The emitted token.
+     *  @param hlaTime HLA logical time as Ptolemy's time.
+     *  @param ptTime PTII time as Ptolemy's time.
+     *  @param microstep The current DE director's microstep.
+     *  @param uavTimeStamp The timestamp of the UAV.
+     *  @throws IllegalActionException If the HlaPublisher attribute name is not retrieved.
      */
-    public void updateFolRAVsTimes(Time ravTimeStamp) {
-        if (_folRAVsTimes.lastIndexOf("*") >= 0) {
-            _folRAVsTimes.replace(_folRAVsTimes.lastIndexOf("*"), _folRAVsTimes.length(), ravTimeStamp + ";");
+    public void updateUAVsInformation(HlaPublisher hp, Token in, Time hlaTime, Time ptTime, int microstep, CertiLogicalTime uavTimeStamp) throws IllegalActionException {
+        String hlaPublisherName = hp.getFullName();
+
+        int attributeIndex = 0;
+        for (int i = 0; i < _numberOfAttributesToPublish; i++) {
+            if (hlaPublisherName.equals(_nameOfTheAttributesToPublish[i])) {
+                attributeIndex = i;
+                break;
+            }
         }
 
-    }
+        String pUAVTimeStamp = uavTimeStamp.getTime() + ";";
+        String preUAVTimeStamp = "(" + ptTime + "," + microstep + ");";
+        storeTimes("UAV " + hlaPublisherName + "." + hp.getAttributeName(), hlaTime, ptTime);
 
-    /** TBC
-     * 
-     * @param value
-     * @return
-     */
-    private String _printFormatedNumbers(double value) {
-        DecimalFormat df = new DecimalFormat(_decimalFormat);
-        df.setRoundingMode(RoundingMode.HALF_DOWN);
-        return df.format(value);
-    }
+        if (_numberOfUAVs > 0
+                && (_preUAVsTimes.length() - _preUAVsTimes.lastIndexOf(preUAVTimeStamp)) == preUAVTimeStamp.length()
+                && (_preUAVsTimes.length() - _preUAVsTimes.lastIndexOf(pUAVTimeStamp)) == pUAVTimeStamp.length()) {
 
-    /** TBC
-     * 
-     * @param time
-     * @return
-     */
-    public String printTimes(Time time) {
-        return _printFormatedNumbers(time.getDoubleValue());
-    }
-
-    /** TBC
-     * 
-     * @param reason
-     * @param hlaCurrentTime
-     * @param directorTime
-     */
-    public void storeTimes(String reason, Time hlaCurrentTime, Time directorTime) {
-        String tHLA = printTimes(hlaCurrentTime);
-        String tPTII = printTimes(directorTime);
-
-        _tPTII.append(tPTII + ";");
-        _tHLA.append(tHLA + ";");
-
-        _reasonsToPrintTheTime.append(reason + ";");
-    }
-
-    /** Verify the existence of a folder, if it doesn't exist, the function tries
-     *  to create it.
-     *
-     *  @param folderName The name of the folder that will be created.
-     *  @return The full address of the folder in a string.
-     *  @exception IOException If the folder cannot be created.
-     */
-    public String createFolder(String folderName) throws IOException {
-        String homeDirectory = System.getProperty("user.home");
-        folderName = homeDirectory + "/" + folderName;
-        File folder = new File(folderName);
-        if (!folder.exists()) {
-            try {
-                // Create multiple directories if needed.
-                if (!folder.mkdirs()) {
-                    throw new IOException(
-                            "Failed to create" + folder + " directory.");
-                } else {
-                    System.out.println("Folder " + folderName + " created.");
-                }
-                return folderName;
-            } catch (SecurityException se) {
-                throw new IOException(
-                        "Could not create the folder " + folderName + ".");
-            }
+            // 'in' is the Token.
+            _UAVsValues[attributeIndex].replace(_UAVsValues[attributeIndex].length() - 2, _UAVsValues[attributeIndex].length(), in.toString() + ";");
         } else {
-            return folderName;
-        }
-    }
+            _preUAVsTimes.append(preUAVTimeStamp);
+            _pUAVsTimes.append(pUAVTimeStamp);
 
-    /** Associate the object file with a file in the computer, creating it, if it doesn't
-     *  already exist.
-     *  @param name the name to of the file
-     */
-    private File createTextFile(String name) {
-        if (_reportsFolder != null) {
-            name = _reportsFolder + "/" + name;
-            if (name == null || name.length() < 3) {
-                System.out.println("Choose a valid name for the txt file.");
-                return null;
-            } else {
-                if (!(name.endsWith(_FILE_EXT_TXT) || name.endsWith(_FILE_EXT_CSV))) {
-                    name = name.concat(_FILE_EXT_TXT);
-                }
-                try {
-                    File file = new File(name);
-
-                    boolean verify = false;
-                    if (!file.exists()) {
-                        verify = file.createNewFile();
-                    } else {
-                        verify = true;
-                    }
-
-                    if (!verify) {
-                        throw new IOException("Cannot create the file.");
-                    }
-                    return file;
-                } catch (IOException e) {
-                    System.out.println("Cannot create the file.");
-                    return null;
-                }
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /** Associate the object file with a file in the computer, creating it, if it doesn't
-     *  already exist.
-     *  @param name the name to of the file
-     *  @param header
-     *  @return
-     */
-    private File createTextFile(String name, String header) {
-        if (_reportsFolder != null) {
-            name = _reportsFolder + "/" + name;
-            if (name == null || name.length() < 3) {
-                System.out.println("Choose a valid name for the txt file.");
-                return null;
-            } else {
-                if (!(name.endsWith(_FILE_EXT_TXT) || name.endsWith(_FILE_EXT_CSV))) {
-                    name = name.concat(_FILE_EXT_TXT);
-                }
-                try {
-                    File file = new File(name);
-                    boolean verify = false;
-                    if (!file.exists()) {
-                        verify = file.createNewFile();
-                        writeInTextFile(file, header);
-                    } else {
-                        verify = true;
-                    }
-                    if (!verify) {
-                        throw new Exception();
-                    }
-                    System.out.println(name);
-                    return file;
-                } catch (Exception e) {
-                    System.out.println("Couldn't create the file.");
-                    return null;
-                }
-            }
-        } else {
-            return null;
-        }
-    }
-
-    /** Return the total number of time advance grants that this federate has received.
-     *  @return The number of time advance grants that this federate has received.
-     *  @see #_numberOfTAGs
-     *  @see #setNumberOfTAGs
-     */
-    public int getNumberOfTAGs() {
-        return _numberOfTAGs;
-    }
-
-    /** TBC
-     *  @param _numberOfTAGs The number of time advance grants that this federate has received.
-     *  @see #_numberOfTAGs
-     *  @see #getNumberOfTAGs
-     */
-    public void incrNumberOfTAGs() {
-        this._numberOfTAGs++;
-    }
-
-    /** Return the number of next event requests that this federate has made.
-     *  @return The number of next event requests that this federate has made.
-     */
-    public int getNumberOfNERs() {
-        return _numberOfNERs;
-    }
-
-    /** TBC.
-     *  @param _numberOfNERs The number of next event requests that this federate has made.
-     */
-    public void incrNumberOfNERs() {
-        this._numberOfNERs++;
-    }
-
-    /** Return the number of time advance requests that this federate has made.
-     *  @return The number of time advance requests that this federate has made.
-     */
-    public int getNumberOfTARs() {
-        return _numberOfTARs;
-    }
-
-    /** TBC
-     *  @param _numberOfTARs The number of time advance requests that this federate has made.
-     */
-    public void incrNumberOfTARs() {
-        this._numberOfTARs++;
-    }
-
-    /** Return the start Time of the execution of the federation.
-     * @return The start Time of the execution of the federation.
-     */
-    public double getStartTime() {
-        return _startTime;
-    }
-
-    /** Set the start Time of the execution of the federation. */
-    public void setStartTime() {
-        _startTime = System.nanoTime();
-    }
-
-    /** Calculate the duration of the execution of the federation. */
-    public void calculateRuntime() {
-        double duration = System.nanoTime() - _startTime;
-        duration = duration / (Math.pow(10, 9));
-
-        _runtime = duration;
-    }
-
-    /** Write the UAV information. */
-    public void writeUAVsInformation() {
-        if (_numberOfUAVs > 0) {
-            StringBuffer header = new StringBuffer("LookAhead;TimeStep;StopTime;Information;");
-            int count = String.valueOf(_UAVsValues[0]).split(";").length;
-            for (int i = 0; i < count; i++) {
-                header.append("UAV" + i + ";");
-            }
-            StringBuffer info = new StringBuffer(
-                    _date.toString() + "\n" 
-                            + header + "\n" 
-                            + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "preUAV TimeStamp:;" + _preUAVsTimes + "\n" 
-                            + ";;;" + "pUAV TimeStamp:;" + _pUAVsTimes + "\n");
             for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-                info.append(";;;" + _nameOfTheAttributesToPublish[i] + ";" + _UAVsValues[i] + "\n");
+                if (i == attributeIndex) {
+                    _UAVsValues[i].append(in.toString() + ";");
+                } else {
+                    _UAVsValues[i].append("-;");
+                }
             }
-            _UAVsValuesFile = createTextFile(_federateName + "-UAV" + _FILE_EXT_CSV);
-            writeInTextFile(_UAVsValuesFile, info.toString());
         }
     }
 
-    /** Write the RAV information. */
-    public void writeRAVsInformation() {
-        if (_numberOfRAVs > 0) {
-            StringBuffer header = new StringBuffer("LookAhead;TimeStep;StopTime;Information;");
-            int count = String.valueOf(_RAVsValues[0]).split(";").length;
-            for (int i = 0; i < count; i++) {
-                header.append("RAV" + i + ";");
-            }
-
-            StringBuffer info = new StringBuffer(
-                    _date.toString() + "\n"
-                            + header + "\n" 
-                            + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "pRAV TimeStamp:;" + _pRAVsTimes + "\n"
-                            + ";;;" + "folRAV TimeStamp:;" + _folRAVsTimes + "\n");
-            for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
-                info.append(";;;" + _nameOfTheAttributesSubscribedTo[i] + ";" + _RAVsValues[i] + "\n");
-            }
-            _RAVsValuesFile = createTextFile(_federateName + "-RAV" + _FILE_EXT_CSV);
-            writeInTextFile(_RAVsValuesFile, info.toString());
-        }
+    /** Set the time of the last advance request call. */
+    public void setTimeOfTheLastAdvanceRequest(long value) {
+        _timeOfTheLastAdvanceRequest = value;
     }
 
-    /** Write the number of HLA calls of each federate, along with informations about the
-     *  time step and the runtime, in a file.
-     *  The name and location of this file are specified in the initialization of the
-     *  variable file.
+    /** Get the time of the last advance request call.  */
+    public double getTimeOfTheLastAdvanceRequest() {
+        return _timeOfTheLastAdvanceRequest;
+    }
+ 
+    /** This method records the PTII time and the HLA time as Ptolemy's time.
+     *  @param reason Reason to store the time values.
+     *  @param hlaCurrentTime HLA logical time as Ptolemy's time.
+     *  @param directorTime PTII time as Ptolemy's time.
      */
-    public void writeNumberOfHLACalls() {
-        // Get RKSolver value.
-        String RKSolver = "<property name=\"ODESolver\" class=\"ptolemy.data.expr.StringParameter\" value=\"ExplicitRK";
-
-        // FIXME: XXX: GiL: TO REWORK
-        // Get FOM file.
-        String folderPath = _fedFilePath.substring(0, _fedFilePath.lastIndexOf("/") + 1);
-
-        File file = new File(folderPath + _modelFileName);
-
-        // Create first line as StringBuffer
-        // ex: Federate AutoPilot in the model f14AutoPilot.xml
-        StringBuffer info = new StringBuffer("Federate " + _federateName + " in the model " + _modelFileName);
-
-        // Add line
-        // ex: RKSolver: UNDEFINED
-        // ex: RKSolver: ExplicitRK23Solver
-        try {
-            RKSolver = AutomaticSimulation.findParameterValue(file, RKSolver);
-            info.append("\nRKSolver: " + RKSolver);
-        } catch (IllegalActionException e) {
-            // FIXME: XXX: GiL: HANDLE EXCEPTION
-            e.printStackTrace();
-        }
-
-        // Add line
-        // ex: stopTime: 12.0    hlaTimeUnit: 1.0    lookAhead: 0.005
-        info.append("\n" + "stopTime: " + _stopTime + "    hlaTimeUnit: " + _hlaTimeUnitValue + "    lookAhead: " + _hlaLookAHead);
-
-        // Add information it is the synchronization point register
-        if (_isCreator) {
-            info = new StringBuffer("SP register -> " + info);
-        }
-
-        // Handle time stepped or event based time management information
-        if (_timeStepped) {
-            info.append("    Time Step: " + _hlaTimeStep + "\n" + "Number of TARs: " + _numberOfTARs);
-        } else if (_eventBased) {
-            info.append("\nNumber of NERs: " + _numberOfNERs);
-        }
-
-        // Add information UAV, TAGS, RAVS
-        info.append("    Number of UAVs:" + _numberOfUAVs
-                + "\nNumber of TAGs: " + _numberOfTAGs
-                + "    Number of RAVs:" + _numberOfRAVs + "\n" + "Runtime: "
-                + _runtime + "\n");
-
-        // Write to file.
-        writeInTextFile(_txtFile, info.toString());
+    public void storeTimes(String reason, Time hlaCurrentTime, Time ptolemyCurrentTime) {
+        _tPTII.append(ptolemyCurrentTime.getDoubleValue() + ";");
+        _tHLA.append(hlaCurrentTime.getDoubleValue() + ";");
+        _reasonsToPrintTheTime.append(reason + ";");
     }
 
     /** Write a report containing(in a .csv file {@link #_csvFile}), among other informations,
@@ -721,12 +461,12 @@ public class HlaReporter {
         writeInTextFile(_csvFile, info.toString());
     }
 
-    /** Write information in a txt file.
+    /** Write information in a '.txt' file.
      *  @param data The information you want to write.
      *  @param file The file in which you want to write.
      *  @return Return true if the information was successfully written in the file.
      */
-    public boolean writeInTextFile(File file, String data) {
+    private boolean writeInTextFile(File file, String data) {
 
         boolean noExceptionOccured = true;
 
@@ -752,65 +492,261 @@ public class HlaReporter {
         return noExceptionOccured;
     }
 
-    /** Write the time file to 'times.csv'. */
+    /** Write the number of HLA calls of each federate, along with information about the
+     *  time step and the runtime, in a file. The name and location of this file are 
+     *  specified in the initialization of the variable file.
+     */
+    public void writeNumberOfHLACalls() {
+        // Get RKSolver value.
+        String RKSolver = "<property name=\"ODESolver\" class=\"ptolemy.data.expr.StringParameter\" value=\"ExplicitRK";
+
+        // FIXME: XXX: GiL: TO REWORK
+        // Get FOM file.
+        String folderPath = _fedFilePath.substring(0, _fedFilePath.lastIndexOf("/") + 1);
+
+        File file = new File(folderPath + _modelFileName);
+
+        // Create first line as StringBuffer
+        // ex: Federate AutoPilot in the model f14AutoPilot.xml
+        StringBuffer info = new StringBuffer("Federate " + _federateName + " in the model " + _modelFileName);
+
+        // Add line
+        // ex: RKSolver: UNDEFINED
+        // ex: RKSolver: ExplicitRK23Solver
+        try {
+            RKSolver = AutomaticSimulation.findParameterValue(file, RKSolver);
+            info.append("\nRKSolver: " + RKSolver);
+        } catch (IllegalActionException e) {
+            // FIXME: XXX: GiL: HANDLE EXCEPTION
+            e.printStackTrace();
+        }
+
+        // Add line
+        // ex: stopTime: 12.0    hlaTimeUnit: 1.0    lookAhead: 0.005
+        info.append("\n" + "stopTime: " + _stopTime + "    hlaTimeUnit: " + _hlaTimeUnitValue + "    lookAhead: " + _hlaLookAHead);
+
+        // Add information it is the synchronization point register
+        if (_isCreator) {
+            info = new StringBuffer("SP register -> " + info);
+        }
+
+        // Handle time stepped or event based time management information
+        if (_timeStepped) {
+            info.append("    Time Step: " + _hlaTimeStep + "\n" + "Number of TARs: " + _numberOfTARs);
+        } else if (_eventBased) {
+            info.append("\nNumber of NERs: " + _numberOfNERs);
+        }
+
+        // Add information UAV, TAGS, RAVS
+        info.append("    Number of UAVs:" + _numberOfUAVs
+                + "\nNumber of TAGs: " + _numberOfTAGs
+                + "    Number of RAVs:" + _numberOfRAVs + "\n" + "Runtime: "
+                + _runtime + "\n");
+
+        // Write to file.
+        writeInTextFile(_txtFile, info.toString());
+    }
+
+    /** Write all recorded RAV information to file. */
+    public void writeRAVsInformation() {
+        if (_numberOfRAVs > 0) {
+            StringBuffer header = new StringBuffer("LookAhead;TimeStep;StopTime;Information;");
+            int count = String.valueOf(_RAVsValues[0]).split(";").length;
+            for (int i = 0; i < count; i++) {
+                header.append("RAV" + i + ";");
+            }
+
+            StringBuffer info = new StringBuffer(
+                    _date.toString() + "\n"
+                            + header + "\n" 
+                            + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "pRAV TimeStamp:;" + _pRAVsTimes + "\n"
+                            + ";;;" + "folRAV TimeStamp:;" + _folRAVsTimes + "\n");
+            for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
+                info.append(";;;" + _nameOfTheAttributesSubscribedTo[i] + ";" + _RAVsValues[i] + "\n");
+            }
+            _RAVsValuesFile = createTextFile(_federateName + "-RAV" + _FILE_EXT_CSV);
+            writeInTextFile(_RAVsValuesFile, info.toString());
+        }
+    }
+
+    /** Write the time file to '...-times.csv' file. */
     public void writeTimes() {
         File timesFile = createTextFile(_federateName + "-times"+ _FILE_EXT_CSV);
         writeInTextFile(timesFile,
-                _date + ";Reason:;" + _reasonsToPrintTheTime
+                _date 
+                + ";Reason:;" + _reasonsToPrintTheTime
                 + "\nt_ptII:;" + _tPTII 
                 + "\nt_hla:;" + _tHLA);
     }
+ 
+    /** Write all recorded UAV information to file. */
+    public void writeUAVsInformation() {
+        if (_numberOfUAVs > 0) {
+            StringBuffer header = new StringBuffer("LookAhead;TimeStep;StopTime;Information;");
+            int count = String.valueOf(_UAVsValues[0]).split(";").length;
+            for (int i = 0; i < count; i++) {
+                header.append("UAV" + i + ";");
+            }
+            StringBuffer info = new StringBuffer(
+                    _date.toString() + "\n" 
+                            + header + "\n" 
+                            + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "preUAV TimeStamp:;" + _preUAVsTimes + "\n" 
+                            + ";;;" + "pUAV TimeStamp:;" + _pUAVsTimes + "\n");
+            for (int i = 0; i < _numberOfAttributesToPublish; i++) {
+                info.append(";;;" + _nameOfTheAttributesToPublish[i] + ";" + _UAVsValues[i] + "\n");
+            }
+            _UAVsValuesFile = createTextFile(_federateName + "-UAV" + _FILE_EXT_CSV);
+            writeInTextFile(_UAVsValuesFile, info.toString());
+        }
+    }
 
-    /** TBC
-     *  @param data
-     *  @return
+    ///////////////////////////////////////////////////////////////////
+    ////                         public  variables                 ////
+    /** Represents the number of time advance grants this federate has received.
+     *  Federates have to ask permission to the federation in order to advance in time.
+     *  If there is no events happening in an inferior time to the proposed one, the
+     *  federation sends a TAG to the federate and this last one advances in time.
      */
-    public boolean writeToCsvFile(String data) {
+    public int _numberOfTAGs;
+    
+    /** Array that contains the delays between a NER or TAR and its respective TAG. */
+    public ArrayList<Double> _TAGDelay;
+
+    ///////////////////////////////////////////////////////////////////
+    ////                         protected methods                 ////
+    
+    ///////////////////////////////////////////////////////////////////
+    ////                         protected variables               ////
+    
+    ///////////////////////////////////////////////////////////////////
+    ////                         private methods                   ////
+
+    /** Verify the existence of a folder, if it doesn't exist, the function tries
+     *  to create it.
+     *  @param folderName The name of the folder that will be created.
+     *  @return The full address of the folder in a string.
+     *  @exception IOException If the folder cannot be created.
+     */
+    private String createFolder(String folderName) throws IOException {
+        String homeDirectory = System.getProperty("user.home");
+        folderName = homeDirectory + "/" + folderName;
+        File folder = new File(folderName);
+        if (!folder.exists()) {
+            try {
+                // Create multiple directories if needed.
+                if (!folder.mkdirs()) {
+                    throw new IOException(
+                            "Failed to create" + folder + " directory.");
+                } else {
+                    System.out.println("Folder " + folderName + " created.");
+                }
+                return folderName;
+            } catch (SecurityException se) {
+                throw new IOException(
+                        "Could not create the folder " + folderName + ".");
+            }
+        } else {
+            return folderName;
+        }
+    }
+
+    /** Associate the object file with a file in the computer, creating it, if it doesn't
+     *  already exist.
+     *  @param name Name of the file.
+     *  @return The object file instance or null.
+     */
+    private File createTextFile(String name) {
+        if (_reportsFolder != null) {
+            name = _reportsFolder + "/" + name;
+            if (name == null || name.length() < 3) {
+                System.out.println("Choose a valid name for the txt file.");
+                return null;
+            } else {
+                if (!(name.endsWith(_FILE_EXT_TXT) || name.endsWith(_FILE_EXT_CSV))) {
+                    name = name.concat(_FILE_EXT_TXT);
+                }
+                try {
+                    File file = new File(name);
+
+                    boolean verify = false;
+                    if (!file.exists()) {
+                        verify = file.createNewFile();
+                    } else {
+                        verify = true;
+                    }
+
+                    if (!verify) {
+                        throw new IOException("Cannot create the file.");
+                    }
+                    return file;
+                } catch (IOException e) {
+                    System.out.println("Cannot create the file.");
+                    return null;
+                }
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /** Associate the object file with a file in the computer, creating it, if it doesn't
+     *  already exist.
+     *  @param name Name of the file.
+     *  @param header File's header.
+     *  @return The object file instance or null.
+     */
+    private File createTextFile(String name, String header) {
+        if (_reportsFolder != null) {
+            name = _reportsFolder + "/" + name;
+            if (name == null || name.length() < 3) {
+                System.out.println("Choose a valid name for the txt file.");
+                return null;
+            } else {
+                if (!(name.endsWith(_FILE_EXT_TXT) || name.endsWith(_FILE_EXT_CSV))) {
+                    name = name.concat(_FILE_EXT_TXT);
+                }
+                try {
+                    File file = new File(name);
+                    boolean verify = false;
+                    if (!file.exists()) {
+                        verify = file.createNewFile();
+                        writeInTextFile(file, header);
+                    } else {
+                        verify = true;
+                    }
+                    if (!verify) {
+                        throw new Exception();
+                    }
+                    System.out.println(name);
+                    return file;
+                } catch (Exception e) {
+                    System.out.println("Couldn't create the file.");
+                    return null;
+                }
+            }
+        } else {
+            return null;
+        }
+    }
+    
+    /** Write data to CSV file.
+     *  @param data Data to write in file
+     *  @return True if the data has been successfully written to the file, False otherwise.
+     */
+    private boolean writeToCsvFile(String data) {
         return writeInTextFile(_csvFile, data);
     }
 
-    /** TBC
-     *  @param data
-     *  @return
+    /** Write data to TXT file.
+     *  @param data Data to write in file
+     *  @return True if the data has been successfully written to the file, False otherwise.
      */
-    public boolean writeToTextFile(String data) {
+    private boolean writeToTextFile(String data) {
         return writeInTextFile(_txtFile, data);
-    }
-
-    /** TBC
-     *  @param tagIndex
-     */
-    public void incrTickCounterAt(int tagIndex) {
-        // Get tick() counter for the current TAG index.
-        int counter = _numberOfTicks.get(tagIndex);
-
-        // Update tick() counter.
-        counter++;
-
-        // Update with new counter.
-        _numberOfTicks.set(tagIndex, counter);
-    }
-
-    /** Display some analysis results as string. */
-    public String displayAnalysisValues() {
-        calculateRuntime();
-
-        return "HLA analysis report:"
-        + "\n number of TARs: " + _numberOfTARs
-        + "\n number of NERs: " + _numberOfNERs 
-        + "\n number of TAGs: " + _numberOfTAGs
-        + "\n number of Ticks2: " + _numberOfTicks2
-        + "\n number of (other) Ticks: " +_numberOfOtherTicks
-        + "\n number of Ticks during TAR/TAG or NER/TAG:" + _numberOfTicks.toString()
-        + "\n number of delays between TAR/TAG or NER/TAG:" + _TAGDelay.toString()
-        + "\n number of UAVs:" + _numberOfUAVs
-        + "\n number of RAVs:" + _numberOfRAVs
-        + "\n runtime:        " + _runtime;
     }
 
     ///////////////////////////////////////////////////////////////////
     ////                         private variables                 ////
-
 
     /** Represents the number of next event request this federate has made.
      *
@@ -818,15 +754,6 @@ public class HlaReporter {
      * advancement, they have to ask the federation's permission to do so using a NER call.
      */
     private int _numberOfNERs;
-
-    /** Represents the number of time advance grants this federate has received.
-     *
-     * Federates have to ask permission to the federation in order to advance in time.
-     * If there is no events happening in an inferior time to the proposed one, the
-     * federation sends a TAG to the federate and this last one advances in time.
-     */
-    public int _numberOfTAGs;
-
 
     /** Represents the number of time advance requests(TAR) this federate 
      *  has made.
@@ -837,31 +764,30 @@ public class HlaReporter {
      */
     private int _numberOfTARs;
 
-    /** .. */
-    public double _runtime;
+    /** TBC. */
+    private double _runtime;
 
-    /** .. */
+    /** TBC. */
     public int _numberOfTicks2;
 
-
-    /** .. */
+    /** TBC. */
     private String _reportsFolder;
 
-    /** .. */
+    /** TBC. */
     private StringBuffer _tPTII;
 
-    /** .. */
+    /** TBC. */
     private StringBuffer _tHLA;
 
-    /** .. */
+    /** TBC. */
     private StringBuffer _reasonsToPrintTheTime;
 
-    /** Represents a text file that is going to keep track of the number of
+    /** Represents a text '.txt' file that is going to keep track of the number of
      *  HLA calls of the federate. */
     private File _txtFile;
 
-    /** Represents a ".csv" file that is going to keep track of the number of
-     *  HLA calls of the federate. */
+    /** Represents a '.csv' file that is going to keep track of the number of
+     *  HLA calls of the federate (csv-compliant). */
     private File _csvFile;
 
     /** Represents a ".csv" file that is going to keep track of the number of
@@ -872,95 +798,40 @@ public class HlaReporter {
      *  the time of their update. */
     private File _UAVsValuesFile;
 
-    /** .. */
+    /** TBC. */
     private Date _date;
-
-    /** .. */
-    private String _decimalFormat;
-
-    /** .. */
-    private StringBuffer[] _UAVsValues;
-
-    /**
-     * @return the _UAVsValues
-     */
-    public StringBuffer[] getUAVsValues() {
-        return _UAVsValues;
-    }
-
-    /**
-     * @param _UAVsValues the _UAVsValues to set
-     */
-    public void setUAVsValues(StringBuffer[] _UAVsValues) {
-        this._UAVsValues = _UAVsValues;
-    }
-
-    /** .. */
+    
+    /** TBC. */
     private int _numberOfAttributesToPublish;
 
-    /**
-     * @return the _numberOfAttributesToPublish
-     */
-    public int getNumberOfAttributesToPublish() {
-        return _numberOfAttributesToPublish;
-    }
-
-    /** .. */
+    /** TBC. */
     private String[] _nameOfTheAttributesToPublish;
 
-    /**
-     * @return the _nameOfTheAttributesToPublish
-     */
-    public String[] getNameOfTheAttributesToPublish() {
-        return _nameOfTheAttributesToPublish;
-    }
-
-
-    /** .. */
+    /** TBC. */
     private int _numberOfAttributesSubscribedTo;
 
-    public int getNumberOfAttributesSubscribedTo() {
-        return _numberOfAttributesSubscribedTo;
-    }
-
-    /** .. */
+    /** TBC. */
     private String[] _nameOfTheAttributesSubscribedTo;
+    
+    /** TBC. */
+    private StringBuffer[] _UAVsValues;
 
-    /** .. */
-    public String[] getNameOfTheAttributesSubscribedTo() {
-        return _nameOfTheAttributesSubscribedTo;
-    }
-
-    /** .. */
+    /** TBC. */
     private StringBuffer _pUAVsTimes;
 
-    /**
-     * @return the _pUAVsTimes
-     */
-    public StringBuffer getPUAVsTimes() {
-        return _pUAVsTimes;
-    }
-
-    /**
-     * @return the _preUAVsTimes
-     */
-    public StringBuffer getPreUAVsTimes() {
-        return _preUAVsTimes;
-    }
-
-    /** .. */
+    /** TBC. */
     private StringBuffer _preUAVsTimes;
 
-    /** .. */
+    /** TBC. */
     private File _RAVsValuesFile;
 
-    /** OK */
+    /** TBC. */
     private StringBuffer[] _RAVsValues;
 
-    /** OK */
+    /** TBC. */
     private StringBuffer _pRAVsTimes;
 
-    /** OK */
+    /** TBC. */
     private StringBuffer _folRAVsTimes;
 
     /** Represents the instant when the simulation is fully started
@@ -971,15 +842,6 @@ public class HlaReporter {
     /** The time of the last TAR or last NER. */
     private double _timeOfTheLastAdvanceRequest;
 
-    public void setTimeOfTheLastAdvanceRequest(long value) {
-        _timeOfTheLastAdvanceRequest = value;
-    }
-
-    /** .. */
-    public double getTimeOfTheLastAdvanceRequest() {
-        return _timeOfTheLastAdvanceRequest;
-    }
-
     /** Array that contains the number of ticks between a NER or TAR and its respective TAG. */
     public ArrayList<Integer> _numberOfTicks;
 
@@ -989,49 +851,8 @@ public class HlaReporter {
     /** Represents the number of received RAV. */
     private int _numberOfRAVs;
 
-    /**
-     * @return the _numberOfRAVs
-     */
-    public int getNumberOfRAVs() {
-        return _numberOfRAVs;
-    }
-
-    /**
-     * @param _numberOfUAVs the _numberOfUAVs to set
-     */
-    public void incrNumberOfRAVs() {
-        _numberOfRAVs++;
-    }
-
-    /**
-     * @param _numberOfRAVs the _numberOfRAVs to set
-     */
-    public void resetNumberOfRAVs() {
-        _numberOfRAVs = 0;
-    }
-
     /** Represents the number of received UAV. */
     private int _numberOfUAVs;
-
-    /** OK */
-    public int getNumberOfUAVs() {
-        return _numberOfUAVs;
-    }
-
-    /**
-     * @param _numberOfUAVs the _numberOfUAVs to set
-     */
-    public void incrNumberOfUAVs() {
-        _numberOfUAVs++;
-    }
-
-    /** OK */
-    public void resetNumberOfUAVs() {
-        _numberOfUAVs = 0;
-    }
-
-    /** Array that contains the delays between a NER or TAR and its respective TAG. */
-    public ArrayList<Double> _TAGDelay;
 
     /** The lookahead value of the Ptolemy Federate. */
     private Double _hlaLookAHead;
@@ -1058,8 +879,7 @@ public class HlaReporter {
     private double _hlaTimeUnitValue;
 
     /** Indicates if the Ptolemy Federate is the creator of the synchronization
-     *  point.
-     */
+     *  point. */
     private Boolean _isCreator;
 
     /** Indicates the use of the nextEventRequest() service. */
@@ -1067,13 +887,6 @@ public class HlaReporter {
 
     /** Indicates the use of the timeAdvanceRequest() service. */
     private Boolean _timeStepped;
-
-    /** HLA attributes tables. */
-
-    /* String = HlaPublisherName, [] HlaPublisherReference HlaAttributeName HlaUAVTimestamp. */
-    protected HashMap<String, Object[]> _hlaAttributesUAV = new HashMap<String, Object[]>();
-    protected HashMap<String, Object[]> _hlaAttributesRAV = new HashMap<String, Object[]>();
-    //protected HashMap<String, Object[]> _nbrTicksByTags = new HashMap<String, Object[]>();
 
     /** CSV file extension suffix. */
     private static final String _FILE_EXT_CSV = ".csv";

@@ -38,7 +38,7 @@ import ptolemy.actor.util.TimedEvent;
 
 /**
  * <p>This class extends the TimedEvent class to add specific information
- * relative to HLA "events" received from the HLA/CERTI.
+ * relative to HLA "events" received from HLA/CERTI.
  * The <i>objectInstanceID</i> parameter give information on who
  * is responsible of an UAV (Update Attribute Value). An UAV is an update
  * value of a HLA attribute which belongs to a HLA class instance.
