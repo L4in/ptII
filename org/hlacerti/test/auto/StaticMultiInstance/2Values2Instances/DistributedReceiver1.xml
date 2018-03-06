@@ -10,13 +10,13 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-30.0, 20.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={1017, 95, 809, 632}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={613, 95, 827, 632}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[593, 514]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[593, 522]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="0.7280248190279214">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{317.3984375, 337.84517045454544}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{317.39843749999983, 343.3394886363636}">
     </property>
     <property name="HlaManager" class="org.hlacerti.lib.HlaManager">
         <property name="federateName" class="ptolemy.data.expr.Parameter" value="&quot;Receiver1TAR&quot;">
@@ -114,25 +114,6 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-80.0, 85.0]">
         </property>
     </property>
-    <property name="period" class="ptolemy.data.expr.Parameter" value="1">
-        <property name="_hideName" class="ptolemy.kernel.util.SingletonAttribute">
-        </property>
-        <property name="_icon" class="ptolemy.vergil.icon.ValueIcon">
-            <property name="_color" class="ptolemy.actor.gui.ColorAttribute" value="{0.0, 0.0, 1.0, 1.0}">
-            </property>
-        </property>
-        <property name="_smallIconDescription" class="ptolemy.kernel.util.SingletonConfigurableAttribute">
-            <configure>
-      <svg>
-        <text x="20" style="font-size:14; font-family:SansSerif; fill:blue" y="20">-P-</text>
-      </svg>
-    </configure>
-        </property>
-        <property name="_editorFactory" class="ptolemy.vergil.toolbox.VisibleParameterEditorFactory">
-        </property>
-        <property name="_location" class="ptolemy.kernel.util.Location" value="[-50.0, 55.0]">
-        </property>
-    </property>
     <property name="enableBackwardTypeInference" class="ptolemy.data.expr.Parameter" value="false">
     </property>
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
@@ -178,7 +159,7 @@
         </property>
     </entity>
     <entity name="HlaSub2 - val" class="ptolemy.actor.lib.gui.Display">
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={1378, 559, 409, 393}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={874, 513, 407, 387}, maximized=false}">
         </property>
         <property name="_paneSize" class="ptolemy.actor.gui.SizeAttribute" value="[407, 343]">
         </property>
@@ -186,7 +167,7 @@
         </property>
     </entity>
     <entity name="HlaSub1 - val" class="ptolemy.actor.lib.gui.Display">
-        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={938, 572, 409, 393}, maximized=false}">
+        <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={388, 513, 407, 387}, maximized=false}">
         </property>
         <property name="_paneSize" class="ptolemy.actor.gui.SizeAttribute" value="[407, 343]">
         </property>
@@ -194,7 +175,7 @@
         </property>
     </entity>
     <entity name="HlaSub1 - test - Value" class="ptolemy.actor.lib.Test">
-        <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{11, 11, 11, 11}">
+        <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{10, 11, 12, 13}">
         </property>
         <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="false">
         </property>
@@ -288,7 +269,7 @@
         </property>
     </entity>
     <entity name="HlaSub2 - test - Value" class="ptolemy.actor.lib.Test">
-        <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{12, 12}">
+        <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{20, 22}">
         </property>
         <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="false">
         </property>

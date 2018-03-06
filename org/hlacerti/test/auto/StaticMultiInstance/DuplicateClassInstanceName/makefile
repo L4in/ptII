@@ -2,7 +2,7 @@
 #
 # @Authors: Christopher Brooks (makefile only)
 #
-# @Version: $Id$
+# @Version: $Id: makefile 141 2018-02-28 09:20:07Z gl.lasnier $
 #
 # @Copyright (c) 2017 The Regents of the University of California.
 # All rights reserved.

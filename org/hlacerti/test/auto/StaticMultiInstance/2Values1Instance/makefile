@@ -2,7 +2,7 @@
 #
 # @Authors: Christopher Brooks (makefile only)
 #
-# @Version: $Id$
+# @Version: $Id: makefile 139 2018-02-27 15:11:20Z gl.lasnier $
 #
 # @Copyright (c) 2017 The Regents of the University of California.
 # All rights reserved.
@@ -29,7 +29,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-ME =		org/hlacerti/test/auto/StaticMultiInstance
+ME =		org/hlacerti/test/auto/StaticMultiInstanceRamp
 
 # Root of the Java directory
 ROOT =		../../../../
@@ -41,7 +41,7 @@ CONFIG =	$(ROOT)/mk/ptII.mk
 include $(CONFIG)
 
 # Used to build jar files
-PTPACKAGE = 	StaticMultiInstance
+PTPACKAGE = 	StaticMultiInstanceRamp
 PTCLASSJAR = 	$(PTPACKAGE).jar
 
 JSRCS =
