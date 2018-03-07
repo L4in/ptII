@@ -264,13 +264,8 @@ public class HlaReporter {
 
         String pRAVTimeStamp = te.timeStamp.toString() + ";";
 
-        /*if (_numberOfRAVs > 0 
+        if (_numberOfRAVs > 0 
                 && (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
-            
-            System.out.println("HLA REPORTER ========== _pRAVsTimes.length()=" + _pRAVsTimes.length());
-            System.out.println("HLA REPORTER ========== _pRAVsTimes.lastIndexOf(pRAVTimeStamp)=" + _pRAVsTimes.lastIndexOf(pRAVTimeStamp));
-            System.out.println("HLA REPORTER ========== _pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)=" + (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)));
-            System.out.println("HLA REPORTER ========== pRAVTimeStamp.length()=" + pRAVTimeStamp.length());
 
             int indexOfAttribute = 0;
 
@@ -281,12 +276,8 @@ public class HlaReporter {
                 }  
             }
 
-            System.out.println("HLA REPORTER ========== before _RAVsValues[indexOfAttribute]= " + _RAVsValues[indexOfAttribute]);
             _RAVsValues[indexOfAttribute].replace(_RAVsValues[indexOfAttribute].length() - 2, _RAVsValues[indexOfAttribute].length(), value.toString() + ";");
-            System.out.println("HLA REPORTER ========== after _RAVsValues[indexOfAttribute]= " + _RAVsValues[indexOfAttribute]);
-
-
-        } else {*/
+        } else {
             if (_numberOfRAVs < 1) {
                 // Initialize RAVs data structures.
                 initializeAttributesSubscribedToVariables(hlaAttributesToSubscribeTo);
@@ -310,7 +301,7 @@ public class HlaReporter {
                     _RAVsValues[j].append("-;");
                 }
             }
-        //}
+        }
     }
 
     /** This method records in StringBuffer arrays all information about UAVs
