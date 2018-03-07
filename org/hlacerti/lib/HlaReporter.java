@@ -1,4 +1,4 @@
-/* This class implements an analysis reporter for the HLA/CERTI framwework.
+/* This class implements an analysis reporter for the HLA/CERTI framework.
 
 @Copyright (c) 2017 The Regents of the University of California.
 All rights reserved.
@@ -245,9 +245,9 @@ public class HlaReporter {
      *  @param ravTimeStamp The RAV timestamp.
      */
     public void updateFolRAVsTimes(Time ravTimeStamp) {
-        if (_folRAVsTimes.lastIndexOf("*") >= 0) {
-            _folRAVsTimes.replace(_folRAVsTimes.lastIndexOf("*"), _folRAVsTimes.length(), ravTimeStamp + ";");
-        }
+      if ( _folRAVsTimes.indexOf("*") >= 0) {
+      _folRAVsTimes.replace(_folRAVsTimes.indexOf("*"), _folRAVsTimes.length() - (_folRAVsTimes.length() - (_folRAVsTimes.indexOf("*") + 1)) , ravTimeStamp + ";");
+      }
     }
 
     /** This method records in StringBuffer arrays all information about RAVs
@@ -264,9 +264,13 @@ public class HlaReporter {
 
         String pRAVTimeStamp = te.timeStamp.toString() + ";";
 
-        if (_numberOfRAVs > 0 
+        /*if (_numberOfRAVs > 0 
                 && (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)) == pRAVTimeStamp.length()) {
-            System.out.println("DEBUG HLA-REPORTER: RAV: IF CASE : _numberOfRAVs=" + _numberOfRAVs);
+            
+            System.out.println("HLA REPORTER ========== _pRAVsTimes.length()=" + _pRAVsTimes.length());
+            System.out.println("HLA REPORTER ========== _pRAVsTimes.lastIndexOf(pRAVTimeStamp)=" + _pRAVsTimes.lastIndexOf(pRAVTimeStamp));
+            System.out.println("HLA REPORTER ========== _pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)=" + (_pRAVsTimes.length() - _pRAVsTimes.lastIndexOf(pRAVTimeStamp)));
+            System.out.println("HLA REPORTER ========== pRAVTimeStamp.length()=" + pRAVTimeStamp.length());
 
             int indexOfAttribute = 0;
 
@@ -277,9 +281,12 @@ public class HlaReporter {
                 }  
             }
 
+            System.out.println("HLA REPORTER ========== before _RAVsValues[indexOfAttribute]= " + _RAVsValues[indexOfAttribute]);
             _RAVsValues[indexOfAttribute].replace(_RAVsValues[indexOfAttribute].length() - 2, _RAVsValues[indexOfAttribute].length(), value.toString() + ";");
+            System.out.println("HLA REPORTER ========== after _RAVsValues[indexOfAttribute]= " + _RAVsValues[indexOfAttribute]);
 
-        } else {
+
+        } else {*/
             if (_numberOfRAVs < 1) {
                 // Initialize RAVs data structures.
                 initializeAttributesSubscribedToVariables(hlaAttributesToSubscribeTo);
@@ -294,7 +301,6 @@ public class HlaReporter {
             }
 
             _folRAVsTimes.append("*");
-
             _pRAVsTimes.append(pRAVTimeStamp);
 
             for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
@@ -304,7 +310,7 @@ public class HlaReporter {
                     _RAVsValues[j].append("-;");
                 }
             }
-        }
+        //}
     }
 
     /** This method records in StringBuffer arrays all information about UAVs
@@ -835,8 +841,7 @@ public class HlaReporter {
     private StringBuffer _folRAVsTimes;
 
     /** Represents the instant when the simulation is fully started
-     *  (when the last federate starts running).
-     */
+     *  (when the last federate starts running). */
     private static double _startTime;
 
     /** The time of the last TAR or last NER. */
