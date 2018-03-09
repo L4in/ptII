@@ -29,10 +29,10 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-ME =		org/hlacerti/demo/StaticMultiInstanceJoker
+ME =		org/hlacerti/test/auto/StaticMultiInstanceJoker/2Values2Instances1Joker
 
 # Root of the Java directory
-ROOT =		../../../../
+ROOT =		../../../../../../
 
 CLASSPATH =	$(ROOT)$(CLASSPATHSEPARATOR)
 

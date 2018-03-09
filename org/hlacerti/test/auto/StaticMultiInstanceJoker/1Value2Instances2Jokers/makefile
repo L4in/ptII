@@ -29,10 +29,10 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-ME =		org/hlacerti/test/auto/StaticMultiInstanceJoker
+ME =		org/hlacerti/demo/StaticMultiInstanceJoker/1Value2Instances2Jokers
 
 # Root of the Java directory
-ROOT =		../../../../
+ROOT =		../../../../../../
 
 CLASSPATH =	$(ROOT)$(CLASSPATHSEPARATOR)
 
@@ -49,7 +49,6 @@ JSRCS =
 OTHER_FILES_TO_BE_JARED = \
 	DistributedReceiver1.xml \
 	DistributedSender1.xml \
-        DistributedSender2.xml \
 	StaticMultiInstanceJoker.fed \
 	StaticMultiInstanceJoker.xml
 
