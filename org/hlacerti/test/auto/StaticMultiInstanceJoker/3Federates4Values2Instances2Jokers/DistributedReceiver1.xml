@@ -10,7 +10,7 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-135.0, -40.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={1955, 49, 813, 752}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={193, 200, 813, 752}, maximized=false}">
     </property>
     <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[597, 634]">
     </property>
@@ -209,9 +209,9 @@
         </property>
     </entity>
     <entity name="HlaSub1 - test - Value" class="ptolemy.actor.lib.Test">
-        <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{21, 21, 21, 21}">
+        <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{21, 22, 23, 24}">
         </property>
-        <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="true">
+        <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="false">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[380.0, 130.0]">
         </property>
@@ -225,7 +225,7 @@
     <entity name="HlaSub1 - test - microstep" class="ptolemy.actor.lib.Test">
         <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{1, 2, 1, 2}">
         </property>
-        <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="true">
+        <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="false">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[380.0, 260.0]">
         </property>
@@ -268,9 +268,9 @@
         </property>
     </entity>
     <entity name="HlaSub2 - test - Value2" class="ptolemy.actor.lib.Test">
-        <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{12, 12}">
+        <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{12, 14}">
         </property>
-        <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="true">
+        <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="false">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[380.0, 410.0]">
         </property>
@@ -284,7 +284,7 @@
     <entity name="HlaSub2 - test - microstep2" class="ptolemy.actor.lib.Test">
         <property name="correctValues" class="ptolemy.data.expr.Parameter" value="{1, 1}">
         </property>
-        <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="true">
+        <property name="trainingMode" class="ptolemy.actor.parameters.SharedParameter" value="false">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[380.0, 540.0]">
         </property>
