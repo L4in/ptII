@@ -29,10 +29,10 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-ME =		org/hlacerti/test/auto/StaticMultiInstanceRamp
+ME =		org/hlacerti/test/auto/StaticMultiInstance/2Values1Instance
 
 # Root of the Java directory
-ROOT =		../../../../
+ROOT =		../../../../../../
 
 CLASSPATH =	$(ROOT)$(CLASSPATHSEPARATOR)
 
@@ -41,7 +41,7 @@ CONFIG =	$(ROOT)/mk/ptII.mk
 include $(CONFIG)
 
 # Used to build jar files
-PTPACKAGE = 	StaticMultiInstanceRamp
+PTPACKAGE = 	StaticMultiInstance
 PTCLASSJAR = 	$(PTPACKAGE).jar
 
 JSRCS =
