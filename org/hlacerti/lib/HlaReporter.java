@@ -42,6 +42,7 @@ import java.util.HashMap;
 
 import certi.rti.impl.CertiLogicalTime;
 
+import ptolemy.actor.TypedIOPort;
 import ptolemy.actor.util.Time;
 import ptolemy.data.Token;
 import ptolemy.kernel.util.IllegalActionException;
@@ -143,16 +144,15 @@ public class HlaReporter {
     
     /** Initialize variables specific to HLA attribute value publication.
      *  @param hlaAttributesToPublish the HashMap of HlaPublisher names and instances.
+     *  @throws IllegalActionException If failed to retrieve HLA actor attribute value name.
      */
-    public void initializeAttributesToPublishVariables(HashMap<String, Object[]> hlaAttributesToPublish) {
+    public void initializeAttributesToPublishVariables(HashMap<String, Object[]> hlaAttributesToPublish) throws IllegalActionException {
         // XXX: FIXME: to improve, instead of using String[] and StringBuffer[] just set a
         // HashMap<String, Object[]> where the key is the HlaPublisher fullName.
 
-        // XXX: FIXME: to replace, _nameOfTheAttributesToPublish => _hlaPublisherFullname,
-        //                         _numberOfAttributesToPublish => _numberOfHlaPublisher
         _numberOfAttributesToPublish = hlaAttributesToPublish.size();
 
-        _nameOfTheAttributesToPublish = new String[_numberOfAttributesToPublish];
+        _nameOfAttributesToPublish = new String[_numberOfAttributesToPublish];
 
         _UAVsValues = new StringBuffer[_numberOfAttributesToPublish];
 
@@ -160,24 +160,29 @@ public class HlaReporter {
         for (int i = 0; i < _numberOfAttributesToPublish; i++) {
             // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, 
             // so toString() prints the HlaPublisher fullName.
-            _nameOfTheAttributesToPublish[i] = attributesToPublish[i].toString();
+            
+            // Get array object which contains all information for a registered HlaPublisher.
+            Object[] tObj = hlaAttributesToPublish.get(attributesToPublish[i].toString());
+            
+            // Get corresponding HlaPublisher actor.
+            HlaPublisher pub = (HlaPublisher) ((TypedIOPort) tObj[0]).getContainer();
+
+            //_nameOfTheAttributesToPublish[i] = attributesToPublish[i].toString();
+            _nameOfAttributesToPublish[i] = pub.getFullName() + "." + pub.getAttributeName();
             _UAVsValues[i] = new StringBuffer("");
         }
-
     }
 
     /** Initialize variables specific to HLA attribute value subscription.
      *  @param hlaAttributesSubscribedTo the HashMap of HlaSubcribers names and instances.
+     *  @throws IllegalActionException If failed to retrieve HLA actor attribute value name.
      */
-    public void initializeAttributesSubscribedToVariables(HashMap<String, Object[]> hlaAttributesSubscribedTo) {
+    public void initializeAttributesSubscribedToVariables(HashMap<String, Object[]> hlaAttributesSubscribedTo) throws IllegalActionException {
         // XXX: FIXME: to improve, instead of using String[] and StringBuffer[] just set a
         // HashMap<String, Object[]> where the key is the HlaSubscrbier fullName.
 
-        // XXX: FIXME: GiL: to replace, _nameOfTheAttributesSubscribedTo => _hlaSubscriberFullname,
-        //                              _numberOfAttributesSubscribedTo => _numberOfHlaSubscriber
         _numberOfAttributesSubscribedTo = hlaAttributesSubscribedTo.size();
-        _nameOfTheAttributesSubscribedTo = new String[_numberOfAttributesSubscribedTo];
-
+        _nameOfAttributesSubscribedTo = new String[_numberOfAttributesSubscribedTo];
 
         _RAVsValues = new StringBuffer[_numberOfAttributesSubscribedTo];
 
@@ -185,7 +190,15 @@ public class HlaReporter {
         for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
             // hlaAttributesToPublish is a HashMap where the key is the HlaPublisher fullName, so
             // toString() will print the HlaPublisher fullName.
-            _nameOfTheAttributesSubscribedTo[i] = attributesSubscribedTo[i].toString();
+            
+            // Get array object which contains all information for a registered HlaPublisher.
+            Object[] tObj = hlaAttributesSubscribedTo.get(attributesSubscribedTo[i].toString());
+            
+            // Get corresponding HlaSubscriber actor.
+            HlaSubscriber sub = (HlaSubscriber) ((TypedIOPort) tObj[0]).getContainer();
+            
+            //_nameOfTheAttributesSubscribedTo[i] = attributesSubscribedTo[i].toString();
+            _nameOfAttributesSubscribedTo[i] = sub.getFullName() + "." + sub.getAttributeName();
             _RAVsValues[i] = new StringBuffer("");
         }
     }
@@ -225,7 +238,6 @@ public class HlaReporter {
 
         _tPTII = new StringBuffer("");
         _tHLA = new StringBuffer("");
-
         _reasonsToPrintTheTime = new StringBuffer("");
 
         _pUAVsTimes = new StringBuffer("");
@@ -256,11 +268,12 @@ public class HlaReporter {
      *  @param te HLA timed event associated to the RAV in Ptolemy's DE domain.
      *  @param hlaAttributesToSubscribeTo List of HlaSubscribers.
      *  @param value The HLA update attribute value received.
+     *  @throws IllegalActionException If the HlaSubscriber attribute name is not retrieved.
      *  NOTE: this method is responsible of the setup of all variable for the RAVs reporting part.
      */
     public void updateRAVsInformation(HlaSubscriber hs, HlaTimedEvent te, 
-            HashMap<String, Object[]> hlaAttributesToSubscribeTo, Object value) {
-        String hlaSubscriberName = hs.getFullName();
+            HashMap<String, Object[]> hlaAttributesToSubscribeTo, Object value) throws IllegalActionException {
+        String hlaSubscriberAttributeName = hs.getFullName() + "." + hs.getAttributeName();
 
         String pRAVTimeStamp = te.timeStamp.toString() + ";";
 
@@ -270,7 +283,7 @@ public class HlaReporter {
             int indexOfAttribute = 0;
 
             for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                if (hlaSubscriberName.equals(_nameOfTheAttributesSubscribedTo[j])) {
+                if (hlaSubscriberAttributeName.equals(_nameOfAttributesSubscribedTo[j])) {
                     indexOfAttribute = j;
                     break;
                 }  
@@ -285,7 +298,7 @@ public class HlaReporter {
             int indexOfAttribute = 0;
 
             for (int j = 0; j < _numberOfAttributesSubscribedTo; j++) {
-                if (hlaSubscriberName.equals(_nameOfTheAttributesSubscribedTo[j])) {
+                if (hlaSubscriberAttributeName.equals(_nameOfAttributesSubscribedTo[j])) {
                     indexOfAttribute = j;
                     break;
                 }
@@ -315,11 +328,11 @@ public class HlaReporter {
      *  @throws IllegalActionException If the HlaPublisher attribute name is not retrieved.
      */
     public void updateUAVsInformation(HlaPublisher hp, Token in, Time hlaTime, Time ptTime, int microstep, CertiLogicalTime uavTimeStamp) throws IllegalActionException {
-        String hlaPublisherName = hp.getFullName();
+        String hlaPublisherAttributeName = hp.getFullName() + "." + hp.getAttributeName();
 
         int attributeIndex = 0;
         for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-            if (hlaPublisherName.equals(_nameOfTheAttributesToPublish[i])) {
+            if (hlaPublisherAttributeName.equals(_nameOfAttributesToPublish[i])) {
                 attributeIndex = i;
                 break;
             }
@@ -327,7 +340,7 @@ public class HlaReporter {
 
         String pUAVTimeStamp = uavTimeStamp.getTime() + ";";
         String preUAVTimeStamp = "(" + ptTime + "," + microstep + ");";
-        storeTimes("UAV " + hlaPublisherName + "." + hp.getAttributeName(), hlaTime, ptTime);
+        storeTimes("UAV " + hlaPublisherAttributeName + "." + hp.getAttributeName(), hlaTime, ptTime);
 
         if (_numberOfUAVs > 0
                 && (_preUAVsTimes.length() - _preUAVsTimes.lastIndexOf(preUAVTimeStamp)) == preUAVTimeStamp.length()
@@ -559,7 +572,7 @@ public class HlaReporter {
                             + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "pRAV TimeStamp:;" + _pRAVsTimes + "\n"
                             + ";;;" + "folRAV TimeStamp:;" + _folRAVsTimes + "\n");
             for (int i = 0; i < _numberOfAttributesSubscribedTo; i++) {
-                info.append(";;;" + _nameOfTheAttributesSubscribedTo[i] + ";" + _RAVsValues[i] + "\n");
+                info.append(";;;" + _nameOfAttributesSubscribedTo[i] + ";" + _RAVsValues[i] + "\n");
             }
             _RAVsValuesFile = createTextFile(_federateName + "-RAV" + _FILE_EXT_CSV);
             writeInTextFile(_RAVsValuesFile, info.toString());
@@ -590,7 +603,7 @@ public class HlaReporter {
                             + _hlaLookAHead + ";" + _hlaTimeStep + ";" + _stopTime + ";" + "preUAV TimeStamp:;" + _preUAVsTimes + "\n" 
                             + ";;;" + "pUAV TimeStamp:;" + _pUAVsTimes + "\n");
             for (int i = 0; i < _numberOfAttributesToPublish; i++) {
-                info.append(";;;" + _nameOfTheAttributesToPublish[i] + ";" + _UAVsValues[i] + "\n");
+                info.append(";;;" + _nameOfAttributesToPublish[i] + ";" + _UAVsValues[i] + "\n");
             }
             _UAVsValuesFile = createTextFile(_federateName + "-UAV" + _FILE_EXT_CSV);
             writeInTextFile(_UAVsValuesFile, info.toString());
@@ -802,13 +815,13 @@ public class HlaReporter {
     private int _numberOfAttributesToPublish;
 
     /** TBC. */
-    private String[] _nameOfTheAttributesToPublish;
+    private String[] _nameOfAttributesToPublish;
 
     /** TBC. */
     private int _numberOfAttributesSubscribedTo;
 
     /** TBC. */
-    private String[] _nameOfTheAttributesSubscribedTo;
+    private String[] _nameOfAttributesSubscribedTo;
     
     /** TBC. */
     private StringBuffer[] _UAVsValues;

@@ -1798,6 +1798,7 @@ implements TimeRegulator {
 
                 if (_debugging) {
                     _debug("       _putRAVOnHlaSubs(" + proposedTime.toString()
+                           + " ravEvent.timeStamp=" + ravEvent.timeStamp
                            + ") for '" + hs.getAttributeName()
                            //+ "',timestamp=" + ravEvent.timeStamp //jc: non need
                     + " in HlaSubs=" + hs.getFullName());
@@ -2327,16 +2328,6 @@ implements TimeRegulator {
             int classHandle = _objectIdToClassHandle.get(theObject);
             String classInstanceOrJokerName = _discoverObjectInstanceMap.get(theObject);
 
-            System.out.println("INNER callback: reflectAttributeValues():"
-                    + " theObject=" + theObject 
-                    + " theAttributes" + theAttributes 
-                    + " userSuppliedTag=" + userSuppliedTag 
-                    + " theTime=" + theTime);
-
-            System.out.println("INNER callback: reflectAttributeValues(): (objectInstanceId) theObject = " + theObject);
-            System.out.println("INNER callback: reflectAttributeValues(): _objectIdToClassHandle.get(theObject) classHandle = " + classHandle);
-            System.out.println("INNER callback: reflectAttributeValues(): _discoverObjectInstanceMap.get(theObject) classInstanceOrJokerName = " + classInstanceOrJokerName);
-
             for (int i = 0; i < theAttributes.size(); i++) {
 
                 Iterator<Entry<String, Object[]>> ot = _hlaAttributesToSubscribeTo
@@ -2351,46 +2342,33 @@ implements TimeRegulator {
                     Object value = null;
                     HlaSubscriber hs = (HlaSubscriber) _getPortFromTab(tObj).getContainer();
 
-                    try {
-                        /*
-                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber=" + hs.getFullName());
-                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber classObjectName in FOM " + hs.getClassObjectName());
-                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber classInstanceOrJokerName " + hs.getClassInstanceName());
-                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber classHandle " + hs.getClassHandle());
-                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber attributeName in FOM " + hs.getAttributeName());
-                    System.out.println("INNER callback: reflectAttributeValues(): hlaSubscriber AttributeHandle " + hs.getAttributeHandle());
-                         */
-                        System.out.println("INNER callback: reflectAttributeValues(): theAttributes.getAttributeHandle(i) = " + theAttributes.getAttributeHandle(i));
-                        //System.out.println("INNER callback: reflectAttributeValues(): classHandle = " + classHandle);
-                        //System.out.println("INNER callback: reflectAttributeValues(): classInstanceOrJokerName = " + classInstanceOrJokerName);
-                        //System.out.println("INNER callback: reflectAttributeValues(): (objectInstanceId) theObject = " + theObject);
-                    } catch (ArrayIndexOutOfBounds e) {
-                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                        System.out.println("INNER callback: reflectAttributeValues(): EXCEPTION ArrayIndexOutOfBounds in DEBUG");
-                        e.printStackTrace();
-                    }/* catch (IllegalActionException e) {
-                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
-                        System.out.println("INNER callback: reflectAttributeValues(): EXCEPTION IllegalActionException in DEBUG");
-                        e.printStackTrace();
-                    }*/
 
-                    // The tuple (attributeHandle, classHandle,
-                    // classInstanceName) allows to identify the
-                    // object attribute (i.e. one of the HlaSubscribers)
+                    System.out.println("INNER callback: reflectAttributeValues():"
+                            + " theObject=" + theObject 
+                            + " theAttributes" + theAttributes 
+                            + " userSuppliedTag=" + userSuppliedTag 
+                            + " theTime=" + theTime
+                            + " classHandle=" + classHandle
+                            + " classInstanceOrJokerName=" + classInstanceOrJokerName
+                            + " HlaSusbcriber=" + hs.getFullName());
+
+                    // The tuple (attributeHandle, classHandle, classInstanceName)
+                    // allows to identify the object attribute (i.e. one of the HlaSubscribers)
                     // where the updated value has to be put.
-                    // XXX: FIXME: class instance name is used to map with corresponding HlaSubscrbier ?
                     try {
                         if (theAttributes.getAttributeHandle(i) == hs.getAttributeHandle()
                                 && classHandle == hs.getClassHandle()
                                 && (classInstanceOrJokerName != null 
                                 && hs.getClassInstanceName().compareTo(classInstanceOrJokerName) == 0)) {
-                                //&& hs.getClassInstanceName().compareTo(classInstanceOrJokerName) == 0)) {
 
                             double timeValue = ((CertiLogicalTime) theTime)
                                     .getTime() / _hlaTimeUnitValue;
 
                             ts = new Time(_director, timeValue);
 
+                            // FIXME: XXX: It appears that sometimes a received RAV value is different
+                            // than the UAV value sent. We need to investigate it this difference comes
+                            // from Ptolemy or from CERTI.
                             value = MessageProcessing.decodeHlaValue(hs,
                                     (BaseType) _getTypeFromTab(tObj),
                                     theAttributes.getValue(i));
@@ -2400,15 +2378,14 @@ implements TimeRegulator {
                                     value }, theObject);
 
                             _fromFederationEvents.get(hs.getFullName()).add(te);
+                            
                             if (_debugging) {
                                 _debug("       *RAV '" + hs.getAttributeName()
-                                        + "', timestamp=" + te.timeStamp.toString() //_printTimes(te.timeStamp)
+                                        + "', timestamp=" + te.timeStamp.toString()
                                         + ",value=" + value.toString()
                                         + " @ "
                                         + hs.getFullName());
                             }
-                            System.out.println("INNER callback: reflectAttributeValues(): HLA attribute=" + hs.getAttributeName()
-                            + " timestamp=" + te.timeStamp + " value=" + value.toString() + " received and stored for = " + hs.getFullName());
 
                             // Notify RAV reception.
                             hasReceivedRAV = true;
@@ -2419,11 +2396,11 @@ implements TimeRegulator {
                             }
                         }
                     } catch (ArrayIndexOutOfBounds e) {
-                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
+                        // FIXME: XXX: how to encapsulate in a specific RTI exception?
+                        System.out.println("INNER callback: reflectAttributeValues(): EXCEPTION ArrayIndexOutOfBounds");
                         e.printStackTrace();
-
                     } catch (IllegalActionException e) {
-                        // FIXME: XXX: Gil: encapsulate in RTI exception ?
+                        // FIXME: XXX: how to encapsulate in a specific RTI exception?
                         System.out.println("INNER callback: reflectAttributeValues(): EXCEPTION IllegalActionException");
                         e.printStackTrace();
                     }
