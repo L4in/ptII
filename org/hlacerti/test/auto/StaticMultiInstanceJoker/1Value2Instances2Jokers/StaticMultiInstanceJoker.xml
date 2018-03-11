@@ -4,13 +4,13 @@
 <entity name="StaticMultiInstanceJoker" class="ptolemy.actor.TypedCompositeActor">
     <property name="_createdBy" class="ptolemy.kernel.attributes.VersionAttribute" value="11.0.devel">
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={48, 51, 701, 926}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={308, 22, 719, 878}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[485, 808]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[485, 768]">
     </property>
     <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.0022749002670535">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{300.9609374999999, 757.0943749999999}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{300.9609374999999, 737.139769736842}">
     </property>
     <property name="Annotation999" class="ptolemy.vergil.kernel.attributes.TextAttribute">
         <property name="textSize" class="ptolemy.data.expr.Parameter" value="14">

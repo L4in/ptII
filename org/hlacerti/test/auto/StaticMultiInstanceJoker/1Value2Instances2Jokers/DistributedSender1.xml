@@ -99,20 +99,20 @@
         <property name="_location" class="ptolemy.kernel.util.Location" value="[100.0, 15.0]">
         </property>
     </property>
-    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={784, 56, 689, 632}, maximized=false}">
+    <property name="_windowProperties" class="ptolemy.actor.gui.WindowPropertiesAttribute" value="{bounds={663, 217, 707, 632}, maximized=false}">
     </property>
-    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[473, 514]">
+    <property name="_vergilSize" class="ptolemy.actor.gui.SizeAttribute" value="[473, 522]">
     </property>
-    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.2086533718554013">
+    <property name="_vergilZoomFactor" class="ptolemy.data.expr.ExpertParameter" value="1.269099246081511">
     </property>
-    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{148.5354769123134, 187.97306436567163}">
+    <property name="_vergilCenter" class="ptolemy.data.expr.ExpertParameter" value="{139.412841796875, 181.0264663201944}">
     </property>
     <property name="Annotation2" class="ptolemy.vergil.kernel.attributes.TextAttribute">
         <property name="textSize" class="ptolemy.data.expr.Parameter" value="10">
         </property>
         <property name="textColor" class="ptolemy.actor.gui.ColorAttribute" value="{0.4,0.4,0.4,1.0}">
         </property>
-        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Author: CIELE Ingénierie (http://www.ciele.fr)&#10;">
+        <property name="text" class="ptolemy.kernel.util.StringAttribute" value="Author: CIELE Ingénierie (http://www.ciele.fr), Janette Cardoso&#10;">
         </property>
         <property name="_location" class="ptolemy.kernel.util.Location" value="[-35.0, 300.0]">
         </property>
