@@ -1,5 +1,5 @@
 -- Author: Janette Cadoso - ISAE SUPAERO - janette.cardoso@isae-supaero.fr 
--- Date: updated on May, 9,2016; July, 25, 2017
+-- Date: updated on May, 9,2016; July, 25, 2017; March 13, 2018
 
 This folder contains two set of demos:
 
@@ -16,3 +16,5 @@ $PTII/ptolemy/apps/hlacerti/demo/CoSimulation
 Co-simulation with Ptolemy federates and C++ federates can be found here:
 - For r71943: /Users/j.cardoso/ptIIforCommit/ptII/org/hlacerti/demo/legacy/StaticMultiInstance/Billard
 - For current revision: /Users/j.cardoso/ptIIforCommit/ptII/org/hlacerti/demo/Billard
+
+-> May be add here a folder "DynamicMultiInstance" with some models up to revision 77500."
