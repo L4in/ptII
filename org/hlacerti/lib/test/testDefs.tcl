@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: $Id: testDefs.tcl 72874 2015-07-26 21:01:52Z cxh $
 #
 # @Copyright (c) 1997-2015 The Regents of the University of California.
 # All rights reserved.

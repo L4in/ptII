@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Brooks, based on Clock.tcl by Edward A. Lee
 #
-# @Version: $Id$
+# @Version: $Id: HLATest.tcl 72874 2015-07-26 21:01:52Z cxh $
 #
 # @Copyright (c) 2013-2015 The Regents of the University of California.
 # All rights reserved.
